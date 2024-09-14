@@ -46,7 +46,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Classes\DatabaseConfig.cs" />
     <Compile Include="Classes\Drivers.cs" />
+    <Compile Include="Console.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Console.Designer.cs">
+      <DependentUpon>Console.cs</DependentUpon>
+    </Compile>
     <Compile Include="DAOs\DriversDAO.cs" />
     <Compile Include="DriverManagement.cs">
       <SubType>Form</SubType>
@@ -54,6 +61,7 @@
     <Compile Include="DriverManagement.Designer.cs">
       <DependentUpon>DriverManagement.cs</DependentUpon>
     </Compile>
+    <Compile Include="DTOs\DriversDTO.cs" />
     <Compile Include="ManagementTemplate.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -63,6 +71,9 @@
     <Compile Include="Enums\LicenseTypeEnum.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Console.resx">
+      <DependentUpon>Console.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="DriverManagement.resx">
       <DependentUpon>DriverManagement.cs</DependentUpon>
     </EmbeddedResource>

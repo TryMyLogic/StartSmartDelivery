@@ -45,7 +45,6 @@
             this.SearchBTN = new System.Windows.Forms.Button();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
-            this.Console_TXTBox = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.flowLayoutPanel1.SuspendLayout();
@@ -242,20 +241,11 @@
             this.label3.Text = "FindMe";
             this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // Console_TXTBox
-            // 
-            this.Console_TXTBox.Location = new System.Drawing.Point(23, 466);
-            this.Console_TXTBox.Multiline = true;
-            this.Console_TXTBox.Name = "Console_TXTBox";
-            this.Console_TXTBox.Size = new System.Drawing.Size(831, 186);
-            this.Console_TXTBox.TabIndex = 22;
-            // 
             // ManagementTemplate
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(888, 664);
-            this.Controls.Add(this.Console_TXTBox);
+            this.ClientSize = new System.Drawing.Size(888, 455);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.SearchBTN);
@@ -295,6 +285,5 @@
         private System.Windows.Forms.Button SearchBTN;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.TextBox Console_TXTBox;
     }
 }

@@ -15,11 +15,25 @@ namespace SmartStartDeliveryForm
         [STAThread]
         static void Main()
         {
+            // Initialize application styles
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new DriverManagement());
 
-          
+            // Show the logging form before running the main form
+            Console console = new Console();
+            console.Show();
+
+            try
+            {
+                console.log(DatabaseConfig.ConnectionString);
+            }
+            catch (InvalidOperationException ex)
+            {
+                console.log(ex.Message);
+            }
+
+            // Run the main form
+            Application.Run(new DriverManagement());
         }
     }
 }

@@ -35,10 +35,5 @@ namespace SmartStartDeliveryForm
         {
 
         }
-
-        public void AppendToConsole(string Text)
-        {
-            Console_TXTBox.AppendText(Text);
-        }
     }
 }

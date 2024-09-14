@@ -19,7 +19,7 @@ Decouples the data access code from the rest of the application
     using System.Data;
     using System.Data.SqlClient;
 
-   static internal class DriversDAO
+    internal class DriversDAO
     {
        
     }
