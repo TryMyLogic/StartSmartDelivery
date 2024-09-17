@@ -34,6 +34,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -48,11 +49,17 @@
   <ItemGroup>
     <Compile Include="Classes\DatabaseConfig.cs" />
     <Compile Include="Classes\Drivers.cs" />
-    <Compile Include="Console.cs">
+    <Compile Include="DataForms\DriverDataForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Console.Designer.cs">
-      <DependentUpon>Console.cs</DependentUpon>
+    <Compile Include="DataForms\DriverDataForm.Designer.cs">
+      <DependentUpon>DriverDataForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormConsole.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormConsole.Designer.cs">
+      <DependentUpon>FormConsole.cs</DependentUpon>
     </Compile>
     <Compile Include="DAOs\DriversDAO.cs" />
     <Compile Include="DriverManagement.cs">
@@ -71,8 +78,11 @@
     <Compile Include="Enums\LicenseTypeEnum.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Console.resx">
-      <DependentUpon>Console.cs</DependentUpon>
+    <EmbeddedResource Include="DataForms\DriverDataForm.resx">
+      <DependentUpon>DriverDataForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormConsole.resx">
+      <DependentUpon>FormConsole.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="DriverManagement.resx">
       <DependentUpon>DriverManagement.cs</DependentUpon>

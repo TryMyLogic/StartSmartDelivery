@@ -1,5 +1,7 @@
 ﻿using SmartStartDeliveryForm.Classes;
 using SmartStartDeliveryForm.DAOs;
+using SmartStartDeliveryForm.DataForms;
+using SmartStartDeliveryForm.DTOs;
 using SmartStartDeliveryForm.Enums;
 using System;
 using System.Collections.Generic;
@@ -16,6 +18,7 @@ namespace SmartStartDeliveryForm
 {
     public partial class DriverManagement : ManagementTemplate
     {
+        private DataTable DriverData;
         public DriverManagement()
         {
             InitializeComponent();
@@ -24,82 +27,11 @@ namespace SmartStartDeliveryForm
         private void DriverManagement_Load(object sender, EventArgs e)
         {
             dataGridView1.RowHeadersVisible = false; // Hides Row Number Column
-            
-        
-
-        // Create sample drivers
-        Drivers driver1 = new Drivers
-            {
-                Name = "John",
-                Surname = "Doe",
-                EmployeeNo = 1,
-                LicenseType = LicenseType.Code8,
-                Availability = true
-            };
-
-            Drivers driver2 = new Drivers
-            {
-                Name = "Jane",
-                Surname = "Smith",
-                EmployeeNo = 2,
-                LicenseType = LicenseType.Code10,
-                Availability = false
-            };
-
-            Drivers driver3 = new Drivers
-            {
-                Name = "Alice",
-                Surname = "Johnson",
-                EmployeeNo = 3,
-                LicenseType = LicenseType.Code14,
-                Availability = true
-            };
-
-            // Add drivers to the DriversDAO
-            //DriversDAO.DriverList.Add(driver1);
-            //DriversDAO.DriverList.Add(driver2);
-            //DriversDAO.DriverList.Add(driver3);
 
             // Clear any existing columns
             dataGridView1.Columns.Clear();
 
-            // Create and configure columns
-            DataGridViewTextBoxColumn nameColumn = new DataGridViewTextBoxColumn
-            {
-                Name = "Name",
-                HeaderText = "Name",
-                DataPropertyName = "Name"
-            };
-
-            DataGridViewTextBoxColumn surnameColumn = new DataGridViewTextBoxColumn
-            {
-                Name = "Surname",
-                HeaderText = "Surname",
-                DataPropertyName = "Surname"
-            };
-
-            DataGridViewTextBoxColumn employeeNoColumn = new DataGridViewTextBoxColumn
-            {
-                Name = "EmployeeNo",
-                HeaderText = "Employee No",
-                DataPropertyName = "EmployeeNo"
-            };
-
-            DataGridViewTextBoxColumn licenseTypeColumn = new DataGridViewTextBoxColumn
-            {
-                Name = "LicenseType",
-                HeaderText = "License Type",
-                DataPropertyName = "LicenseType",
-            };
-
-            DataGridViewCheckBoxColumn availabilityColumn = new DataGridViewCheckBoxColumn
-            {
-                Name = "Availability",
-                HeaderText = "Availability",
-                DataPropertyName = "Availability"
-            };
-
-            DataGridViewButtonColumn editButtonColumn = new DataGridViewButtonColumn
+            DataGridViewButtonColumn EditButtonColumn = new DataGridViewButtonColumn
             {
                 Name = "Edit",
                 HeaderText = "",
@@ -107,7 +39,7 @@ namespace SmartStartDeliveryForm
                 UseColumnTextForButtonValue = true
             };
 
-            DataGridViewButtonColumn deleteButtonColumn = new DataGridViewButtonColumn
+            DataGridViewButtonColumn DeleteButtonColumn = new DataGridViewButtonColumn
             {
                 Name = "Delete",
                 HeaderText = "",
@@ -115,33 +47,82 @@ namespace SmartStartDeliveryForm
                 UseColumnTextForButtonValue = true
             };
 
-            // Add columns to DataGridView
-            dataGridView1.Columns.Add(nameColumn);
-            dataGridView1.Columns.Add(surnameColumn);
-            dataGridView1.Columns.Add(employeeNoColumn);
-            dataGridView1.Columns.Add(licenseTypeColumn);
-            dataGridView1.Columns.Add(availabilityColumn);
-            dataGridView1.Columns.Add(editButtonColumn);
-            dataGridView1.Columns.Add(deleteButtonColumn);
-
             SetTitle("Driver Management");
-            // Bind DataSource to the DataGridView
-            //dataGridView1.DataSource = DriversDAO.DriverList;
+            SetSearchOptions(typeof(DriversDTO));
+
+            DriverData = DriversDAO.GetAllDrivers();
+            dataGridView1.DataSource = DriverData;
+
+            // Add columns to DataGridView
+            dataGridView1.Columns.Add(EditButtonColumn);
+            dataGridView1.Columns.Add(DeleteButtonColumn);
         }
 
         protected override void InsertBTN_Click(object sender, EventArgs e)
         {
-            
-            Drivers newDriver = new Drivers
+
+            DriverDataForm DriverDataForm = new DriverDataForm();
+            DriverDataForm.SubmitClicked += DriverDataForm_SubmitClicked;
+            DriverDataForm.Show();
+        }
+
+        // Submit button click event handler
+        private void DriverDataForm_SubmitClicked(object sender, EventArgs e)
+        {
+            // Handle the event
+            DriverDataForm Form = sender as DriverDataForm;
+            if (Form != null)
             {
-                Name = NameTXTBox.Text,
-                Surname = SurnameTXTBox.Text,
-                EmployeeNo = int.Parse(EmployeeNumberTXTBox.Text),
-                LicenseType = (LicenseType)Enum.Parse(typeof(LicenseType), LicenseTypeCombobox.Text),
-                Availability = true
+                DriversDTO DriverDTO = Form.GetDriverData();
+
+                if (Form.Mode == FormMode.Add)
+                {
+                    DriversDAO.InsertDriver(DriverDTO);
+                }
+                else if (Form.Mode == FormMode.Edit)
+                {
+                    DriversDAO.UpdateDriver(DriverDTO); // Ensure you have an UpdateDriver method
+                }
+
+                Form.ClearData(); //Clear form for next batch of data
+            }
+        }
+
+        protected override void EditBTN_Click(int RowIndex)
+        {
+            var SelectedRow = dataGridView1.Rows[RowIndex];
+
+            DriversDTO DriverData = new DriversDTO
+            {
+                Name = SelectedRow.Cells["Name"].Value.ToString(),
+                Surname = SelectedRow.Cells["Surname"].Value.ToString(),
+                EmployeeNo = SelectedRow.Cells["EmployeeNo"].Value.ToString(),
+                LicenseType = (LicenseType)Enum.Parse(typeof(LicenseType), SelectedRow.Cells["LicenseType"].Value.ToString()),
+                Availability = bool.Parse(SelectedRow.Cells["Availability"].Value.ToString())
             };
 
-            //DriversDAO.DriverList.Add(newDriver);
+            DriverDataForm driverDataForm = new DriverDataForm
+            {
+                Mode = FormMode.Edit
+            };
+
+            driverDataForm.InitializeEditing(DriverData);
+            driverDataForm.SubmitClicked += DriverDataForm_SubmitClicked;
+            driverDataForm.Show();
+        }
+        protected override void DeleteBTN_Click(int RowIndex)
+        {
+            var SelectedRow = dataGridView1.Rows[RowIndex];
+            string EmployeeNo = SelectedRow.Cells["EmployeeNo"].Value.ToString();
+            DialogResult Result = MessageBox.Show("Are you sure?", "Delete Row", MessageBoxButtons.YesNo);
+            if (Result == DialogResult.Yes)
+            {
+                // Delete From Data Table
+                DriverData.Rows.RemoveAt(RowIndex);
+
+                //Delete From Database
+                DriversDAO.DeleteDriver(EmployeeNo);
+            }
         }
     }
 }

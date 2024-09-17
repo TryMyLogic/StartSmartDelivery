@@ -3,16 +3,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Configuration;
 
 namespace SmartStartDeliveryForm.Classes
 {
-     internal class DatabaseConfig
+
+    internal class DatabaseConfig
     {
         static string _ConnectionString;
-        public static void Initialize(string serverAddress, string databaseName)
+
+        // Initialize the connection string from app.config
+        public static void Initialize(string ConnectionStringName)
         {
-            // Use Windows Authentication (Trusted Connection)
-            _ConnectionString = $"Server={serverAddress};Database={databaseName};Trusted_Connection=True;";
+            // Retrieve the connection string from app.config
+            _ConnectionString = ConfigurationManager.ConnectionStrings[ConnectionStringName]?.ConnectionString;
+
+            if (string.IsNullOrEmpty(_ConnectionString))
+            {
+                throw new InvalidOperationException("Connection string not found in configuration file.");
+            }
         }
 
         public static string ConnectionString
@@ -27,4 +36,5 @@ namespace SmartStartDeliveryForm.Classes
             }
         }
     }
+
 }

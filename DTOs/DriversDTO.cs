@@ -14,8 +14,10 @@ namespace SmartStartDeliveryForm.DTOs
     {
         public string Name { get; set; }
         public string Surname { get; set; }
-        public int EmployeeNo { get; set; }
+        public string EmployeeNo { get; set; }
         public LicenseType LicenseType { get; set; }
         public bool Availability { get; set; }
+
+        public DriversDTO() { }
     }
 }

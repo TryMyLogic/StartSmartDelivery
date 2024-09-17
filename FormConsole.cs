@@ -11,9 +11,12 @@ using System.Xml.Serialization;
 
 namespace SmartStartDeliveryForm
 {
-    public partial class Console : Form
+    public partial class FormConsole : Form
     {
-        public Console()
+        private static FormConsole _instance;
+        private static readonly object _lock = new object();
+
+        public FormConsole()
         {
             InitializeComponent();
         }
@@ -23,7 +26,23 @@ namespace SmartStartDeliveryForm
 
         }
 
-        public void log(string text)
+        //Singleton Pattern (Global instance)
+        public static FormConsole Instance
+        {
+            get
+            {
+                lock (_lock)
+                {
+                    if (_instance == null || _instance.IsDisposed)
+                    {
+                        _instance = new FormConsole();
+                    }
+                    return _instance;
+                }
+            }
+        }
+
+        public void Log(string text)
         {
             if (richTextBox1.InvokeRequired)
             {
@@ -38,7 +57,7 @@ namespace SmartStartDeliveryForm
             }
         }
 
-        public void clearConsole()
+        public void ClearConsole()
         {
             if (richTextBox1.InvokeRequired)
             {

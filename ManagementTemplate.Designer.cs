@@ -44,7 +44,7 @@
             this.InsertBTN = new System.Windows.Forms.Button();
             this.SearchBTN = new System.Windows.Forms.Button();
             this.textBox1 = new System.Windows.Forms.TextBox();
-            this.label3 = new System.Windows.Forms.Label();
+            this.cboSearchOptions = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.flowLayoutPanel1.SuspendLayout();
@@ -172,8 +172,9 @@
             this.dataGridView1.ReadOnly = true;
             this.dataGridView1.RowHeadersWidth = 51;
             this.dataGridView1.RowTemplate.Height = 24;
-            this.dataGridView1.Size = new System.Drawing.Size(596, 285);
+            this.dataGridView1.Size = new System.Drawing.Size(596, 341);
             this.dataGridView1.TabIndex = 15;
+            this.dataGridView1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
             // 
             // flowLayoutPanel1
             // 
@@ -205,7 +206,7 @@
             this.InsertBTN.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(162)))), ((int)(((byte)(184)))));
             this.InsertBTN.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.InsertBTN.ForeColor = System.Drawing.Color.White;
-            this.InsertBTN.Location = new System.Drawing.Point(804, 347);
+            this.InsertBTN.Location = new System.Drawing.Point(804, 413);
             this.InsertBTN.Name = "InsertBTN";
             this.InsertBTN.Size = new System.Drawing.Size(72, 30);
             this.InsertBTN.TabIndex = 17;
@@ -218,7 +219,7 @@
             this.SearchBTN.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(162)))), ((int)(((byte)(184)))));
             this.SearchBTN.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.SearchBTN.ForeColor = System.Drawing.Color.White;
-            this.SearchBTN.Location = new System.Drawing.Point(732, 380);
+            this.SearchBTN.Location = new System.Drawing.Point(436, 413);
             this.SearchBTN.Name = "SearchBTN";
             this.SearchBTN.Size = new System.Drawing.Size(72, 30);
             this.SearchBTN.TabIndex = 19;
@@ -227,26 +228,26 @@
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(732, 416);
+            this.textBox1.Location = new System.Drawing.Point(282, 421);
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(144, 22);
+            this.textBox1.Size = new System.Drawing.Size(148, 22);
             this.textBox1.TabIndex = 21;
             // 
-            // label3
+            // cboSearchOptions
             // 
-            this.label3.Location = new System.Drawing.Point(801, 380);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(75, 33);
-            this.label3.TabIndex = 0;
-            this.label3.Text = "FindMe";
-            this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.cboSearchOptions.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cboSearchOptions.FormattingEnabled = true;
+            this.cboSearchOptions.Location = new System.Drawing.Point(282, 391);
+            this.cboSearchOptions.Name = "cboSearchOptions";
+            this.cboSearchOptions.Size = new System.Drawing.Size(148, 24);
+            this.cboSearchOptions.TabIndex = 22;
             // 
             // ManagementTemplate
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(888, 455);
-            this.Controls.Add(this.label3);
+            this.Controls.Add(this.cboSearchOptions);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.SearchBTN);
             this.Controls.Add(this.InsertBTN);
@@ -284,6 +285,6 @@
         private System.Windows.Forms.Button InsertBTN;
         private System.Windows.Forms.Button SearchBTN;
         private System.Windows.Forms.TextBox textBox1;
-        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.ComboBox cboSearchOptions;
     }
 }

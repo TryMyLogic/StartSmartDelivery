@@ -9,9 +9,6 @@ namespace SmartStartDeliveryForm
 {
     internal static class Program
     {
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
         [STAThread]
         static void Main()
         {
@@ -19,17 +16,16 @@ namespace SmartStartDeliveryForm
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            // Show the logging form before running the main form
-            Console console = new Console();
-            console.Show();
-
+            FormConsole.Instance.Show();
+            //Initialize connection to the database
             try
             {
-                console.log(DatabaseConfig.ConnectionString);
+                DatabaseConfig.Initialize("StartSmartDB");
+                FormConsole.Instance.Log("Database Initialized");
             }
             catch (InvalidOperationException ex)
             {
-                console.log(ex.Message);
+                FormConsole.Instance.Log(ex.Message);
             }
 
             // Run the main form

@@ -1,6 +1,6 @@
 ﻿namespace SmartStartDeliveryForm
 {
-    partial class Console
+    partial class FormConsole
     {
         /// <summary>
         /// Required designer variable.
