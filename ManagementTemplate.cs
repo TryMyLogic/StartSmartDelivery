@@ -29,10 +29,10 @@ namespace SmartStartDeliveryForm
             dataGridView1.RowHeadersVisible = false; // Hides Row Number Column
         }
 
-        protected void SetTitle(string NewTitle = "SetMe")
-        {
-            TitleLabel.Text = NewTitle;
-        }
+        //protected void SetTitle(string NewTitle = "SetMe")
+        //{
+        //    TitleLabel.Text = NewTitle;
+        //}
 
         protected void SetSearchOptions(Type Dto)
         {
@@ -91,6 +91,16 @@ namespace SmartStartDeliveryForm
 
                 MessageBox.Show($"Delete button clicked for row {RowIndex}");
             }
+        }
+
+        protected virtual void refreshToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+             
+        }
+
+        protected virtual void reloadToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

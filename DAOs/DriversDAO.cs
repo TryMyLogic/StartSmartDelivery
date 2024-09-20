@@ -43,7 +43,7 @@ Decouples the data access code from the rest of the application
                     WHEN 3 THEN 'Code14'
                     ELSE 'Unknown'
                 END AS LicenseType,
-Availability
+                Availability
                 FROM Drivers;";
 
                     using (SqlCommand command = new SqlCommand(Query, Connection))
@@ -51,6 +51,11 @@ Availability
                         using (SqlDataAdapter adapter = new SqlDataAdapter(command))
                         {
                             adapter.Fill(Dt);
+
+                            // Set EmployeeNo as the primary key
+                            DataColumn[] primaryKeyColumns = new DataColumn[1];
+                            primaryKeyColumns[0] = Dt.Columns["EmployeeNo"];
+                            Dt.PrimaryKey = primaryKeyColumns;
                         }
                     }
                 }
@@ -69,7 +74,7 @@ Availability
             {
                 try
                 {
-                    string Query = "CheckEmployeeNoUnique";
+                    string Query = "proc_CheckEmployeeNoUnique";
                     using (var Command = new SqlCommand(Query, Connection))
                     {
                         Command.CommandType = CommandType.StoredProcedure;

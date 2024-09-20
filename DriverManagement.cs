@@ -36,7 +36,8 @@ namespace SmartStartDeliveryForm
                 Name = "Edit",
                 HeaderText = "",
                 Text = "Edit",
-                UseColumnTextForButtonValue = true
+                UseColumnTextForButtonValue = true,
+             
             };
 
             DataGridViewButtonColumn DeleteButtonColumn = new DataGridViewButtonColumn
@@ -44,10 +45,13 @@ namespace SmartStartDeliveryForm
                 Name = "Delete",
                 HeaderText = "",
                 Text = "Delete",
-                UseColumnTextForButtonValue = true
+                UseColumnTextForButtonValue = true,
+
+             
             };
 
-            SetTitle("Driver Management");
+          
+            //SetTitle("Driver Management");
             SetSearchOptions(typeof(DriversDTO));
 
             DriverData = DriversDAO.GetAllDrivers();
@@ -56,6 +60,9 @@ namespace SmartStartDeliveryForm
             // Add columns to DataGridView
             dataGridView1.Columns.Add(EditButtonColumn);
             dataGridView1.Columns.Add(DeleteButtonColumn);
+
+            dataGridView1.Columns["Edit"].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+            dataGridView1.Columns["Delete"].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
         }
 
         protected override void InsertBTN_Click(object sender, EventArgs e)
@@ -77,11 +84,32 @@ namespace SmartStartDeliveryForm
 
                 if (Form.Mode == FormMode.Add)
                 {
+                    DataRow NewRow = DriverData.NewRow();
+                    NewRow["Name"] = DriverDTO.Name;
+                    NewRow["Surname"] = DriverDTO.Surname;
+                    NewRow["EmployeeNo"] = DriverDTO.EmployeeNo;
+                    NewRow["LicenseType"] = DriverDTO.LicenseType; // Assuming LicenseType is an int
+                    NewRow["Availability"] = DriverDTO.Availability;
+
+                    //Add to datatable
+                    DriverData.Rows.Add(NewRow);
+
+                    //Add to database
                     DriversDAO.InsertDriver(DriverDTO);
                 }
                 else if (Form.Mode == FormMode.Edit)
                 {
-                    DriversDAO.UpdateDriver(DriverDTO); // Ensure you have an UpdateDriver method
+                    DataRow RowToUpdate = DriverData.Rows.Find(DriverDTO.EmployeeNo); // Assuming EmployeeNo is the primary key
+                    if (RowToUpdate != null)
+                    {
+                        RowToUpdate["Name"] = DriverDTO.Name;
+                        RowToUpdate["Surname"] = DriverDTO.Surname;
+                        RowToUpdate["EmployeeNo"] = DriverDTO.EmployeeNo;
+                        RowToUpdate["LicenseType"] = DriverDTO.LicenseType;
+                        RowToUpdate["Availability"] = DriverDTO.Availability;
+                    }
+
+                    DriversDAO.UpdateDriver(DriverDTO);
                 }
 
                 Form.ClearData(); //Clear form for next batch of data
@@ -123,6 +151,41 @@ namespace SmartStartDeliveryForm
                 //Delete From Database
                 DriversDAO.DeleteDriver(EmployeeNo);
             }
+        }
+
+        protected override void refreshToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //Rebind
+            dataGridView1.DataSource = null;
+            dataGridView1.DataSource = DriverData;
+
+            dataGridView1.Columns["Name"].DisplayIndex = 0;
+            dataGridView1.Columns["Surname"].DisplayIndex = 1;
+            dataGridView1.Columns["EmployeeNo"].DisplayIndex = 2;
+            dataGridView1.Columns["LicenseType"].DisplayIndex = 3;
+            dataGridView1.Columns["Availability"].DisplayIndex = 4;
+            dataGridView1.Columns["Edit"].DisplayIndex = 5;
+            dataGridView1.Columns["Delete"].DisplayIndex = 6;
+
+            MessageBox.Show("Succesfully Refreshed", "Refresh Status");
+        }
+
+        protected override void reloadToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //Refetch data and Rebind
+            DriverData = DriversDAO.GetAllDrivers();
+            dataGridView1.DataSource = null;
+            dataGridView1.DataSource = DriverData;
+
+            dataGridView1.Columns["Name"].DisplayIndex = 0;
+            dataGridView1.Columns["Surname"].DisplayIndex = 1;
+            dataGridView1.Columns["EmployeeNo"].DisplayIndex = 2;
+            dataGridView1.Columns["LicenseType"].DisplayIndex = 3;
+            dataGridView1.Columns["Availability"].DisplayIndex = 4;
+            dataGridView1.Columns["Edit"].DisplayIndex = 5;
+            dataGridView1.Columns["Delete"].DisplayIndex = 6;
+
+            MessageBox.Show("Succesfully Reloaded", "Reload Status");
         }
     }
 }
