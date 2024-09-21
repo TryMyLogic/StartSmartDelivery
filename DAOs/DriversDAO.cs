@@ -1,28 +1,25 @@
-﻿using SmartStartDeliveryForm.Classes;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Data.SqlClient;
+using System.Data;
+using System.Collections;
+using System.Configuration;
+using SmartStartDeliveryForm.Classes;
+using SmartStartDeliveryForm.DTOs;
+using SmartStartDeliveryForm.Enums;
 
 namespace SmartStartDeliveryForm.DAOs
 {
-    using SmartStartDeliveryForm.DTOs;
-    using SmartStartDeliveryForm.Enums;
     /*
 *a DAO:
 Encapsulates the data access operations (like querying, inserting, updating, and deleting data).
 Provides an interface to interact with the data source (such as a database).
 Decouples the data access code from the rest of the application
 */
-    using System;
-    using System.Collections;
-    using System.Configuration;
-    using System.Data;
-    using System.Data.SqlClient;
-
     internal static class DriversDAO
     {
         private static string _ConnectionString = DatabaseConfig.ConnectionString;
@@ -35,27 +32,24 @@ Decouples the data access code from the rest of the application
             {
                 try
                 {
-                    string Query = @"
-                SELECT Name, Surname, EmployeeNo,
-                CASE LicenseType
-                    WHEN 1 THEN 'Code8'
-                    WHEN 2 THEN 'Code10'
-                    WHEN 3 THEN 'Code14'
-                    ELSE 'Unknown'
-                END AS LicenseType,
-                Availability
+                    string Query = @"SELECT *, 
+                    CASE LicenseType
+                        WHEN 1 THEN 'Code8'
+                        WHEN 2 THEN 'Code10'
+                        WHEN 3 THEN 'Code14'
+                        ELSE 'Unknown'
+                    END AS LicenseTypeText
                 FROM Drivers;";
 
-                    using (SqlCommand command = new SqlCommand(Query, Connection))
+                    using (SqlCommand Command = new SqlCommand(Query, Connection))
                     {
-                        using (SqlDataAdapter adapter = new SqlDataAdapter(command))
+                        using (SqlDataAdapter Adapter = new SqlDataAdapter(Command))
                         {
-                            adapter.Fill(Dt);
+                            Adapter.Fill(Dt);
 
-                            // Set EmployeeNo as the primary key
-                            DataColumn[] primaryKeyColumns = new DataColumn[1];
-                            primaryKeyColumns[0] = Dt.Columns["EmployeeNo"];
-                            Dt.PrimaryKey = primaryKeyColumns;
+                            DataColumn[] PrimaryKeyColumns = new DataColumn[1];
+                            PrimaryKeyColumns[0] = Dt.Columns["DriverID"];
+                            Dt.PrimaryKey = PrimaryKeyColumns;
                         }
                     }
                 }
@@ -74,35 +68,39 @@ Decouples the data access code from the rest of the application
             {
                 try
                 {
-                    string Query = "proc_CheckEmployeeNoUnique";
+                    string Query = "SELECT TOP 1 * FROM Drivers WHERE EmployeeNo = @EmployeeNo";
+
                     using (var Command = new SqlCommand(Query, Connection))
                     {
-                        Command.CommandType = CommandType.StoredProcedure;
-                        Command.Parameters.AddWithValue("@EmployeeNo", EmployeeNo);
+                        Command.CommandType = CommandType.Text; // Since it's a direct SQL query
+                        Command.Parameters.Add(new SqlParameter("@EmployeeNo", SqlDbType.NVarChar, 50) { Value = EmployeeNo });
                         Connection.Open();
-                        int Result = (int)Command.ExecuteScalar();
-                        return Result;
+
+                        object FoundRow = Command.ExecuteScalar();
+                        int Result = (FoundRow != null) ? (int)FoundRow : 0; 
+
+                        return Result; // 1 if the EmployeeNo exists, 0 if not
                     }
                 }
                 catch (SqlException ex)
                 {
                     FormConsole.Instance.Log("An error occurred while accessing the database: " + ex.Message);
-                    return 1; //Assume its not unique on error
+                    return 1; // Assume it's not unique on error
                 }
             }
         }
 
-        public static void DeleteDriver(string EmployeeNo)
+        public static void DeleteDriver(int DriverID)
         {
             using (SqlConnection Connection = new SqlConnection(_ConnectionString))
             {
                 try
                 {
-                    string Query = "DELETE FROM Drivers WHERE EmployeeNo = @EmployeeNo";
+                    string Query = "DELETE FROM Drivers WHERE DriverID = @DriverID";
 
                     using (SqlCommand command = new SqlCommand(Query, Connection))
                     {
-                        command.Parameters.AddWithValue("@EmployeeNo", EmployeeNo);
+                        command.Parameters.Add(new SqlParameter("@DriverID", SqlDbType.Int) { Value = DriverID });
 
                         Connection.Open();
                         int RowsAffected = command.ExecuteNonQuery();
@@ -113,7 +111,7 @@ Decouples the data access code from the rest of the application
                         }
                         else
                         {
-                            FormConsole.Instance.Log("No rows were deleted. Employee No may not exist.");
+                            FormConsole.Instance.Log("No rows were deleted. Employee may not exist.");
                         }
                     }
                 }
@@ -124,33 +122,41 @@ Decouples the data access code from the rest of the application
             }
         }
 
-        public static void InsertDriver(DriversDTO Driver)
+        public static int InsertDriver(DriversDTO driver)
         {
             using (SqlConnection Connection = new SqlConnection(_ConnectionString))
             {
                 try
                 {
-                    Connection.Open();
-                    string Query = "INSERT INTO Drivers (Name, Surname, EmployeeNo, LicenseType) VALUES (@Name, @Surname, @EmployeeNo, @LicenseType);";
+                    string Query = @"
+                INSERT INTO Drivers (Name, Surname, EmployeeNo, LicenseType, Availability) 
+                VALUES (@Name, @Surname, @EmployeeNo, @LicenseType, @Availability);
+                SELECT CAST(SCOPE_IDENTITY() AS int);"; // Get the new DriverID
 
                     using (SqlCommand Command = new SqlCommand(Query, Connection))
                     {
-                        // Parameters prevent SQL injections and handle data properly
-                        Command.Parameters.AddWithValue("@Name", Driver.Name);
-                        Command.Parameters.AddWithValue("@Surname", Driver.Surname);
-                        Command.Parameters.AddWithValue("@EmployeeNo", Driver.EmployeeNo);
-                        Command.Parameters.AddWithValue("@LicenseType", (int)Driver.LicenseType); // Ensure LicenseType is a valid value (1, 2, or 3)
+                        // Add parameters
+                        Command.Parameters.Add(new SqlParameter("@Name", SqlDbType.NVarChar, 100) { Value = driver.Name });
+                        Command.Parameters.Add(new SqlParameter("@Surname", SqlDbType.NVarChar, 100) { Value = driver.Surname });
+                        Command.Parameters.Add(new SqlParameter("@EmployeeNo", SqlDbType.NVarChar, 50) { Value = driver.EmployeeNo });
+                        Command.Parameters.Add(new SqlParameter("@LicenseType", SqlDbType.Int) { Value = (int)driver.LicenseType });
+                        Command.Parameters.Add(new SqlParameter("@Availability", SqlDbType.Bit) { Value = driver.Availability });
 
-                        int RowsAffected = Command.ExecuteNonQuery();
-                        FormConsole.Instance.Log($"{RowsAffected} row(s) inserted.");
+                        Connection.Open();
+                        int newDriverId = (int)Command.ExecuteScalar(); 
+
+                        FormConsole.Instance.Log("Driver added successfully with ID: " + newDriverId);
+                        return newDriverId; 
                     }
                 }
                 catch (SqlException ex)
                 {
-                    FormConsole.Instance.Log("An error occurred while accessing the database: " + ex.Message);
+                    FormConsole.Instance.Log("An error occurred while adding the driver: " + ex.Message);
+                    return -1; //Indicates an error occurred
                 }
             }
         }
+
 
         public static void UpdateDriver(DriversDTO driver)
         {
@@ -158,17 +164,20 @@ Decouples the data access code from the rest of the application
             {
                 try
                 {
-                    string Query = "UPDATE Drivers SET Name = @Name, Surname = @Surname, LicenseType = @LicenseType WHERE EmployeeNo = @EmployeeNo;";
+                    string Query = "UPDATE Drivers SET Name = @Name, Surname = @Surname, EmployeeNo = @EmployeeNo, LicenseType = @LicenseType, Availability = @Availability WHERE DriverID = @DriverID;";
                     using (SqlCommand Command = new SqlCommand(Query, Connection))
                     {
-                        Command.Parameters.AddWithValue("@Name", driver.Name);
-                        Command.Parameters.AddWithValue("@Surname", driver.Surname);
-                        Command.Parameters.AddWithValue("@EmployeeNo", driver.EmployeeNo);
-                        Command.Parameters.AddWithValue("@LicenseType", (int)driver.LicenseType);
+                        // Add parameters to the command
+                        Command.Parameters.Add(new SqlParameter("@DriverID", SqlDbType.Int) { Value = driver.DriverId });
+                        Command.Parameters.Add(new SqlParameter("@Name", SqlDbType.NVarChar, 100) { Value = driver.Name });
+                        Command.Parameters.Add(new SqlParameter("@Surname", SqlDbType.NVarChar, 100) { Value = driver.Surname });
+                        Command.Parameters.Add(new SqlParameter("@EmployeeNo", SqlDbType.NVarChar, 50) { Value = driver.EmployeeNo });
+                        Command.Parameters.Add(new SqlParameter("@LicenseType", SqlDbType.Int) { Value = (int)driver.LicenseType });
+                        Command.Parameters.Add(new SqlParameter("@Availability", SqlDbType.Bit) { Value = driver.Availability });
 
                         Connection.Open();
-                        int rowsAffected = Command.ExecuteNonQuery();
-                        FormConsole.Instance.Log($"{rowsAffected} row(s) updated.");
+                        int RowsAffected = Command.ExecuteNonQuery();
+                        FormConsole.Instance.Log($"{RowsAffected} row(s) updated.");
                     }
                 }
                 catch (SqlException ex)

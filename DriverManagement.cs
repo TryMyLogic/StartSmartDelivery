@@ -37,7 +37,7 @@ namespace SmartStartDeliveryForm
                 HeaderText = "",
                 Text = "Edit",
                 UseColumnTextForButtonValue = true,
-             
+
             };
 
             DataGridViewButtonColumn DeleteButtonColumn = new DataGridViewButtonColumn
@@ -46,21 +46,20 @@ namespace SmartStartDeliveryForm
                 HeaderText = "",
                 Text = "Delete",
                 UseColumnTextForButtonValue = true,
-
-             
             };
 
-          
-            //SetTitle("Driver Management");
             SetSearchOptions(typeof(DriversDTO));
 
             DriverData = DriversDAO.GetAllDrivers();
             dataGridView1.DataSource = DriverData;
 
-            // Add columns to DataGridView
+            // Hide the DriverID column
+            dataGridView1.Columns["DriverID"].Visible = false;
+
             dataGridView1.Columns.Add(EditButtonColumn);
             dataGridView1.Columns.Add(DeleteButtonColumn);
 
+            //Prevents buttons from getting too large
             dataGridView1.Columns["Edit"].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             dataGridView1.Columns["Delete"].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
         }
@@ -84,22 +83,26 @@ namespace SmartStartDeliveryForm
 
                 if (Form.Mode == FormMode.Add)
                 {
-                    DataRow NewRow = DriverData.NewRow();
-                    NewRow["Name"] = DriverDTO.Name;
-                    NewRow["Surname"] = DriverDTO.Surname;
-                    NewRow["EmployeeNo"] = DriverDTO.EmployeeNo;
-                    NewRow["LicenseType"] = DriverDTO.LicenseType; // Assuming LicenseType is an int
-                    NewRow["Availability"] = DriverDTO.Availability;
+                    int newDriverId = DriversDAO.InsertDriver(DriverDTO);
 
-                    //Add to datatable
-                    DriverData.Rows.Add(NewRow);
+                    if (newDriverId != -1) // Check for success
+                    {
+                        DataRow NewRow = DriverData.NewRow();
+                        NewRow["DriverID"] = newDriverId; 
+                        NewRow["Name"] = DriverDTO.Name;
+                        NewRow["Surname"] = DriverDTO.Surname;
+                        NewRow["EmployeeNo"] = DriverDTO.EmployeeNo;
+                        NewRow["LicenseType"] = DriverDTO.LicenseType;
+                        NewRow["Availability"] = DriverDTO.Availability;
 
-                    //Add to database
-                    DriversDAO.InsertDriver(DriverDTO);
+                        // Add to DataTable
+                        DriverData.Rows.Add(NewRow);
+                    }
                 }
                 else if (Form.Mode == FormMode.Edit)
                 {
-                    DataRow RowToUpdate = DriverData.Rows.Find(DriverDTO.EmployeeNo); // Assuming EmployeeNo is the primary key
+                    DataRow RowToUpdate = DriverData.Rows.Find(DriverDTO.DriverId); // Assuming EmployeeNo is the primary key
+
                     if (RowToUpdate != null)
                     {
                         RowToUpdate["Name"] = DriverDTO.Name;
@@ -110,6 +113,7 @@ namespace SmartStartDeliveryForm
                     }
 
                     DriversDAO.UpdateDriver(DriverDTO);
+                    Form.Close();
                 }
 
                 Form.ClearData(); //Clear form for next batch of data
@@ -122,6 +126,7 @@ namespace SmartStartDeliveryForm
 
             DriversDTO DriverData = new DriversDTO
             {
+                DriverId = int.Parse(SelectedRow.Cells["DriverID"].Value.ToString()),
                 Name = SelectedRow.Cells["Name"].Value.ToString(),
                 Surname = SelectedRow.Cells["Surname"].Value.ToString(),
                 EmployeeNo = SelectedRow.Cells["EmployeeNo"].Value.ToString(),
@@ -141,7 +146,7 @@ namespace SmartStartDeliveryForm
         protected override void DeleteBTN_Click(int RowIndex)
         {
             var SelectedRow = dataGridView1.Rows[RowIndex];
-            string EmployeeNo = SelectedRow.Cells["EmployeeNo"].Value.ToString();
+            int DriverID = int.Parse(SelectedRow.Cells["DriverID"].Value.ToString());
             DialogResult Result = MessageBox.Show("Are you sure?", "Delete Row", MessageBoxButtons.YesNo);
             if (Result == DialogResult.Yes)
             {
@@ -149,7 +154,7 @@ namespace SmartStartDeliveryForm
                 DriverData.Rows.RemoveAt(RowIndex);
 
                 //Delete From Database
-                DriversDAO.DeleteDriver(EmployeeNo);
+                DriversDAO.DeleteDriver(DriverID);
             }
         }
 
@@ -186,6 +191,11 @@ namespace SmartStartDeliveryForm
             dataGridView1.Columns["Delete"].DisplayIndex = 6;
 
             MessageBox.Show("Succesfully Reloaded", "Reload Status");
+        }
+
+        protected override void rollbackToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

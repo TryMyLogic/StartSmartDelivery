@@ -21,6 +21,7 @@ namespace SmartStartDeliveryForm.DataForms
     }
     public partial class DriverDataForm : Form
     {
+        public int DriverId { get; set; }
         public FormMode Mode { get; set; }
         public DriverDataForm()
         {
@@ -34,6 +35,7 @@ namespace SmartStartDeliveryForm.DataForms
 
         internal void InitializeEditing(DriversDTO DriverData)
         {
+            DriverId = DriverData.DriverId;
             // Populate form with existing driver data for editing
             txtName.Text = DriverData.Name;
             txtSurname.Text = DriverData.Surname;
@@ -109,7 +111,7 @@ namespace SmartStartDeliveryForm.DataForms
         internal DriversDTO GetDriverData()
         {
             DriversDTO Driver = new DriversDTO();
-
+            Driver.DriverId = this.DriverId;
             Driver.Name = txtName.Text;
             Driver.Surname = txtSurname.Text;
             Driver.EmployeeNo = txtEmployeeNo.Text;

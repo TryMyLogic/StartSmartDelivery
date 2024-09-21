@@ -29,11 +29,6 @@ namespace SmartStartDeliveryForm
             dataGridView1.RowHeadersVisible = false; // Hides Row Number Column
         }
 
-        //protected void SetTitle(string NewTitle = "SetMe")
-        //{
-        //    TitleLabel.Text = NewTitle;
-        //}
-
         protected void SetSearchOptions(Type Dto)
         {
             cboSearchOptions.Items.Clear();
@@ -58,8 +53,6 @@ namespace SmartStartDeliveryForm
         {
             if (e.RowIndex >= 0)
             {
-
-
                 if (dataGridView1.Columns[e.ColumnIndex].Name == "Edit")
                 {
                     EditBTN_Click(e.RowIndex);
@@ -68,37 +61,29 @@ namespace SmartStartDeliveryForm
                 {
                     DeleteBTN_Click(e.RowIndex);
                 }
-
             }
         }
 
         protected virtual void EditBTN_Click(int RowIndex)
         {
-            // Retrieve the data for the selected row
-            var SelectedRow = dataGridView1.Rows[RowIndex];
-            // Implement your edit logic here{rowIndex}");
-            MessageBox.Show($"Edit button clicked for row {RowIndex}");
+
         }
         protected virtual void DeleteBTN_Click(int RowIndex)
         {
-            // Retrieve the data for the selected row
-            var SelectedRow = dataGridView1.Rows[RowIndex];
-            // Implement your delete logic here
 
-            DialogResult Result = MessageBox.Show("Are you sure", "Delete Row", MessageBoxButtons.YesNo);
-            if (Result == DialogResult.Yes)
-            {
-
-                MessageBox.Show($"Delete button clicked for row {RowIndex}");
-            }
         }
 
         protected virtual void refreshToolStripMenuItem_Click(object sender, EventArgs e)
         {
-             
+
         }
 
         protected virtual void reloadToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        protected virtual void rollbackToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
         }

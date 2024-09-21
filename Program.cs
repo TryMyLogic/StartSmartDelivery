@@ -17,6 +17,7 @@ namespace SmartStartDeliveryForm
             Application.SetCompatibleTextRenderingDefault(false);
 
             FormConsole.Instance.Show();
+            
             //Initialize connection to the database
             try
             {
@@ -26,10 +27,11 @@ namespace SmartStartDeliveryForm
             catch (InvalidOperationException ex)
             {
                 FormConsole.Instance.Log(ex.Message);
+                MessageBox.Show(ex.ToString());
             }
 
             // Run the main form
             Application.Run(new DriverManagement());
-        }
+        }   
     }
 }
