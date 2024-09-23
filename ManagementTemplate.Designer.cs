@@ -76,6 +76,7 @@
             this.dataGridView1.Size = new System.Drawing.Size(888, 290);
             this.dataGridView1.TabIndex = 15;
             this.dataGridView1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
+            this.dataGridView1.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dataGridView1_CellFormatting);
             // 
             // InsertBTN
             // 
@@ -202,7 +203,7 @@
             // rollbackToolStripMenuItem
             // 
             this.rollbackToolStripMenuItem.Name = "rollbackToolStripMenuItem";
-            this.rollbackToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.rollbackToolStripMenuItem.Size = new System.Drawing.Size(149, 26);
             this.rollbackToolStripMenuItem.Text = "Rollback";
             this.rollbackToolStripMenuItem.Click += new System.EventHandler(this.rollbackToolStripMenuItem_Click);
             // 
@@ -258,7 +259,7 @@
             this.tableLayoutPanel1.Padding = new System.Windows.Forms.Padding(0, 10, 0, 10);
             this.tableLayoutPanel1.RowCount = 1;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 61F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(888, 81);
             this.tableLayoutPanel1.TabIndex = 27;
             // 

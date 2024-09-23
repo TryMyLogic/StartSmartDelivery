@@ -31,37 +31,45 @@ namespace SmartStartDeliveryForm
             // Clear any existing columns
             dataGridView1.Columns.Clear();
 
-            DataGridViewButtonColumn EditButtonColumn = new DataGridViewButtonColumn
-            {
-                Name = "Edit",
-                HeaderText = "",
-                Text = "Edit",
-                UseColumnTextForButtonValue = true,
-
-            };
-
-            DataGridViewButtonColumn DeleteButtonColumn = new DataGridViewButtonColumn
-            {
-                Name = "Delete",
-                HeaderText = "",
-                Text = "Delete",
-                UseColumnTextForButtonValue = true,
-            };
-
+            
             SetSearchOptions(typeof(DriversDTO));
-
             DriverData = DriversDAO.GetAllDrivers();
-            dataGridView1.DataSource = DriverData;
 
-            // Hide the DriverID column
-            dataGridView1.Columns["DriverID"].Visible = false;
+            if (DriverData == null || DriverData.Rows.Count == 0)
+            {
+                MessageBox.Show("Failed to load driver data. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            else
+            {
+                dataGridView1.DataSource = DriverData;
 
-            dataGridView1.Columns.Add(EditButtonColumn);
-            dataGridView1.Columns.Add(DeleteButtonColumn);
+                DataGridViewButtonColumn EditButtonColumn = new DataGridViewButtonColumn
+                {
+                    Name = "Edit",
+                    HeaderText = "",
+                    Text = "Edit",
+                    UseColumnTextForButtonValue = true,
+                };
 
-            //Prevents buttons from getting too large
-            dataGridView1.Columns["Edit"].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
-            dataGridView1.Columns["Delete"].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+                DataGridViewButtonColumn DeleteButtonColumn = new DataGridViewButtonColumn
+                {
+                    Name = "Delete",
+                    HeaderText = "",
+                    Text = "Delete",
+                    UseColumnTextForButtonValue = true,
+                };
+
+                // Hide the DriverID column
+                dataGridView1.Columns["DriverID"].Visible = false;
+
+                // Add Edit and Delete buttons
+                dataGridView1.Columns.Add(EditButtonColumn);
+                dataGridView1.Columns.Add(DeleteButtonColumn);
+
+                // Prevent buttons from getting too large
+                dataGridView1.Columns["Edit"].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+                dataGridView1.Columns["Delete"].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+            }
         }
 
         protected override void InsertBTN_Click(object sender, EventArgs e)
@@ -197,5 +205,23 @@ namespace SmartStartDeliveryForm
         {
 
         }
+
+        protected override void dataGridView1_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (dataGridView1.Columns[e.ColumnIndex].Name == "LicenseType" && e.Value != null)
+            {
+                try
+                {
+                    e.Value = ((LicenseType)e.Value).ToString();
+                    e.FormattingApplied = true;
+                }
+                catch
+                {
+                   // Invalid Values are left as is (integers)
+                    e.FormattingApplied = true;
+                }
+            }
+        }
+
     }
 }

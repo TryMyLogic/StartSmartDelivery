@@ -32,14 +32,7 @@ Decouples the data access code from the rest of the application
             {
                 try
                 {
-                    string Query = @"SELECT *, 
-                    CASE LicenseType
-                        WHEN 1 THEN 'Code8'
-                        WHEN 2 THEN 'Code10'
-                        WHEN 3 THEN 'Code14'
-                        ELSE 'Unknown'
-                    END AS LicenseTypeText
-                FROM Drivers;";
+                    string Query = @"SELECT * FROM Drivers;";
 
                     using (SqlCommand Command = new SqlCommand(Query, Connection))
                     {
@@ -56,6 +49,7 @@ Decouples the data access code from the rest of the application
                 catch (SqlException ex)
                 {
                     FormConsole.Instance.Log("An error occurred while accessing the database: " + ex.Message);
+                    return null;
                 }
             }
 

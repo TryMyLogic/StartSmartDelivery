@@ -23,6 +23,8 @@ namespace SmartStartDeliveryForm
             {
                 DatabaseConfig.Initialize("StartSmartDB");
                 FormConsole.Instance.Log("Database Initialized");
+                // Only run the form if the Database connects
+                Application.Run(new DriverManagement());
             }
             catch (InvalidOperationException ex)
             {
@@ -30,8 +32,7 @@ namespace SmartStartDeliveryForm
                 MessageBox.Show(ex.ToString());
             }
 
-            // Run the main form
-            Application.Run(new DriverManagement());
+          
         }   
     }
 }

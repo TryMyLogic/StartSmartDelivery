@@ -87,5 +87,10 @@ namespace SmartStartDeliveryForm
         {
 
         }
+
+        protected virtual void dataGridView1_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        {
+
+        }
     }
 }
