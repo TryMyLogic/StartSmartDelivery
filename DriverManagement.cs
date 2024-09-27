@@ -31,7 +31,6 @@ namespace SmartStartDeliveryForm
             // Clear any existing columns
             dataGridView1.Columns.Clear();
 
-            
             SetSearchOptions(typeof(DriversDTO));
             DriverData = DriversDAO.GetAllDrivers();
 
@@ -151,6 +150,7 @@ namespace SmartStartDeliveryForm
             driverDataForm.SubmitClicked += DriverDataForm_SubmitClicked;
             driverDataForm.Show();
         }
+
         protected override void DeleteBTN_Click(int RowIndex)
         {
             var SelectedRow = dataGridView1.Rows[RowIndex];
@@ -168,6 +168,15 @@ namespace SmartStartDeliveryForm
 
         protected override void refreshToolStripMenuItem_Click(object sender, EventArgs e)
         {
+
+            var dataTable = (DataTable)dataGridView1.DataSource;
+
+            // Remove any filters that were applied
+            if (dataTable != null)
+            {
+                dataTable.DefaultView.RowFilter = string.Empty;  // Clear any applied filters
+            }
+
             //Rebind
             dataGridView1.DataSource = null;
             dataGridView1.DataSource = DriverData;
@@ -179,6 +188,9 @@ namespace SmartStartDeliveryForm
             dataGridView1.Columns["Availability"].DisplayIndex = 4;
             dataGridView1.Columns["Edit"].DisplayIndex = 5;
             dataGridView1.Columns["Delete"].DisplayIndex = 6;
+
+            // Hide the DriverID column
+            dataGridView1.Columns["DriverID"].Visible = false;
 
             MessageBox.Show("Succesfully Refreshed", "Refresh Status");
         }
@@ -197,6 +209,9 @@ namespace SmartStartDeliveryForm
             dataGridView1.Columns["Availability"].DisplayIndex = 4;
             dataGridView1.Columns["Edit"].DisplayIndex = 5;
             dataGridView1.Columns["Delete"].DisplayIndex = 6;
+
+            // Hide the DriverID column
+            dataGridView1.Columns["DriverID"].Visible = false;
 
             MessageBox.Show("Succesfully Reloaded", "Reload Status");
         }
@@ -222,6 +237,15 @@ namespace SmartStartDeliveryForm
                 }
             }
         }
+
+        protected override HashSet<string> GetExcludedColumns()
+        {
+            return new HashSet<string> { "DriverID" }; // By default, exclude nothing.
+        }
+
+
+
+
 
     }
 }

@@ -34,7 +34,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(882, 453);
+            this.ClientSize = new System.Drawing.Size(882, 566);
             this.MinimumSize = new System.Drawing.Size(900, 500);
             this.Name = "DriverManagement";
             this.Text = "DriverManagement";

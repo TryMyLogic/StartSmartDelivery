@@ -29,14 +29,21 @@ namespace SmartStartDeliveryForm
             dataGridView1.RowHeadersVisible = false; // Hides Row Number Column
         }
 
+        protected virtual HashSet<string> GetExcludedColumns()
+        {
+            return new HashSet<string>(); // By default, exclude nothing.
+        }
         protected void SetSearchOptions(Type Dto)
         {
             cboSearchOptions.Items.Clear();
 
-            var properties = Dto.GetProperties();
-            foreach (var property in properties)
+            //Makes comparison case insensitive
+            var ExcludedColumns = GetExcludedColumns().Select(c => c.ToLower()).ToHashSet();
+            var Properties = Dto.GetProperties();
+            foreach (var Property in Properties)
             {
-                cboSearchOptions.Items.Add(property.Name);
+                if (!ExcludedColumns.Contains(Property.Name.ToLower()))
+                    cboSearchOptions.Items.Add(Property.Name);
             }
 
             cboSearchOptions.SelectedIndex = 0;
@@ -92,5 +99,95 @@ namespace SmartStartDeliveryForm
         {
 
         }
+
+        protected virtual void SearchBTN_Click(object sender, EventArgs e)
+        {
+            var SelectedOption = cboSearchOptions.SelectedItem.ToString();
+            var SearchTerm = txtSearchBox.Text.Trim();
+
+            if (!string.IsNullOrEmpty(SearchTerm))
+            {
+                var dataTable = (DataTable)dataGridView1.DataSource;
+
+                if (dataTable != null)
+                {
+                    // Escape single quotes in the search term
+                    SearchTerm = SearchTerm.Replace("'", "''");
+
+                    var ColumnType = dataTable.Columns[SelectedOption].DataType;
+
+                    string filterExpression;
+
+                    if (ColumnType == typeof(string))
+                    {
+                        filterExpression = $"{SelectedOption} LIKE '%{SearchTerm}%'";
+                    }
+                    else if (ColumnType == typeof(int))
+                    {
+                        filterExpression = SearchEnumColumn(SelectedOption, SearchTerm);
+                        //If it isnt an enum. handle as a normal int
+                        
+                        //TODO
+
+                    }
+                    else
+                    {
+                        FormConsole.Instance.Log("Unsupported data type for filtering.");
+                        return; 
+                    }
+
+                    // Apply the filter
+                    dataTable.DefaultView.RowFilter = filterExpression;
+                    FormConsole.Instance.Log($"Filter applied: {filterExpression}");
+                }
+                else
+                {
+                    FormConsole.Instance.Log("No data source found for DataGridView.");
+                }
+            }
+            else
+            {
+                FormConsole.Instance.Log("Search term is empty, removing filter.");
+
+                var dataTable = (DataTable)dataGridView1.DataSource;
+                if (dataTable != null)
+                {
+                    dataTable.DefaultView.RowFilter = string.Empty;  // Reset the filter
+                }
+            }
+        }
+
+        /*
+        Note: The SearchEnum function works on the assumption that
+        1. The namespace for Enums is the same across the board
+        2. The column name for any Enum column have the same name as the 
+           Enum itself.
+         */
+        protected string SearchEnumColumn(string selectedOption, string searchTerm)
+        {
+            var EnumType = Type.GetType($"SmartStartDeliveryForm.Enums.{selectedOption}", false);
+
+            FormConsole.Instance.Log("enumType" + EnumType);
+            if (EnumType != null && EnumType.IsEnum)
+            {
+                // Check if the SearchTerm is found within the Enum 
+                if (Enum.IsDefined(EnumType, searchTerm))
+                {
+                    var enumValue = Enum.Parse(EnumType, searchTerm);
+                    return $"{selectedOption} = {(int)enumValue}";
+                }
+                else
+                {
+                    FormConsole.Instance.Log($"Invalid {selectedOption} search term.");
+                    return string.Empty;
+                }
+            }
+
+            // Return empty if not an enum
+            return string.Empty;
+        }
+
+
+
     }
 }

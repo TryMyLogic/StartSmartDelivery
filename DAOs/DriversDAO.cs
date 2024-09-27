@@ -14,8 +14,8 @@ using SmartStartDeliveryForm.Enums;
 
 namespace SmartStartDeliveryForm.DAOs
 {
-    /*
-*a DAO:
+/*
+DAO:
 Encapsulates the data access operations (like querying, inserting, updating, and deleting data).
 Provides an interface to interact with the data source (such as a database).
 Decouples the data access code from the rest of the application
@@ -68,6 +68,7 @@ Decouples the data access code from the rest of the application
                     {
                         Command.CommandType = CommandType.Text; // Since it's a direct SQL query
                         Command.Parameters.Add(new SqlParameter("@EmployeeNo", SqlDbType.NVarChar, 50) { Value = EmployeeNo });
+
                         Connection.Open();
 
                         object FoundRow = Command.ExecuteScalar();
