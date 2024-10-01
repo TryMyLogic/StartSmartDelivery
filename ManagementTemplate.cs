@@ -116,29 +116,49 @@ namespace SmartStartDeliveryForm
 
                     var ColumnType = dataTable.Columns[SelectedOption].DataType;
 
-                    string filterExpression;
-
+                    string FilterExpression;
+                    FormConsole.Instance.Log("Type: " + ColumnType);
                     if (ColumnType == typeof(string))
                     {
-                        filterExpression = $"{SelectedOption} LIKE '%{SearchTerm}%'";
+                        FilterExpression = $"{SelectedOption} LIKE '%{SearchTerm}%'";
                     }
                     else if (ColumnType == typeof(int))
                     {
-                        filterExpression = SearchEnumColumn(SelectedOption, SearchTerm);
+                        FilterExpression = SearchEnumColumn(SelectedOption, SearchTerm);
                         //If it isnt an enum. handle as a normal int
-                        
+
                         //TODO
 
+                    }
+                    else if (ColumnType == typeof(bool)) // Handle boolean column
+                    {
+                        if (bool.TryParse(SearchTerm, out bool BoolSearchTerm))
+                        {
+                            FilterExpression = $"{SelectedOption} = {BoolSearchTerm.ToString().ToLower()}"; // Ensure proper case for boolean
+                        }
+                        else if (SearchTerm == "1")
+                        {
+                            FilterExpression = $"{SelectedOption} = true";
+                        }
+                        else if (SearchTerm == "0")
+                        {
+                            FilterExpression = $"{SelectedOption} = false";
+                        }
+                        else
+                        {
+                            FormConsole.Instance.Log("Invalid boolean search term.");
+                            return; // Early exit for invalid boolean
+                        }
                     }
                     else
                     {
                         FormConsole.Instance.Log("Unsupported data type for filtering.");
-                        return; 
+                        return;
                     }
 
                     // Apply the filter
-                    dataTable.DefaultView.RowFilter = filterExpression;
-                    FormConsole.Instance.Log($"Filter applied: {filterExpression}");
+                    dataTable.DefaultView.RowFilter = FilterExpression;
+                    FormConsole.Instance.Log($"Filter applied: {FilterExpression}");
                 }
                 else
                 {
