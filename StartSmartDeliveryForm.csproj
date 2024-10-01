@@ -69,6 +69,12 @@
       <DependentUpon>DriverManagement.cs</DependentUpon>
     </Compile>
     <Compile Include="DTOs\DriversDTO.cs" />
+    <Compile Include="Login.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Login.Designer.cs">
+      <DependentUpon>Login.cs</DependentUpon>
+    </Compile>
     <Compile Include="ManagementTemplate.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -87,6 +93,9 @@
     <EmbeddedResource Include="DriverManagement.resx">
       <DependentUpon>DriverManagement.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Login.resx">
+      <DependentUpon>Login.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="ManagementTemplate.resx">
       <DependentUpon>ManagementTemplate.cs</DependentUpon>
     </EmbeddedResource>
@@ -98,6 +107,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

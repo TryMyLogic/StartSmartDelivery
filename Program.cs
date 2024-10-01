@@ -24,7 +24,7 @@ namespace SmartStartDeliveryForm
                 DatabaseConfig.Initialize("StartSmartDB");
                 FormConsole.Instance.Log("Database Initialized");
                 // Only run the form if the Database connects
-                Application.Run(new DriverManagement());
+                Application.Run(new Login());
             }
             catch (InvalidOperationException ex)
             {
