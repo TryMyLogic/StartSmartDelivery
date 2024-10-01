@@ -155,7 +155,7 @@ namespace SmartStartDeliveryForm
                         FormConsole.Instance.Log("Unsupported data type for filtering.");
                         return;
                     }
-
+                    FormConsole.Instance.Log("" + FilterExpression);
                     // Apply the filter
                     dataTable.DefaultView.RowFilter = FilterExpression;
                     FormConsole.Instance.Log($"Filter applied: {FilterExpression}");
@@ -207,7 +207,25 @@ namespace SmartStartDeliveryForm
             return string.Empty;
         }
 
+        private void driverManagementToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (!(this is DriverManagement)) //Prevents opening when already on the target page
+            {
+                DriverManagement DriverManagement = new DriverManagement();
+                DriverManagement.Show();
 
+                this.Close(); 
+            }
+        }
+        private void vehicleManagementToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (!(this is VehicleManagement)) //Prevents opening when already on the target page
+            {
+                VehicleManagement VehicleManagement = new VehicleManagement();
+                VehicleManagement.Show();
 
+                this.Close();
+            }
+        }
     }
 }

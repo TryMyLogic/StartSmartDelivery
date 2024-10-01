@@ -1,6 +1,6 @@
 ﻿namespace SmartStartDeliveryForm
 {
-    partial class DriverManagement : ManagementTemplate
+    partial class VehicleManagement
     {
         /// <summary>
         /// Required designer variable.
@@ -30,16 +30,15 @@
         {
             this.SuspendLayout();
             // 
-            // DriverManagement
+            // VehicleManagement
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(882, 566);
-            this.MinimumSize = new System.Drawing.Size(900, 500);
-            this.Name = "DriverManagement";
+            this.Name = "VehicleManagement";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "DriverManagement";
-            this.Load += new System.EventHandler(this.DriverManagement_Load);
+            this.Text = "VehicleManagement";
+            this.Load += new System.EventHandler(this.VehicleManagement_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

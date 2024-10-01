@@ -41,7 +41,6 @@
             this.deliveryManagementToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.vehicleManagementToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.driverManagementToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.testToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dataManagementToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.rollbackToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.refreshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -193,20 +192,14 @@
             this.vehicleManagementToolStripMenuItem.Name = "vehicleManagementToolStripMenuItem";
             this.vehicleManagementToolStripMenuItem.Size = new System.Drawing.Size(238, 26);
             this.vehicleManagementToolStripMenuItem.Text = "Vehicle Management";
+            this.vehicleManagementToolStripMenuItem.Click += new System.EventHandler(this.vehicleManagementToolStripMenuItem_Click);
             // 
             // driverManagementToolStripMenuItem
             // 
-            this.driverManagementToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.testToolStripMenuItem});
             this.driverManagementToolStripMenuItem.Name = "driverManagementToolStripMenuItem";
             this.driverManagementToolStripMenuItem.Size = new System.Drawing.Size(238, 26);
             this.driverManagementToolStripMenuItem.Text = "Driver Management";
-            // 
-            // testToolStripMenuItem
-            // 
-            this.testToolStripMenuItem.Name = "testToolStripMenuItem";
-            this.testToolStripMenuItem.Size = new System.Drawing.Size(118, 26);
-            this.testToolStripMenuItem.Text = "Test";
+            this.driverManagementToolStripMenuItem.Click += new System.EventHandler(this.driverManagementToolStripMenuItem_Click);
             // 
             // dataManagementToolStripMenuItem
             // 
@@ -477,6 +470,7 @@
             this.Controls.Add(this.panel3);
             this.Controls.Add(this.menuStrip1);
             this.Name = "ManagementTemplate";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Template";
             this.Load += new System.EventHandler(this.Template_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
@@ -513,7 +507,6 @@
         private System.Windows.Forms.ToolStripMenuItem deliveryManagementToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem vehicleManagementToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem driverManagementToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem testToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem dataManagementToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem rollbackToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem refreshToolStripMenuItem;
