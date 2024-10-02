@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SmartStartDeliveryForm.DTOs
 {
-    internal class VehiclesDTO
+    public class VehiclesDTO
     {
         public int VehicleId { get; set; }
         public string Make { get; set; }

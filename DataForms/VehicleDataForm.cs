@@ -76,7 +76,7 @@ namespace SmartStartDeliveryForm.DataForms
             return Vehicle;
         }
 
-        private void SubmitBTN_Click(object sender, EventArgs e)
+        public void SubmitBTN_Click(object sender, EventArgs e)
         {
             if (ValidForm())
             {
