@@ -5,6 +5,8 @@ VisualStudioVersion = 17.11.35208.52
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StartSmartDeliveryForm", "StartSmartDeliveryForm.csproj", "{0EEA0248-DD98-4AE2-BB57-74B2F847390D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartStartDelivery.Tests", "SmartStartDelivery.Tests\SmartStartDelivery.Tests.csproj", "{7E0769B8-462E-4B02-A693-0E7177D3AC8A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{0EEA0248-DD98-4AE2-BB57-74B2F847390D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0EEA0248-DD98-4AE2-BB57-74B2F847390D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0EEA0248-DD98-4AE2-BB57-74B2F847390D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E0769B8-462E-4B02-A693-0E7177D3AC8A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E0769B8-462E-4B02-A693-0E7177D3AC8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E0769B8-462E-4B02-A693-0E7177D3AC8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E0769B8-462E-4B02-A693-0E7177D3AC8A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
