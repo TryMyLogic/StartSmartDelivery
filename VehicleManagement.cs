@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using SmartStartDeliveryForm.Fakes;
 using SmartStartDeliveryForm.DataForms;
+using SmartStartDeliveryForm.Classes;
+using SmartStartDeliveryForm.Enums;
 
 namespace SmartStartDeliveryForm
 {
@@ -72,9 +74,99 @@ namespace SmartStartDeliveryForm
         protected override void InsertBTN_Click(object sender, EventArgs e)
         {
 
-          //  DriverDataForm diverDataForm = new DriverDataForm();
-           // DriverDataForm.SubmitClicked += DriverDataForm_SubmitClicked;
-           // DriverDataForm.Show();
+            VehicleDataForm VehicleDataForm = new VehicleDataForm();
+            VehicleDataForm.SubmitClicked += VehicleDataForm_SubmitClicked;
+            VehicleDataForm.Show();
+        }
+
+        // Submit button click event handler
+        private void VehicleDataForm_SubmitClicked(object sender, EventArgs e)
+        {
+            // Handle the event
+            FormConsole.Instance.Log("Hello");
+            VehicleDataForm Form = sender as VehicleDataForm;
+            if (Form != null)
+            {
+                VehiclesDTO VehicleDTO = Form.GetVehicleData();
+                FormConsole.Instance.Log("Mode: " + Form.Mode);
+                if (Form.Mode == FormMode.Add)
+                {
+
+                    int newVehicleID = VehicleData.Rows.Count > 0 ?
+                     Convert.ToInt32(VehicleData.Compute("MAX(VehicleID)", string.Empty)) + 1 :
+                     1;
+                    FormConsole.Instance.Log("ID: " + newVehicleID);
+                    if (newVehicleID != -1) // Check for success
+                    {
+                        DataRow NewRow = VehicleData.NewRow();
+                        NewRow["VehicleID"] = newVehicleID;
+                        NewRow["Make"] = VehicleDTO.Make;
+                        NewRow["Model"] = VehicleDTO.Model;
+                        NewRow["Year"] = VehicleDTO.Year;
+                        NewRow["NumberPlate"] = VehicleDTO.NumberPlate;
+                        NewRow["Availability"] = VehicleDTO.Availability;
+
+                        // Add to DataTable
+                        VehicleData.Rows.Add(NewRow);
+                    }
+                }
+                else if (Form.Mode == FormMode.Edit)
+                {
+                    DataRow RowToUpdate = VehicleData.Rows.Find(VehicleDTO.VehicleId); // Assuming EmployeeNo is the primary key
+
+                    if (RowToUpdate != null)
+                    {
+                        RowToUpdate["Make"] = VehicleDTO.Make;
+                        RowToUpdate["Model"] = VehicleDTO.Model;
+                        RowToUpdate["Year"] = VehicleDTO.Year;
+                        RowToUpdate["NumberPlate"] = VehicleDTO.NumberPlate;
+                        RowToUpdate["Availability"] = VehicleDTO.Availability;
+                    }
+
+                    Form.Close();
+                }
+
+                Form.ClearData(); //Clear form for next batch of data
+            }
+        }
+
+        protected override void EditBTN_Click(int RowIndex)
+        {
+            var SelectedRow = dataGridView1.Rows[RowIndex];
+
+            VehiclesDTO VehicleData = new VehiclesDTO
+            {
+                VehicleId = int.Parse(SelectedRow.Cells["VehicleID"].Value.ToString()),
+                Make = SelectedRow.Cells["Make"].Value.ToString(),
+                Model = SelectedRow.Cells["Model"].Value.ToString(),
+                Year = int.Parse(SelectedRow.Cells["Year"].Value.ToString()),
+                NumberPlate = SelectedRow.Cells["NumberPlate"].Value.ToString(),
+                Availability = int.Parse(SelectedRow.Cells["Availability"].Value.ToString())
+            };
+
+            VehicleDataForm VehicleDataForm = new VehicleDataForm
+            {
+                Mode = FormMode.Edit
+            };
+
+            VehicleDataForm.InitializeEditing(VehicleData);
+            VehicleDataForm.SubmitClicked += VehicleDataForm_SubmitClicked;
+            VehicleDataForm.Show();
+        }
+
+        protected override void DeleteBTN_Click(int RowIndex)
+        {
+            var SelectedRow = dataGridView1.Rows[RowIndex];
+            int VehicleID = int.Parse(SelectedRow.Cells["VehicleID"].Value.ToString());
+            DialogResult Result = MessageBox.Show("Are you sure?", "Delete Row", MessageBoxButtons.YesNo);
+            if (Result == DialogResult.Yes)
+            {
+                // Delete From Data Table
+                VehicleData.Rows.RemoveAt(RowIndex);
+
+                //Delete From Database
+               // VehiclesDAO.DeleteDriver(DriverID);
+            }
         }
 
     }

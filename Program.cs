@@ -21,8 +21,8 @@ namespace SmartStartDeliveryForm
             //Initialize connection to the database
             try
             {
-                DatabaseConfig.Initialize("StartSmartDB");
-                FormConsole.Instance.Log("Database Initialized");
+          //      DatabaseConfig.Initialize("StartSmartDB");
+               // FormConsole.Instance.Log("Database Initialized");
                 // Only run the form if the Database connects
                 Application.Run(new VehicleManagement());
             }

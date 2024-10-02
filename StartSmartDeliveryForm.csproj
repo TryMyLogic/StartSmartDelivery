@@ -51,6 +51,7 @@
     <Compile Include="Classes\Drivers.cs" />
     <Compile Include="Classes\User.cs" />
     <Compile Include="Classes\Vehicles.cs" />
+    <Compile Include="DAOs\VehiclesDAO.cs" />
     <Compile Include="DataForms\DriverDataForm.cs">
       <SubType>Form</SubType>
     </Compile>

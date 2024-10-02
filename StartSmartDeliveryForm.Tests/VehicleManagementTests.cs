@@ -8,5 +8,6 @@ namespace StartSmartDeliveryForm.Tests
 {
     internal class VehicleManagementTests
     {
+
     }
 }
