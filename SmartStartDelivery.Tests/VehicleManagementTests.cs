@@ -18,8 +18,8 @@ namespace SmartStartDelivery.Tests
     {
         [Theory]
         [InlineData("Toyota", "Prius", 2023, "NUM123GP", 1)] //Test passes
-        //[InlineData("Honda", "Civic", 2020, "NUM543GP", 2)] //Test passes
-       // [InlineData("Ford", "F-150", 2021, "NUM645GP", 3)] //Test fails - found bug since 3 is valid (stands for Vehicle under Maintenance)
+        [InlineData("Honda", "Civic", 2020, "NUM543GP", 2)] //Test passes
+        [InlineData("Ford", "F-150", 2021, "NUM645GP", 3)] //Test fails - found bug since 3 is valid (stands for Vehicle under Maintenance)
         public void VehicleDataForm_SubmitClicked_AddsVehicle_WhenInAddMode(string Make, string Model, int Year, string NumberPlate,int Availability)
         {
             // Arrange 
@@ -69,7 +69,9 @@ namespace SmartStartDelivery.Tests
         }
 
         [Theory]
-        [InlineData("Toyota", "Prius", 2023, "NUM123GP", 1)]
+        [InlineData("Toyota", "Prius", 2023, "NUM123GP", 1)] //Test passes
+        [InlineData("Honda", "Civic", 2020, "NUM543GP", 2)] //Test passes
+        [InlineData("Ford", "F-150", 2021, "NUM645GP", 3)] //Test fails - found bug since 3 is valid (stands for Vehicle under Maintenance)
         public void VehicleDataForm_SubmitClicked_UpdatesVehicle_WhenInEditMode(string Make, string Model, int Year, string NumberPlate, int Availability)
         {
             // Arrange
@@ -122,9 +124,9 @@ namespace SmartStartDelivery.Tests
         }
 
         [Theory]
-        [InlineData(10)]
-        [InlineData(15)]
-        [InlineData(20)]
+        [InlineData(10)] //Test passes
+        [InlineData(15)] //Test passes
+        [InlineData(20)] //Test passes
         public void DeleteBTN_Click_RemovesRow_FromDataTable(int VehicleID)
         {
             // Arrange

@@ -8,8 +8,8 @@ namespace SmartStartDeliveryForm.Enums
 {
    public enum VehicleAvailabilityEnum
     {
-        Available = 1,
-        Unavailable,
+        Available = 1, 
+        Unavailable, 
         UnderMaintenance
     }
 
