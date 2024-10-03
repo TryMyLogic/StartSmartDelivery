@@ -494,7 +494,7 @@
         }
 
         #endregion
-        protected System.Windows.Forms.DataGridView dataGridView1;
+        public System.Windows.Forms.DataGridView dataGridView1;
         private System.Windows.Forms.Button InsertBTN;
         private System.Windows.Forms.Button SearchBTN;
         protected System.Windows.Forms.TextBox txtSearchBox;
