@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SmartStartDeliveryForm.Enums
 {
-    enum VehicleAvailabilityEnum
+   public enum VehicleAvailabilityEnum
     {
         Available = 1,
         Unavailable,

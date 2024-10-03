@@ -18,7 +18,7 @@ namespace SmartStartDeliveryForm
 {
     public partial class VehicleManagement : ManagementTemplate
     {
-        private DataTable VehicleData;
+        public DataTable VehicleData;
         public VehicleManagement()
         {
             InitializeComponent();
@@ -71,6 +71,12 @@ namespace SmartStartDeliveryForm
             }
         }
 
+        public void OverrideVehicleData(DataTable dataTable)
+        {
+            VehicleData = dataTable;
+            dataGridView1.DataSource = VehicleData;
+        }
+
         protected override void InsertBTN_Click(object sender, EventArgs e)
         {
 
@@ -80,10 +86,9 @@ namespace SmartStartDeliveryForm
         }
 
         // Submit button click event handler
-        private void VehicleDataForm_SubmitClicked(object sender, EventArgs e)
+        public void VehicleDataForm_SubmitClicked(object sender, EventArgs e)
         {
             // Handle the event
-            FormConsole.Instance.Log("Hello");
             VehicleDataForm Form = sender as VehicleDataForm;
             if (Form != null)
             {
@@ -95,7 +100,7 @@ namespace SmartStartDeliveryForm
                     int newVehicleID = VehicleData.Rows.Count > 0 ?
                      Convert.ToInt32(VehicleData.Compute("MAX(VehicleID)", string.Empty)) + 1 :
                      1;
-                    FormConsole.Instance.Log("ID: " + newVehicleID);
+
                     if (newVehicleID != -1) // Check for success
                     {
                         DataRow NewRow = VehicleData.NewRow();

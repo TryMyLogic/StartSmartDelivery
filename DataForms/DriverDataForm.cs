@@ -22,7 +22,7 @@ namespace SmartStartDeliveryForm.DataForms
     public partial class DriverDataForm : Form
     {
         public int DriverId { get; set; }
-        public FormMode Mode { get; set; }
+        public FormMode Mode { get; set; }  //Defaults to Add if not explicily stated
         public DriverDataForm()
         {
             InitializeComponent();

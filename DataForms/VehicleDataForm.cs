@@ -58,6 +58,7 @@ namespace SmartStartDeliveryForm.DataForms
             txtNumberPlate.Clear();
             cboAvailability.SelectedIndex = 0;
         }
+
         internal VehiclesDTO GetVehicleData()
         {
             VehiclesDTO Vehicle = new VehiclesDTO();
