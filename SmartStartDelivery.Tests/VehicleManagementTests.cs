@@ -121,8 +121,11 @@ namespace SmartStartDelivery.Tests
             Assert.Equal(Availability, VehicleManagementForm.VehicleData.Rows[0]["Availability"]);
         }
 
-        [Fact]
-        public void DeleteBTN_Click_RemovesRow_FromDataTable()
+        [Theory]
+        [InlineData(10)]
+        [InlineData(15)]
+        [InlineData(20)]
+        public void DeleteBTN_Click_RemovesRow_FromDataTable(int VehicleID)
         {
             // Arrange
             VehicleManagement VehicleManagementForm = new VehicleManagement();
@@ -136,18 +139,27 @@ namespace SmartStartDelivery.Tests
             TestVehicleData.Columns.Add("Availability", typeof(int));
 
             TestVehicleData.Rows.Add(10, "DefaultMake", "DefaultModel", 1000, "NUM000GP", 1);
+            TestVehicleData.Rows.Add(15, "DefaultMake", "DefaultModel", 1000, "NUM000GP", 1);
+            TestVehicleData.Rows.Add(20, "DefaultMake", "DefaultModel", 1000, "NUM000GP", 1);
+
+            // Set the primary key
+            DataColumn[] PrimaryKeyColumns = new DataColumn[1];
+            PrimaryKeyColumns[0] = TestVehicleData.Columns["VehicleID"];
+            TestVehicleData.PrimaryKey = PrimaryKeyColumns;
 
             //Override this specific instances private DataTable
             VehicleManagementForm.OverrideVehicleData(TestVehicleData);
 
             // Act
             //===== DeleteBTN Clicked =====
-            var SelectedRow = VehicleManagementForm.dataGridView1.Rows[0];
-            int VehicleID = int.Parse(SelectedRow.Cells["VehicleID"].Value.ToString());
-            TestVehicleData.Rows.RemoveAt(0);
+            DataRow RowToDelete = TestVehicleData.Rows.Find(VehicleID);
+            int RowIndex = TestVehicleData.Rows.IndexOf(RowToDelete);
+            TestVehicleData.Rows.RemoveAt(RowIndex);
 
             // Assert
-            Assert.Equal(0, TestVehicleData.Rows.Count); //Test initally had 1 row. Now it should be 0
+            Assert.Equal(2, TestVehicleData.Rows.Count); //Test initally had 3 rows. Now it should be 2
+            DataRow[] FoundRows = TestVehicleData.Select($"VehicleID = {VehicleID}");
+            Assert.Empty(FoundRows); //Deleted ID shouldnt be found
         }
 
     }
