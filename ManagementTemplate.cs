@@ -29,6 +29,35 @@ namespace StartSmartDeliveryForm
             dataGridView1.RowHeadersVisible = false; // Hides Row Number Column
         }
 
+        protected void AddEditDeleteButtons()
+        {
+            DataGridViewButtonColumn editButtonColumn = new DataGridViewButtonColumn
+            {
+                Name = "Edit",
+                HeaderText = "",
+                Text = "Edit",
+                UseColumnTextForButtonValue = true,
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.None
+            };
+
+            DataGridViewButtonColumn deleteButtonColumn = new DataGridViewButtonColumn
+            {
+                Name = "Delete",
+                HeaderText = "",
+                Text = "Delete",
+                UseColumnTextForButtonValue = true,
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.None
+            };
+
+            // Add Edit and Delete buttons
+            dataGridView1.Columns.Add(editButtonColumn);
+            dataGridView1.Columns.Add(deleteButtonColumn);
+
+            // Prevent buttons from getting too large
+            dataGridView1.Columns["Edit"].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+            dataGridView1.Columns["Delete"].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+        }
+
         protected virtual HashSet<string> GetExcludedColumns()
         {
             return new HashSet<string>(); // By default, exclude nothing.

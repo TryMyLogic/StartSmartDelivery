@@ -41,33 +41,10 @@ namespace StartSmartDeliveryForm
             else
             {
                 dataGridView1.DataSource = DriverData;
+                AddEditDeleteButtons();
 
-                DataGridViewButtonColumn EditButtonColumn = new DataGridViewButtonColumn
-                {
-                    Name = "Edit",
-                    HeaderText = "",
-                    Text = "Edit",
-                    UseColumnTextForButtonValue = true,
-                };
-
-                DataGridViewButtonColumn DeleteButtonColumn = new DataGridViewButtonColumn
-                {
-                    Name = "Delete",
-                    HeaderText = "",
-                    Text = "Delete",
-                    UseColumnTextForButtonValue = true,
-                };
-
-                // Hide the DriverID column
+                // Hide the Primary Key Column from User
                 dataGridView1.Columns["DriverID"].Visible = false;
-
-                // Add Edit and Delete buttons
-                dataGridView1.Columns.Add(EditButtonColumn);
-                dataGridView1.Columns.Add(DeleteButtonColumn);
-
-                // Prevent buttons from getting too large
-                dataGridView1.Columns["Edit"].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
-                dataGridView1.Columns["Delete"].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             }
         }
 
