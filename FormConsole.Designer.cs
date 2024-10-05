@@ -1,4 +1,4 @@
-﻿namespace SmartStartDeliveryForm
+﻿namespace StartSmartDeliveryForm
 {
     partial class FormConsole
     {

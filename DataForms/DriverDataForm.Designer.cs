@@ -1,4 +1,4 @@
-﻿namespace SmartStartDeliveryForm.DataForms
+﻿namespace StartSmartDeliveryForm.DataForms
 {
     partial class DriverDataForm
     {

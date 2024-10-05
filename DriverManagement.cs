@@ -1,8 +1,8 @@
-﻿using SmartStartDeliveryForm.Classes;
-using SmartStartDeliveryForm.DAOs;
-using SmartStartDeliveryForm.DataForms;
-using SmartStartDeliveryForm.DTOs;
-using SmartStartDeliveryForm.Enums;
+﻿using StartSmartDeliveryForm.Classes;
+using StartSmartDeliveryForm.DAOs;
+using StartSmartDeliveryForm.DataForms;
+using StartSmartDeliveryForm.DTOs;
+using StartSmartDeliveryForm.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -14,7 +14,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace SmartStartDeliveryForm
+namespace StartSmartDeliveryForm
 {
     public partial class DriverManagement : ManagementTemplate
     {

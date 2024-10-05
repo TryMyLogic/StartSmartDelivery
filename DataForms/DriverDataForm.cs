@@ -1,5 +1,5 @@
-﻿using SmartStartDeliveryForm.DTOs;
-using SmartStartDeliveryForm.Enums;
+﻿using StartSmartDeliveryForm.DTOs;
+using StartSmartDeliveryForm.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -10,9 +10,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using SmartStartDeliveryForm.Classes;
+using StartSmartDeliveryForm.Classes;
 
-namespace SmartStartDeliveryForm.DataForms
+namespace StartSmartDeliveryForm.DataForms
 {
     public enum FormMode
     {

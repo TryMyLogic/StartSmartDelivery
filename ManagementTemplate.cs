@@ -1,6 +1,6 @@
-﻿using SmartStartDeliveryForm.Classes;
-using SmartStartDeliveryForm.DAOs;
-using SmartStartDeliveryForm.Enums;
+﻿using StartSmartDeliveryForm.Classes;
+using StartSmartDeliveryForm.DAOs;
+using StartSmartDeliveryForm.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -10,11 +10,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using SmartStartDeliveryForm.DataForms;
-using SmartStartDeliveryForm.DTOs;
+using StartSmartDeliveryForm.DataForms;
+using StartSmartDeliveryForm.DTOs;
 using System.IO;
 
-namespace SmartStartDeliveryForm
+namespace StartSmartDeliveryForm
 {
     public partial class ManagementTemplate : Form
     {
@@ -185,7 +185,7 @@ namespace SmartStartDeliveryForm
          */
         protected string SearchEnumColumn(string selectedOption, string searchTerm)
         {
-            var EnumType = Type.GetType($"SmartStartDeliveryForm.Enums.{selectedOption}", false);
+            var EnumType = Type.GetType($"StartSmartDeliveryForm.Enums.{selectedOption}", false);
 
             FormConsole.Instance.Log("enumType" + EnumType);
             if (EnumType != null && EnumType.IsEnum)

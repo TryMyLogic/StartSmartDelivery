@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Configuration;
 
-namespace SmartStartDeliveryForm.Classes
+namespace StartSmartDeliveryForm.Classes
 {
 
     internal class DatabaseConfig

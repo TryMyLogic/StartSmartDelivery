@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{0EEA0248-DD98-4AE2-BB57-74B2F847390D}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>SmartStartDeliveryForm</RootNamespace>
-    <AssemblyName>SmartStartDeliveryForm</AssemblyName>
+    <RootNamespace>StartSmartDeliveryForm</RootNamespace>
+    <AssemblyName>StartSmartDeliveryForm</AssemblyName>
     <TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

@@ -1,11 +1,11 @@
-﻿using SmartStartDeliveryForm.Classes;
+﻿using StartSmartDeliveryForm.Classes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace SmartStartDeliveryForm
+namespace StartSmartDeliveryForm
 {
     internal static class Program
     {
@@ -24,7 +24,7 @@ namespace SmartStartDeliveryForm
                 DatabaseConfig.Initialize("StartSmartDB");
                 FormConsole.Instance.Log("Database Initialized");
                 // Only run the form if the Database connects
-                Application.Run(new Login());
+                Application.Run(new DriverManagement());
             }
             catch (InvalidOperationException ex)
             {

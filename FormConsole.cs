@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 
-namespace SmartStartDeliveryForm
+namespace StartSmartDeliveryForm
 {
     public partial class FormConsole : Form
     {

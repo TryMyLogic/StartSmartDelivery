@@ -8,11 +8,11 @@ using System.Data.SqlClient;
 using System.Data;
 using System.Collections;
 using System.Configuration;
-using SmartStartDeliveryForm.Classes;
-using SmartStartDeliveryForm.DTOs;
-using SmartStartDeliveryForm.Enums;
+using StartSmartDeliveryForm.Classes;
+using StartSmartDeliveryForm.DTOs;
+using StartSmartDeliveryForm.Enums;
 
-namespace SmartStartDeliveryForm.DAOs
+namespace StartSmartDeliveryForm.DAOs
 {
 /*
 DAO:

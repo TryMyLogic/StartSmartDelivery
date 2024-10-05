@@ -1,4 +1,4 @@
-﻿using SmartStartDeliveryForm.Enums;
+﻿using StartSmartDeliveryForm.Enums;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
@@ -6,9 +6,9 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using SmartStartDeliveryForm.DAOs;
+using StartSmartDeliveryForm.DAOs;
 
-namespace SmartStartDeliveryForm.Classes
+namespace StartSmartDeliveryForm.Classes
 {
     internal class Drivers
     {
