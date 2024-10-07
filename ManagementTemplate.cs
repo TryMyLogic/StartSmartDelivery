@@ -13,6 +13,7 @@ using System.Windows.Forms;
 using StartSmartDeliveryForm.DataForms;
 using StartSmartDeliveryForm.DTOs;
 using System.IO;
+using System.Reflection;
 
 namespace StartSmartDeliveryForm
 {
@@ -26,7 +27,28 @@ namespace StartSmartDeliveryForm
 
         private void Template_Load(object sender, EventArgs e)
         {
-            dataGridView1.RowHeadersVisible = false; // Hides Row Number Column
+            dgvMain.RowHeadersVisible = false; // Hides Row Number Column
+        }
+
+        protected virtual HashSet<string> GetExcludedColumns()
+        {
+            return new HashSet<string>(); // By default, exclude nothing.
+        }
+
+        protected void SetSearchOptions(Type Dto)
+        {
+            cboSearchOptions.Items.Clear();
+
+            //Makes comparison case insensitive
+            var ExcludedColumns = GetExcludedColumns().Select(c => c.ToLower()).ToHashSet();
+            PropertyInfo[] properties = Dto.GetProperties();
+            foreach (PropertyInfo property in properties)
+            {
+                if (!ExcludedColumns.Contains(property.Name.ToLower()))
+                    cboSearchOptions.Items.Add(property.Name);
+            }
+
+            cboSearchOptions.SelectedIndex = 0;
         }
 
         protected void AddEditDeleteButtons()
@@ -50,100 +72,44 @@ namespace StartSmartDeliveryForm
             };
 
             // Add Edit and Delete buttons
-            dataGridView1.Columns.Add(editButtonColumn);
-            dataGridView1.Columns.Add(deleteButtonColumn);
+            dgvMain.Columns.Add(editButtonColumn);
+            dgvMain.Columns.Add(deleteButtonColumn);
 
             // Prevent buttons from getting too large
-            dataGridView1.Columns["Edit"].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
-            dataGridView1.Columns["Delete"].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+            dgvMain.Columns["Edit"].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+            dgvMain.Columns["Delete"].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
         }
 
-        protected virtual HashSet<string> GetExcludedColumns()
-        {
-            return new HashSet<string>(); // By default, exclude nothing.
-        }
-        protected void SetSearchOptions(Type Dto)
-        {
-            cboSearchOptions.Items.Clear();
-
-            //Makes comparison case insensitive
-            var ExcludedColumns = GetExcludedColumns().Select(c => c.ToLower()).ToHashSet();
-            var Properties = Dto.GetProperties();
-            foreach (var Property in Properties)
-            {
-                if (!ExcludedColumns.Contains(Property.Name.ToLower()))
-                    cboSearchOptions.Items.Add(Property.Name);
-            }
-
-            cboSearchOptions.SelectedIndex = 0;
-        }
-
-
-
-        protected virtual void InsertBTN_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void dgvMain_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0)
             {
-                if (dataGridView1.Columns[e.ColumnIndex].Name == "Edit")
+                if (dgvMain.Columns[e.ColumnIndex].Name == "Edit")
                 {
-                    EditBTN_Click(e.RowIndex);
+                    btnEdit_Click(e.RowIndex);
                 }
-                else if (dataGridView1.Columns[e.ColumnIndex].Name == "Delete")
+                else if (dgvMain.Columns[e.ColumnIndex].Name == "Delete")
                 {
-                    DeleteBTN_Click(e.RowIndex);
+                    btnDelete_Click(e.RowIndex);
                 }
             }
         }
 
-        protected virtual void EditBTN_Click(int RowIndex)
+        private void btnSearch_Click(object sender, EventArgs e)
         {
-
-        }
-        protected virtual void DeleteBTN_Click(int RowIndex)
-        {
-
-        }
-
-        protected virtual void refreshToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        protected virtual void reloadToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        protected virtual void rollbackToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        protected virtual void dataGridView1_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
-        {
-
-        }
-
-        protected virtual void SearchBTN_Click(object sender, EventArgs e)
-        {
-            var SelectedOption = cboSearchOptions.SelectedItem.ToString();
-            var SearchTerm = txtSearchBox.Text.Trim();
+            string SelectedOption = cboSearchOptions.SelectedItem.ToString();
+            string SearchTerm = txtSearchBox.Text.Trim();
 
             if (!string.IsNullOrEmpty(SearchTerm))
             {
-                var dataTable = (DataTable)dataGridView1.DataSource;
+                DataTable dataTable = (DataTable)dgvMain.DataSource;
 
                 if (dataTable != null)
                 {
                     // Escape single quotes in the search term
                     SearchTerm = SearchTerm.Replace("'", "''");
 
-                    var ColumnType = dataTable.Columns[SelectedOption].DataType;
+                    Type ColumnType = dataTable.Columns[SelectedOption].DataType;
 
                     string FilterExpression;
                     FormConsole.Instance.Log("Type: " + ColumnType);
@@ -198,7 +164,7 @@ namespace StartSmartDeliveryForm
             {
                 FormConsole.Instance.Log("Search term is empty, removing filter.");
 
-                var dataTable = (DataTable)dataGridView1.DataSource;
+                var dataTable = (DataTable)dgvMain.DataSource;
                 if (dataTable != null)
                 {
                     dataTable.DefaultView.RowFilter = string.Empty;  // Reset the filter
@@ -212,7 +178,7 @@ namespace StartSmartDeliveryForm
         2. The column name for any Enum column have the same name as the 
            Enum itself.
          */
-        protected string SearchEnumColumn(string selectedOption, string searchTerm)
+        private string SearchEnumColumn(string selectedOption, string searchTerm)
         {
             var EnumType = Type.GetType($"StartSmartDeliveryForm.Enums.{selectedOption}", false);
 
@@ -222,7 +188,7 @@ namespace StartSmartDeliveryForm
                 // Check if the SearchTerm is found within the Enum 
                 if (Enum.IsDefined(EnumType, searchTerm))
                 {
-                    var enumValue = Enum.Parse(EnumType, searchTerm);
+                    object enumValue = Enum.Parse(EnumType, searchTerm);
                     return $"{selectedOption} = {(int)enumValue}";
                 }
                 else
@@ -236,7 +202,40 @@ namespace StartSmartDeliveryForm
             return string.Empty;
         }
 
+        //Required by Children:
+        protected virtual void btnInsert_Click(object sender, EventArgs e)
+        {
 
+        }
 
+        protected virtual void btnEdit_Click(int RowIndex)
+        {
+
+        }
+
+        protected virtual void btnDelete_Click(int RowIndex)
+        {
+
+        }
+
+        protected virtual void refreshToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        protected virtual void reloadToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        protected virtual void rollbackToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        protected virtual void dgvMain_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        {
+
+        }
     }
 }

@@ -5,7 +5,7 @@ VisualStudioVersion = 17.11.35208.52
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StartSmartDeliveryForm", "StartSmartDeliveryForm.csproj", "{0EEA0248-DD98-4AE2-BB57-74B2F847390D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StartSmartDeliveryForm.Tests", "StartSmartDeliveryForm.Tests\StartSmartDeliveryForm.Tests.csproj", "{3C959AF9-E3AF-4952-BA3A-BA22096D1417}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StartSmartDeliveryForm.Tests", "StartSmartDeliveryForm.Tests\StartSmartDeliveryForm.Tests.csproj", "{3C959AF9-E3AF-4952-BA3A-BA22096D1417}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

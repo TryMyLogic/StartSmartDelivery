@@ -28,9 +28,9 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            this.InsertBTN = new System.Windows.Forms.Button();
-            this.SearchBTN = new System.Windows.Forms.Button();
+            this.dgvMain = new System.Windows.Forms.DataGridView();
+            this.btnInsert = new System.Windows.Forms.Button();
+            this.btnSearch = new System.Windows.Forms.Button();
             this.txtSearchBox = new System.Windows.Forms.TextBox();
             this.cboSearchOptions = new System.Windows.Forms.ComboBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
@@ -41,7 +41,6 @@
             this.deliveryManagementToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.vehicleManagementToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.driverManagementToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.testToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dataManagementToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.rollbackToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.refreshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -50,22 +49,22 @@
             this.panel2 = new System.Windows.Forms.Panel();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.panel7 = new System.Windows.Forms.Panel();
-            this.button4 = new System.Windows.Forms.Button();
-            this.Next = new System.Windows.Forms.Button();
+            this.btnLast = new System.Windows.Forms.Button();
+            this.btnNext = new System.Windows.Forms.Button();
             this.panel6 = new System.Windows.Forms.Panel();
-            this.button3 = new System.Windows.Forms.Button();
-            this.Previous = new System.Windows.Forms.Button();
+            this.btnFirst = new System.Windows.Forms.Button();
+            this.btnPrevious = new System.Windows.Forms.Button();
             this.panel4 = new System.Windows.Forms.Panel();
-            this.label3 = new System.Windows.Forms.Label();
+            this.lblStartEndPages = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.panel5 = new System.Windows.Forms.Panel();
-            this.textBox3 = new System.Windows.Forms.TextBox();
+            this.txtGotoPage = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
-            this.button5 = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
+            this.btnGotoPage = new System.Windows.Forms.Button();
+            this.btnClearFilters = new System.Windows.Forms.Button();
+            this.btnAddFilters = new System.Windows.Forms.Button();
             this.panel3 = new System.Windows.Forms.Panel();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvMain)).BeginInit();
             this.menuStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -77,49 +76,49 @@
             this.panel3.SuspendLayout();
             this.SuspendLayout();
             // 
-            // dataGridView1
+            // dgvMain
             // 
-            this.dataGridView1.AllowUserToAddRows = false;
-            this.dataGridView1.AllowUserToDeleteRows = false;
-            this.dataGridView1.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dataGridView1.Location = new System.Drawing.Point(0, 84);
-            this.dataGridView1.Margin = new System.Windows.Forms.Padding(0);
-            this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.ReadOnly = true;
-            this.dataGridView1.RowHeadersWidth = 51;
-            this.dataGridView1.RowTemplate.Height = 24;
-            this.dataGridView1.Size = new System.Drawing.Size(888, 214);
-            this.dataGridView1.TabIndex = 15;
-            this.dataGridView1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
-            this.dataGridView1.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dataGridView1_CellFormatting);
+            this.dgvMain.AllowUserToAddRows = false;
+            this.dgvMain.AllowUserToDeleteRows = false;
+            this.dgvMain.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.dgvMain.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvMain.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgvMain.Location = new System.Drawing.Point(0, 84);
+            this.dgvMain.Margin = new System.Windows.Forms.Padding(0);
+            this.dgvMain.Name = "dgvMain";
+            this.dgvMain.ReadOnly = true;
+            this.dgvMain.RowHeadersWidth = 51;
+            this.dgvMain.RowTemplate.Height = 24;
+            this.dgvMain.Size = new System.Drawing.Size(888, 214);
+            this.dgvMain.TabIndex = 15;
+            this.dgvMain.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvMain_CellContentClick);
+            this.dgvMain.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dgvMain_CellFormatting);
             // 
-            // InsertBTN
+            // btnInsert
             // 
-            this.InsertBTN.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(162)))), ((int)(((byte)(184)))));
-            this.InsertBTN.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.InsertBTN.ForeColor = System.Drawing.Color.White;
-            this.InsertBTN.Location = new System.Drawing.Point(3, 28);
-            this.InsertBTN.Name = "InsertBTN";
-            this.InsertBTN.Size = new System.Drawing.Size(72, 30);
-            this.InsertBTN.TabIndex = 17;
-            this.InsertBTN.Text = "Insert";
-            this.InsertBTN.UseVisualStyleBackColor = false;
-            this.InsertBTN.Click += new System.EventHandler(this.InsertBTN_Click);
+            this.btnInsert.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(162)))), ((int)(((byte)(184)))));
+            this.btnInsert.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnInsert.ForeColor = System.Drawing.Color.White;
+            this.btnInsert.Location = new System.Drawing.Point(3, 28);
+            this.btnInsert.Name = "btnInsert";
+            this.btnInsert.Size = new System.Drawing.Size(72, 30);
+            this.btnInsert.TabIndex = 17;
+            this.btnInsert.Text = "Insert";
+            this.btnInsert.UseVisualStyleBackColor = false;
+            this.btnInsert.Click += new System.EventHandler(this.btnInsert_Click);
             // 
-            // SearchBTN
+            // btnSearch
             // 
-            this.SearchBTN.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(162)))), ((int)(((byte)(184)))));
-            this.SearchBTN.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.SearchBTN.ForeColor = System.Drawing.Color.White;
-            this.SearchBTN.Location = new System.Drawing.Point(154, 25);
-            this.SearchBTN.Name = "SearchBTN";
-            this.SearchBTN.Size = new System.Drawing.Size(72, 30);
-            this.SearchBTN.TabIndex = 19;
-            this.SearchBTN.Text = "Search";
-            this.SearchBTN.UseVisualStyleBackColor = false;
-            this.SearchBTN.Click += new System.EventHandler(this.SearchBTN_Click);
+            this.btnSearch.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(162)))), ((int)(((byte)(184)))));
+            this.btnSearch.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnSearch.ForeColor = System.Drawing.Color.White;
+            this.btnSearch.Location = new System.Drawing.Point(154, 25);
+            this.btnSearch.Name = "btnSearch";
+            this.btnSearch.Size = new System.Drawing.Size(72, 30);
+            this.btnSearch.TabIndex = 19;
+            this.btnSearch.Text = "Search";
+            this.btnSearch.UseVisualStyleBackColor = false;
+            this.btnSearch.Click += new System.EventHandler(this.btnSearch_Click);
             // 
             // txtSearchBox
             // 
@@ -196,17 +195,9 @@
             // 
             // driverManagementToolStripMenuItem
             // 
-            this.driverManagementToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.testToolStripMenuItem});
             this.driverManagementToolStripMenuItem.Name = "driverManagementToolStripMenuItem";
             this.driverManagementToolStripMenuItem.Size = new System.Drawing.Size(238, 26);
             this.driverManagementToolStripMenuItem.Text = "Driver Management";
-            // 
-            // testToolStripMenuItem
-            // 
-            this.testToolStripMenuItem.Name = "testToolStripMenuItem";
-            this.testToolStripMenuItem.Size = new System.Drawing.Size(118, 26);
-            this.testToolStripMenuItem.Text = "Test";
             // 
             // dataManagementToolStripMenuItem
             // 
@@ -244,7 +235,7 @@
             this.panel1.AutoSize = true;
             this.panel1.Controls.Add(this.cboSearchOptions);
             this.panel1.Controls.Add(this.txtSearchBox);
-            this.panel1.Controls.Add(this.SearchBTN);
+            this.panel1.Controls.Add(this.btnSearch);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Left;
             this.panel1.Location = new System.Drawing.Point(50, 84);
             this.panel1.Margin = new System.Windows.Forms.Padding(50, 0, 0, 0);
@@ -255,7 +246,7 @@
             // panel2
             // 
             this.panel2.AutoSize = true;
-            this.panel2.Controls.Add(this.InsertBTN);
+            this.panel2.Controls.Add(this.btnInsert);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Right;
             this.panel2.Location = new System.Drawing.Point(760, 84);
             this.panel2.Margin = new System.Windows.Forms.Padding(0, 0, 50, 0);
@@ -289,96 +280,96 @@
             // 
             // panel7
             // 
-            this.panel7.Controls.Add(this.button4);
-            this.panel7.Controls.Add(this.Next);
+            this.panel7.Controls.Add(this.btnLast);
+            this.panel7.Controls.Add(this.btnNext);
             this.panel7.Dock = System.Windows.Forms.DockStyle.Left;
             this.panel7.Location = new System.Drawing.Point(546, 13);
             this.panel7.Name = "panel7";
             this.panel7.Size = new System.Drawing.Size(200, 30);
             this.panel7.TabIndex = 36;
             // 
-            // button4
+            // btnLast
             // 
-            this.button4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(162)))), ((int)(((byte)(184)))));
-            this.button4.Dock = System.Windows.Forms.DockStyle.Right;
-            this.button4.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button4.ForeColor = System.Drawing.Color.White;
-            this.button4.Location = new System.Drawing.Point(100, 0);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(100, 30);
-            this.button4.TabIndex = 35;
-            this.button4.Text = "Last";
-            this.button4.UseVisualStyleBackColor = false;
+            this.btnLast.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(162)))), ((int)(((byte)(184)))));
+            this.btnLast.Dock = System.Windows.Forms.DockStyle.Right;
+            this.btnLast.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnLast.ForeColor = System.Drawing.Color.White;
+            this.btnLast.Location = new System.Drawing.Point(100, 0);
+            this.btnLast.Name = "btnLast";
+            this.btnLast.Size = new System.Drawing.Size(100, 30);
+            this.btnLast.TabIndex = 35;
+            this.btnLast.Text = "Last";
+            this.btnLast.UseVisualStyleBackColor = false;
             // 
-            // Next
+            // btnNext
             // 
-            this.Next.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(162)))), ((int)(((byte)(184)))));
-            this.Next.Dock = System.Windows.Forms.DockStyle.Left;
-            this.Next.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.Next.ForeColor = System.Drawing.Color.White;
-            this.Next.Location = new System.Drawing.Point(0, 0);
-            this.Next.Name = "Next";
-            this.Next.Size = new System.Drawing.Size(100, 30);
-            this.Next.TabIndex = 33;
-            this.Next.Text = "Next";
-            this.Next.UseVisualStyleBackColor = false;
+            this.btnNext.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(162)))), ((int)(((byte)(184)))));
+            this.btnNext.Dock = System.Windows.Forms.DockStyle.Left;
+            this.btnNext.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnNext.ForeColor = System.Drawing.Color.White;
+            this.btnNext.Location = new System.Drawing.Point(0, 0);
+            this.btnNext.Name = "btnNext";
+            this.btnNext.Size = new System.Drawing.Size(100, 30);
+            this.btnNext.TabIndex = 33;
+            this.btnNext.Text = "Next";
+            this.btnNext.UseVisualStyleBackColor = false;
             // 
             // panel6
             // 
-            this.panel6.Controls.Add(this.button3);
-            this.panel6.Controls.Add(this.Previous);
+            this.panel6.Controls.Add(this.btnFirst);
+            this.panel6.Controls.Add(this.btnPrevious);
             this.panel6.Dock = System.Windows.Forms.DockStyle.Right;
             this.panel6.Location = new System.Drawing.Point(142, 13);
             this.panel6.Name = "panel6";
             this.panel6.Size = new System.Drawing.Size(200, 30);
             this.panel6.TabIndex = 35;
             // 
-            // button3
+            // btnFirst
             // 
-            this.button3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(162)))), ((int)(((byte)(184)))));
-            this.button3.Dock = System.Windows.Forms.DockStyle.Right;
-            this.button3.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button3.ForeColor = System.Drawing.Color.White;
-            this.button3.Location = new System.Drawing.Point(0, 0);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(100, 30);
-            this.button3.TabIndex = 35;
-            this.button3.Text = "First";
-            this.button3.UseVisualStyleBackColor = false;
+            this.btnFirst.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(162)))), ((int)(((byte)(184)))));
+            this.btnFirst.Dock = System.Windows.Forms.DockStyle.Right;
+            this.btnFirst.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnFirst.ForeColor = System.Drawing.Color.White;
+            this.btnFirst.Location = new System.Drawing.Point(0, 0);
+            this.btnFirst.Name = "btnFirst";
+            this.btnFirst.Size = new System.Drawing.Size(100, 30);
+            this.btnFirst.TabIndex = 35;
+            this.btnFirst.Text = "First";
+            this.btnFirst.UseVisualStyleBackColor = false;
             // 
-            // Previous
+            // btnPrevious
             // 
-            this.Previous.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(162)))), ((int)(((byte)(184)))));
-            this.Previous.Dock = System.Windows.Forms.DockStyle.Right;
-            this.Previous.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.Previous.ForeColor = System.Drawing.Color.White;
-            this.Previous.Location = new System.Drawing.Point(100, 0);
-            this.Previous.Name = "Previous";
-            this.Previous.Size = new System.Drawing.Size(100, 30);
-            this.Previous.TabIndex = 34;
-            this.Previous.Text = "Previous";
-            this.Previous.UseVisualStyleBackColor = false;
+            this.btnPrevious.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(162)))), ((int)(((byte)(184)))));
+            this.btnPrevious.Dock = System.Windows.Forms.DockStyle.Right;
+            this.btnPrevious.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnPrevious.ForeColor = System.Drawing.Color.White;
+            this.btnPrevious.Location = new System.Drawing.Point(100, 0);
+            this.btnPrevious.Name = "btnPrevious";
+            this.btnPrevious.Size = new System.Drawing.Size(100, 30);
+            this.btnPrevious.TabIndex = 34;
+            this.btnPrevious.Text = "Previous";
+            this.btnPrevious.UseVisualStyleBackColor = false;
             // 
             // panel4
             // 
             this.panel4.AutoSize = true;
-            this.panel4.Controls.Add(this.label3);
+            this.panel4.Controls.Add(this.lblStartEndPages);
             this.panel4.Controls.Add(this.label1);
             this.panel4.Location = new System.Drawing.Point(348, 13);
             this.panel4.Name = "panel4";
             this.panel4.Size = new System.Drawing.Size(108, 16);
             this.panel4.TabIndex = 31;
             // 
-            // label3
+            // lblStartEndPages
             // 
-            this.label3.AutoSize = true;
-            this.label3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label3.Location = new System.Drawing.Point(40, 0);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(68, 16);
-            this.label3.TabIndex = 31;
-            this.label3.Text = "Start / End";
-            this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblStartEndPages.AutoSize = true;
+            this.lblStartEndPages.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblStartEndPages.Location = new System.Drawing.Point(40, 0);
+            this.lblStartEndPages.Name = "lblStartEndPages";
+            this.lblStartEndPages.Size = new System.Drawing.Size(68, 16);
+            this.lblStartEndPages.TabIndex = 31;
+            this.lblStartEndPages.Text = "Start / End";
+            this.lblStartEndPages.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // label1
             // 
@@ -393,21 +384,21 @@
             // panel5
             // 
             this.panel5.AutoSize = true;
-            this.panel5.Controls.Add(this.textBox3);
+            this.panel5.Controls.Add(this.txtGotoPage);
             this.panel5.Controls.Add(this.label2);
-            this.panel5.Controls.Add(this.button5);
+            this.panel5.Controls.Add(this.btnGotoPage);
             this.panel5.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel5.Location = new System.Drawing.Point(348, 49);
             this.panel5.Name = "panel5";
             this.panel5.Size = new System.Drawing.Size(192, 32);
             this.panel5.TabIndex = 34;
             // 
-            // textBox3
+            // txtGotoPage
             // 
-            this.textBox3.Location = new System.Drawing.Point(81, 6);
-            this.textBox3.Name = "textBox3";
-            this.textBox3.Size = new System.Drawing.Size(72, 22);
-            this.textBox3.TabIndex = 31;
+            this.txtGotoPage.Location = new System.Drawing.Point(81, 6);
+            this.txtGotoPage.Name = "txtGotoPage";
+            this.txtGotoPage.Size = new System.Drawing.Size(72, 22);
+            this.txtGotoPage.TabIndex = 31;
             // 
             // label2
             // 
@@ -418,47 +409,47 @@
             this.label2.TabIndex = 30;
             this.label2.Text = "Goto Page";
             // 
-            // button5
+            // btnGotoPage
             // 
-            this.button5.Location = new System.Drawing.Point(159, 3);
-            this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(30, 26);
-            this.button5.TabIndex = 37;
-            this.button5.Text = "🔍";
-            this.button5.UseVisualStyleBackColor = true;
+            this.btnGotoPage.Location = new System.Drawing.Point(159, 3);
+            this.btnGotoPage.Name = "btnGotoPage";
+            this.btnGotoPage.Size = new System.Drawing.Size(30, 26);
+            this.btnGotoPage.TabIndex = 37;
+            this.btnGotoPage.Text = "🔍";
+            this.btnGotoPage.UseVisualStyleBackColor = true;
             // 
-            // button1
+            // btnClearFilters
             // 
-            this.button1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(162)))), ((int)(((byte)(184)))));
-            this.button1.Dock = System.Windows.Forms.DockStyle.Right;
-            this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button1.ForeColor = System.Drawing.Color.White;
-            this.button1.Location = new System.Drawing.Point(763, 10);
-            this.button1.Margin = new System.Windows.Forms.Padding(0);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(125, 40);
-            this.button1.TabIndex = 17;
-            this.button1.Text = "Clear Filters";
-            this.button1.UseVisualStyleBackColor = false;
+            this.btnClearFilters.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(162)))), ((int)(((byte)(184)))));
+            this.btnClearFilters.Dock = System.Windows.Forms.DockStyle.Right;
+            this.btnClearFilters.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnClearFilters.ForeColor = System.Drawing.Color.White;
+            this.btnClearFilters.Location = new System.Drawing.Point(763, 10);
+            this.btnClearFilters.Margin = new System.Windows.Forms.Padding(0);
+            this.btnClearFilters.Name = "btnClearFilters";
+            this.btnClearFilters.Size = new System.Drawing.Size(125, 40);
+            this.btnClearFilters.TabIndex = 17;
+            this.btnClearFilters.Text = "Clear Filters";
+            this.btnClearFilters.UseVisualStyleBackColor = false;
             // 
-            // button2
+            // btnAddFilters
             // 
-            this.button2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(162)))), ((int)(((byte)(184)))));
-            this.button2.Dock = System.Windows.Forms.DockStyle.Right;
-            this.button2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button2.ForeColor = System.Drawing.Color.White;
-            this.button2.Location = new System.Drawing.Point(638, 10);
-            this.button2.Margin = new System.Windows.Forms.Padding(0);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(125, 40);
-            this.button2.TabIndex = 18;
-            this.button2.Text = "Add Filters";
-            this.button2.UseVisualStyleBackColor = false;
+            this.btnAddFilters.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(162)))), ((int)(((byte)(184)))));
+            this.btnAddFilters.Dock = System.Windows.Forms.DockStyle.Right;
+            this.btnAddFilters.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnAddFilters.ForeColor = System.Drawing.Color.White;
+            this.btnAddFilters.Location = new System.Drawing.Point(638, 10);
+            this.btnAddFilters.Margin = new System.Windows.Forms.Padding(0);
+            this.btnAddFilters.Name = "btnAddFilters";
+            this.btnAddFilters.Size = new System.Drawing.Size(125, 40);
+            this.btnAddFilters.TabIndex = 18;
+            this.btnAddFilters.Text = "Add Filters";
+            this.btnAddFilters.UseVisualStyleBackColor = false;
             // 
             // panel3
             // 
-            this.panel3.Controls.Add(this.button2);
-            this.panel3.Controls.Add(this.button1);
+            this.panel3.Controls.Add(this.btnAddFilters);
+            this.panel3.Controls.Add(this.btnClearFilters);
             this.panel3.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel3.Location = new System.Drawing.Point(0, 24);
             this.panel3.Margin = new System.Windows.Forms.Padding(0);
@@ -472,14 +463,14 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(888, 453);
-            this.Controls.Add(this.dataGridView1);
+            this.Controls.Add(this.dgvMain);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.panel3);
             this.Controls.Add(this.menuStrip1);
             this.Name = "ManagementTemplate";
             this.Text = "Template";
             this.Load += new System.EventHandler(this.Template_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvMain)).EndInit();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.panel1.ResumeLayout(false);
@@ -500,9 +491,9 @@
         }
 
         #endregion
-        protected System.Windows.Forms.DataGridView dataGridView1;
-        private System.Windows.Forms.Button InsertBTN;
-        private System.Windows.Forms.Button SearchBTN;
+        protected System.Windows.Forms.DataGridView dgvMain;
+        private System.Windows.Forms.Button btnInsert;
+        private System.Windows.Forms.Button btnSearch;
         protected System.Windows.Forms.TextBox txtSearchBox;
         protected System.Windows.Forms.ComboBox cboSearchOptions;
         private System.Windows.Forms.MenuStrip menuStrip1;
@@ -513,7 +504,6 @@
         private System.Windows.Forms.ToolStripMenuItem deliveryManagementToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem vehicleManagementToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem driverManagementToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem testToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem dataManagementToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem rollbackToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem refreshToolStripMenuItem;
@@ -521,21 +511,21 @@
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button btnClearFilters;
+        private System.Windows.Forms.Button btnAddFilters;
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.Panel panel4;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label lblStartEndPages;
         private System.Windows.Forms.Panel panel7;
-        private System.Windows.Forms.Button button4;
-        private System.Windows.Forms.Button Next;
+        private System.Windows.Forms.Button btnLast;
+        private System.Windows.Forms.Button btnNext;
         private System.Windows.Forms.Panel panel6;
-        private System.Windows.Forms.Button button3;
-        private System.Windows.Forms.Button Previous;
+        private System.Windows.Forms.Button btnFirst;
+        private System.Windows.Forms.Button btnPrevious;
         private System.Windows.Forms.Panel panel5;
-        private System.Windows.Forms.TextBox textBox3;
+        private System.Windows.Forms.TextBox txtGotoPage;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Button button5;
+        private System.Windows.Forms.Button btnGotoPage;
     }
 }

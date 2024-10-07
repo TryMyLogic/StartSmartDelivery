@@ -18,7 +18,7 @@ namespace StartSmartDeliveryForm
 {
     public partial class DriverManagement : ManagementTemplate
     {
-        private DataTable DriverData;
+        private DataTable _driverData;
         public DriverManagement()
         {
             InitializeComponent();
@@ -26,96 +26,52 @@ namespace StartSmartDeliveryForm
 
         private void DriverManagement_Load(object sender, EventArgs e)
         {
-            dataGridView1.RowHeadersVisible = false; // Hides Row Number Column
+            dgvMain.RowHeadersVisible = false; // Hides Row Number Column
 
             // Clear any existing columns
-            dataGridView1.Columns.Clear();
+            dgvMain.Columns.Clear();
 
             SetSearchOptions(typeof(DriversDTO));
-            DriverData = DriversDAO.GetAllDrivers();
+            _driverData = DriversDAO.GetAllDrivers();
 
-            if (DriverData == null || DriverData.Rows.Count == 0)
+            if (_driverData == null || _driverData.Rows.Count == 0)
             {
                 MessageBox.Show("Failed to load driver data. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             else
             {
-                dataGridView1.DataSource = DriverData;
+                dgvMain.DataSource = _driverData;
                 AddEditDeleteButtons();
 
                 // Hide the Primary Key Column from User
-                dataGridView1.Columns["DriverID"].Visible = false;
+                dgvMain.Columns["DriverID"].Visible = false;
             }
         }
 
-        protected override void InsertBTN_Click(object sender, EventArgs e)
+        protected override HashSet<string> GetExcludedColumns()
         {
-
-            DriverDataForm DriverDataForm = new DriverDataForm();
-            DriverDataForm.SubmitClicked += DriverDataForm_SubmitClicked;
-            DriverDataForm.Show();
+            return new HashSet<string> { "DriverID" }; // By default, exclude nothing.
         }
 
-        // Submit button click event handler
-        private void DriverDataForm_SubmitClicked(object sender, EventArgs e)
+        protected override void btnInsert_Click(object sender, EventArgs e)
         {
-            // Handle the event
-            DriverDataForm Form = sender as DriverDataForm;
-            if (Form != null)
-            {
-                DriversDTO DriverDTO = Form.GetDriverData();
-
-                if (Form.Mode == FormMode.Add)
-                {
-                    int newDriverId = DriversDAO.InsertDriver(DriverDTO);
-
-                    if (newDriverId != -1) // Check for success
-                    {
-                        DataRow NewRow = DriverData.NewRow();
-                        NewRow["DriverID"] = newDriverId; 
-                        NewRow["Name"] = DriverDTO.Name;
-                        NewRow["Surname"] = DriverDTO.Surname;
-                        NewRow["EmployeeNo"] = DriverDTO.EmployeeNo;
-                        NewRow["LicenseType"] = DriverDTO.LicenseType;
-                        NewRow["Availability"] = DriverDTO.Availability;
-
-                        // Add to DataTable
-                        DriverData.Rows.Add(NewRow);
-                    }
-                }
-                else if (Form.Mode == FormMode.Edit)
-                {
-                    DataRow RowToUpdate = DriverData.Rows.Find(DriverDTO.DriverId); // Assuming EmployeeNo is the primary key
-
-                    if (RowToUpdate != null)
-                    {
-                        RowToUpdate["Name"] = DriverDTO.Name;
-                        RowToUpdate["Surname"] = DriverDTO.Surname;
-                        RowToUpdate["EmployeeNo"] = DriverDTO.EmployeeNo;
-                        RowToUpdate["LicenseType"] = DriverDTO.LicenseType;
-                        RowToUpdate["Availability"] = DriverDTO.Availability;
-                    }
-
-                    DriversDAO.UpdateDriver(DriverDTO);
-                    Form.Close();
-                }
-
-                Form.ClearData(); //Clear form for next batch of data
-            }
+            DriverDataForm driverDataForm = new DriverDataForm();
+            driverDataForm.SubmitClicked += DriverDataForm_SubmitClicked;
+            driverDataForm.Show();
         }
 
-        protected override void EditBTN_Click(int RowIndex)
+        protected override void btnEdit_Click(int rowIndex)
         {
-            var SelectedRow = dataGridView1.Rows[RowIndex];
+            DataGridViewRow selectedRow = dgvMain.Rows[rowIndex];
 
-            DriversDTO DriverData = new DriversDTO
+            DriversDTO driverData = new DriversDTO
             {
-                DriverId = int.Parse(SelectedRow.Cells["DriverID"].Value.ToString()),
-                Name = SelectedRow.Cells["Name"].Value.ToString(),
-                Surname = SelectedRow.Cells["Surname"].Value.ToString(),
-                EmployeeNo = SelectedRow.Cells["EmployeeNo"].Value.ToString(),
-                LicenseType = (LicenseType)Enum.Parse(typeof(LicenseType), SelectedRow.Cells["LicenseType"].Value.ToString()),
-                Availability = bool.Parse(SelectedRow.Cells["Availability"].Value.ToString())
+                DriverId = int.Parse(selectedRow.Cells["DriverID"].Value.ToString()),
+                Name = selectedRow.Cells["Name"].Value.ToString(),
+                Surname = selectedRow.Cells["Surname"].Value.ToString(),
+                EmployeeNo = selectedRow.Cells["EmployeeNo"].Value.ToString(),
+                LicenseType = (LicenseType)Enum.Parse(typeof(LicenseType), selectedRow.Cells["LicenseType"].Value.ToString()),
+                Availability = bool.Parse(selectedRow.Cells["Availability"].Value.ToString())
             };
 
             DriverDataForm driverDataForm = new DriverDataForm
@@ -123,30 +79,78 @@ namespace StartSmartDeliveryForm
                 Mode = FormMode.Edit
             };
 
-            driverDataForm.InitializeEditing(DriverData);
+            driverDataForm.InitializeEditing(driverData);
             driverDataForm.SubmitClicked += DriverDataForm_SubmitClicked;
             driverDataForm.Show();
         }
 
-        protected override void DeleteBTN_Click(int RowIndex)
+        protected override void btnDelete_Click(int rowIndex)
         {
-            var SelectedRow = dataGridView1.Rows[RowIndex];
-            int DriverID = int.Parse(SelectedRow.Cells["DriverID"].Value.ToString());
-            DialogResult Result = MessageBox.Show("Are you sure?", "Delete Row", MessageBoxButtons.YesNo);
-            if (Result == DialogResult.Yes)
+            DataGridViewRow selectedRow = dgvMain.Rows[rowIndex];
+            int driverID = int.Parse(selectedRow.Cells["DriverID"].Value.ToString());
+            DialogResult result = MessageBox.Show("Are you sure?", "Delete Row", MessageBoxButtons.YesNo);
+            if (result == DialogResult.Yes)
             {
                 // Delete From Data Table
-                DriverData.Rows.RemoveAt(RowIndex);
+                _driverData.Rows.RemoveAt(rowIndex);
 
                 //Delete From Database
-                DriversDAO.DeleteDriver(DriverID);
+                DriversDAO.DeleteDriver(driverID);
+            }
+        }
+
+        // DriverDataForm submit button event handler
+        private void DriverDataForm_SubmitClicked(object sender, EventArgs e)
+        {
+            // Handle the event
+            DriverDataForm form = sender as DriverDataForm;
+            if (form != null)
+            {
+                DriversDTO driverDTO = form.GetDriverData();
+
+                if (form.Mode == FormMode.Add)
+                {
+                    int newDriverId = DriversDAO.InsertDriver(driverDTO);
+
+                    if (newDriverId != -1) // Check for success
+                    {
+                        DataRow newRow = _driverData.NewRow();
+                        newRow["DriverID"] = newDriverId;
+                        newRow["Name"] = driverDTO.Name;
+                        newRow["Surname"] = driverDTO.Surname;
+                        newRow["EmployeeNo"] = driverDTO.EmployeeNo;
+                        newRow["LicenseType"] = driverDTO.LicenseType;
+                        newRow["Availability"] = driverDTO.Availability;
+
+                        // Add to DataTable
+                        _driverData.Rows.Add(newRow);
+                    }
+                }
+                else if (form.Mode == FormMode.Edit)
+                {
+                    DataRow rowToUpdate = _driverData.Rows.Find(driverDTO.DriverId); // Assuming EmployeeNo is the primary key
+
+                    if (rowToUpdate != null)
+                    {
+                        rowToUpdate["Name"] = driverDTO.Name;
+                        rowToUpdate["Surname"] = driverDTO.Surname;
+                        rowToUpdate["EmployeeNo"] = driverDTO.EmployeeNo;
+                        rowToUpdate["LicenseType"] = driverDTO.LicenseType;
+                        rowToUpdate["Availability"] = driverDTO.Availability;
+                    }
+
+                    DriversDAO.UpdateDriver(driverDTO);
+                    form.Close();
+                }
+
+                form.ClearData(); //Clear form for next batch of data
             }
         }
 
         protected override void refreshToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
-            var dataTable = (DataTable)dataGridView1.DataSource;
+            var dataTable = (DataTable)dgvMain.DataSource;
 
             // Remove any filters that were applied
             if (dataTable != null)
@@ -155,19 +159,19 @@ namespace StartSmartDeliveryForm
             }
 
             //Rebind
-            dataGridView1.DataSource = null;
-            dataGridView1.DataSource = DriverData;
+            dgvMain.DataSource = null;
+            dgvMain.DataSource = _driverData;
 
-            dataGridView1.Columns["Name"].DisplayIndex = 0;
-            dataGridView1.Columns["Surname"].DisplayIndex = 1;
-            dataGridView1.Columns["EmployeeNo"].DisplayIndex = 2;
-            dataGridView1.Columns["LicenseType"].DisplayIndex = 3;
-            dataGridView1.Columns["Availability"].DisplayIndex = 4;
-            dataGridView1.Columns["Edit"].DisplayIndex = 5;
-            dataGridView1.Columns["Delete"].DisplayIndex = 6;
+            dgvMain.Columns["Name"].DisplayIndex = 0;
+            dgvMain.Columns["Surname"].DisplayIndex = 1;
+            dgvMain.Columns["EmployeeNo"].DisplayIndex = 2;
+            dgvMain.Columns["LicenseType"].DisplayIndex = 3;
+            dgvMain.Columns["Availability"].DisplayIndex = 4;
+            dgvMain.Columns["Edit"].DisplayIndex = 5;
+            dgvMain.Columns["Delete"].DisplayIndex = 6;
 
             // Hide the DriverID column
-            dataGridView1.Columns["DriverID"].Visible = false;
+            dgvMain.Columns["DriverID"].Visible = false;
 
             MessageBox.Show("Succesfully Refreshed", "Refresh Status");
         }
@@ -175,20 +179,20 @@ namespace StartSmartDeliveryForm
         protected override void reloadToolStripMenuItem_Click(object sender, EventArgs e)
         {
             //Refetch data and Rebind
-            DriverData = DriversDAO.GetAllDrivers();
-            dataGridView1.DataSource = null;
-            dataGridView1.DataSource = DriverData;
+            _driverData = DriversDAO.GetAllDrivers();
+            dgvMain.DataSource = null;
+            dgvMain.DataSource = _driverData;
 
-            dataGridView1.Columns["Name"].DisplayIndex = 0;
-            dataGridView1.Columns["Surname"].DisplayIndex = 1;
-            dataGridView1.Columns["EmployeeNo"].DisplayIndex = 2;
-            dataGridView1.Columns["LicenseType"].DisplayIndex = 3;
-            dataGridView1.Columns["Availability"].DisplayIndex = 4;
-            dataGridView1.Columns["Edit"].DisplayIndex = 5;
-            dataGridView1.Columns["Delete"].DisplayIndex = 6;
+            dgvMain.Columns["Name"].DisplayIndex = 0;
+            dgvMain.Columns["Surname"].DisplayIndex = 1;
+            dgvMain.Columns["EmployeeNo"].DisplayIndex = 2;
+            dgvMain.Columns["LicenseType"].DisplayIndex = 3;
+            dgvMain.Columns["Availability"].DisplayIndex = 4;
+            dgvMain.Columns["Edit"].DisplayIndex = 5;
+            dgvMain.Columns["Delete"].DisplayIndex = 6;
 
             // Hide the DriverID column
-            dataGridView1.Columns["DriverID"].Visible = false;
+            dgvMain.Columns["DriverID"].Visible = false;
 
             MessageBox.Show("Succesfully Reloaded", "Reload Status");
         }
@@ -198,9 +202,9 @@ namespace StartSmartDeliveryForm
 
         }
 
-        protected override void dataGridView1_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        protected override void dgvMain_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            if (dataGridView1.Columns[e.ColumnIndex].Name == "LicenseType" && e.Value != null)
+            if (dgvMain.Columns[e.ColumnIndex].Name == "LicenseType" && e.Value != null)
             {
                 try
                 {
@@ -214,15 +218,5 @@ namespace StartSmartDeliveryForm
                 }
             }
         }
-
-        protected override HashSet<string> GetExcludedColumns()
-        {
-            return new HashSet<string> { "DriverID" }; // By default, exclude nothing.
-        }
-
-
-
-
-
     }
 }
