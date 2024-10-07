@@ -237,5 +237,30 @@ namespace StartSmartDeliveryForm
         {
 
         }
+
+        protected virtual void btnFirst_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        protected virtual void btnPrevious_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        protected virtual void btnNext_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        protected virtual void btnLast_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        protected virtual void btnGotoPage_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

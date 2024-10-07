@@ -8,16 +8,16 @@ namespace StartSmartDeliveryForm.Tests
 {
     public class DriverManagementTests
     {
-        [Fact]
-        public void ExampleTest()
-        {
-            //Arrange
+      //  [Fact]
+        //public void ExampleTest()
+        //{
+        //    //Arrange
 
 
-            //Act
+        //    //Act
 
 
-            //Assert
-        }
+        //    //Assert
+        //}
     }
 }

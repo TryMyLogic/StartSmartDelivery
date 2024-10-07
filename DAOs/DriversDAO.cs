@@ -22,13 +22,13 @@ Decouples the data access code from the rest of the application
 */
     internal static class DriversDAO
     {
-        private static string _ConnectionString = DatabaseConfig.ConnectionString;
+        private static string s_connectionString = DatabaseConfig.ConnectionString;
 
         public static DataTable GetAllDrivers()
         {
             DataTable Dt = new DataTable();
 
-            using (SqlConnection Connection = new SqlConnection(_ConnectionString))
+            using (SqlConnection Connection = new SqlConnection(s_connectionString))
             {
                 try
                 {
@@ -58,7 +58,7 @@ Decouples the data access code from the rest of the application
 
         public static int GetEmployeeNoCount(string EmployeeNo)
         {
-            using (SqlConnection Connection = new SqlConnection(_ConnectionString))
+            using (SqlConnection Connection = new SqlConnection(s_connectionString))
             {
                 try
                 {
@@ -87,7 +87,7 @@ Decouples the data access code from the rest of the application
 
         public static void DeleteDriver(int DriverID)
         {
-            using (SqlConnection Connection = new SqlConnection(_ConnectionString))
+            using (SqlConnection Connection = new SqlConnection(s_connectionString))
             {
                 try
                 {
@@ -119,7 +119,7 @@ Decouples the data access code from the rest of the application
 
         public static int InsertDriver(DriversDTO driver)
         {
-            using (SqlConnection Connection = new SqlConnection(_ConnectionString))
+            using (SqlConnection Connection = new SqlConnection(s_connectionString))
             {
                 try
                 {
@@ -152,10 +152,9 @@ Decouples the data access code from the rest of the application
             }
         }
 
-
         public static void UpdateDriver(DriversDTO driver)
         {
-            using (SqlConnection Connection = new SqlConnection(_ConnectionString))
+            using (SqlConnection Connection = new SqlConnection(s_connectionString))
             {
                 try
                 {
@@ -180,6 +179,47 @@ Decouples the data access code from the rest of the application
                     FormConsole.Instance.Log("An error occurred while accessing the database: " + ex.Message);
                 }
             }
+        }
+
+        public static DataTable GetDriversAtPage(int Page)
+        {
+            int Pagelimit = 10;
+            int Offset = (Page-1) * Pagelimit;
+            DataTable Dt = new DataTable();
+
+            using (SqlConnection Connection = new SqlConnection(s_connectionString))
+            {
+                try
+                {
+                    string Query = @"
+                    SELECT * FROM Drivers
+                    ORDER BY DriverID
+                    OFFSET @Offset ROWS 
+                    FETCH NEXT @Pagelimit ROWS ONLY;";
+
+                    using (SqlCommand Command = new SqlCommand(Query, Connection))
+                    {
+                        Command.Parameters.Add(new SqlParameter("@Offset", SqlDbType.Int) { Value = Offset });
+                        Command.Parameters.Add(new SqlParameter("@Pagelimit", SqlDbType.Int) { Value = Pagelimit });
+
+                        using (SqlDataAdapter Adapter = new SqlDataAdapter(Command))
+                        {
+                            Adapter.Fill(Dt);
+
+                            DataColumn[] PrimaryKeyColumns = new DataColumn[1];
+                            PrimaryKeyColumns[0] = Dt.Columns["DriverID"];
+                            Dt.PrimaryKey = PrimaryKeyColumns;
+                        }
+                    }
+                }
+                catch (SqlException ex)
+                {
+                    FormConsole.Instance.Log("An error occurred while accessing the database: " + ex.Message);
+                    return null;
+                }
+            }
+
+            return Dt;
         }
 
     }

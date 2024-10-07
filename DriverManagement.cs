@@ -18,6 +18,8 @@ namespace StartSmartDeliveryForm
 {
     public partial class DriverManagement : ManagementTemplate
     {
+        private int _currentPage;
+        private int _totalPages;
         private DataTable _driverData;
         public DriverManagement()
         {
@@ -32,7 +34,11 @@ namespace StartSmartDeliveryForm
             dgvMain.Columns.Clear();
 
             SetSearchOptions(typeof(DriversDTO));
-            _driverData = DriversDAO.GetAllDrivers();
+            _driverData = DriversDAO.GetDriversAtPage(2);
+
+            _currentPage = 1; //Always starts at page 1
+            _totalPages = 5; //Gets count from db
+            lblStartEndPages.Text = $"{_currentPage}/{_totalPages}";
 
             if (_driverData == null || _driverData.Rows.Count == 0)
             {
@@ -102,9 +108,7 @@ namespace StartSmartDeliveryForm
         // DriverDataForm submit button event handler
         private void DriverDataForm_SubmitClicked(object sender, EventArgs e)
         {
-            // Handle the event
-            DriverDataForm form = sender as DriverDataForm;
-            if (form != null)
+            if (sender is DriverDataForm form)
             {
                 DriversDTO driverDTO = form.GetDriverData();
 
@@ -122,7 +126,6 @@ namespace StartSmartDeliveryForm
                         newRow["LicenseType"] = driverDTO.LicenseType;
                         newRow["Availability"] = driverDTO.Availability;
 
-                        // Add to DataTable
                         _driverData.Rows.Add(newRow);
                     }
                 }
@@ -213,10 +216,72 @@ namespace StartSmartDeliveryForm
                 }
                 catch
                 {
-                   // Invalid Values are left as is (integers)
+                    // Invalid Values are left as is (integers)
                     e.FormattingApplied = true;
                 }
             }
+        }
+
+        protected override void btnFirst_Click(object sender, EventArgs e)
+        {
+            _currentPage = 1;
+            lblStartEndPages.Text = $"{_currentPage}/{_totalPages}";
+            _driverData = DriversDAO.GetDriversAtPage(_currentPage);
+            dgvMain.DataSource = _driverData;
+        }
+
+        protected override void btnPrevious_Click(object sender, EventArgs e)
+        {
+            if (_currentPage > 0)
+            {
+                _currentPage--;
+                lblStartEndPages.Text = $"{_currentPage}/{_totalPages}";
+                _driverData = DriversDAO.GetDriversAtPage(_currentPage);
+                dgvMain.DataSource = _driverData;
+            }
+        }
+
+        protected override void btnNext_Click(object sender, EventArgs e)
+        {
+            if (_currentPage < _totalPages)
+            {
+                _currentPage++;
+                lblStartEndPages.Text = $"{_currentPage}/{_totalPages}";
+                _driverData = DriversDAO.GetDriversAtPage(_currentPage);
+                dgvMain.DataSource = _driverData;
+            }
+        }
+
+        protected override void btnLast_Click(object sender, EventArgs e)
+        {
+            _currentPage = _totalPages;
+            lblStartEndPages.Text = $"{_currentPage}/{_totalPages}";
+            _driverData = DriversDAO.GetDriversAtPage(_totalPages);
+            dgvMain.DataSource = _driverData;
+        }
+
+        protected override void btnGotoPage_Click(object sender, EventArgs e)
+        {
+            bool ParsedGoto = int.TryParse(txtGotoPage.Text, out int GotoPage);
+            if (ParsedGoto)
+            {
+                if (GotoPage == _currentPage) return; //Already on that page. Do nothing
+
+                if (GotoPage >= 1 && GotoPage <= _totalPages)
+                {
+
+                    _currentPage = GotoPage;
+                    lblStartEndPages.Text = $"{_currentPage}/{_totalPages}";
+                    _driverData = DriversDAO.GetDriversAtPage(_currentPage);
+                    dgvMain.DataSource = _driverData;
+                }
+                else
+                {
+                    MessageBox.Show("GotoPage is out of range", "Invalid Number");
+                    return;
+                }
+            }
+
         }
     }
 }

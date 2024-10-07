@@ -300,6 +300,7 @@
             this.btnLast.TabIndex = 35;
             this.btnLast.Text = "Last";
             this.btnLast.UseVisualStyleBackColor = false;
+            this.btnLast.Click += new System.EventHandler(this.btnLast_Click);
             // 
             // btnNext
             // 
@@ -313,6 +314,7 @@
             this.btnNext.TabIndex = 33;
             this.btnNext.Text = "Next";
             this.btnNext.UseVisualStyleBackColor = false;
+            this.btnNext.Click += new System.EventHandler(this.btnNext_Click);
             // 
             // panel6
             // 
@@ -336,6 +338,7 @@
             this.btnFirst.TabIndex = 35;
             this.btnFirst.Text = "First";
             this.btnFirst.UseVisualStyleBackColor = false;
+            this.btnFirst.Click += new System.EventHandler(this.btnFirst_Click);
             // 
             // btnPrevious
             // 
@@ -349,6 +352,7 @@
             this.btnPrevious.TabIndex = 34;
             this.btnPrevious.Text = "Previous";
             this.btnPrevious.UseVisualStyleBackColor = false;
+            this.btnPrevious.Click += new System.EventHandler(this.btnPrevious_Click);
             // 
             // panel4
             // 
@@ -357,7 +361,7 @@
             this.panel4.Controls.Add(this.label1);
             this.panel4.Location = new System.Drawing.Point(348, 13);
             this.panel4.Name = "panel4";
-            this.panel4.Size = new System.Drawing.Size(108, 16);
+            this.panel4.Size = new System.Drawing.Size(102, 16);
             this.panel4.TabIndex = 31;
             // 
             // lblStartEndPages
@@ -365,10 +369,11 @@
             this.lblStartEndPages.AutoSize = true;
             this.lblStartEndPages.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblStartEndPages.Location = new System.Drawing.Point(40, 0);
+            this.lblStartEndPages.Margin = new System.Windows.Forms.Padding(0);
             this.lblStartEndPages.Name = "lblStartEndPages";
-            this.lblStartEndPages.Size = new System.Drawing.Size(68, 16);
+            this.lblStartEndPages.Size = new System.Drawing.Size(62, 16);
             this.lblStartEndPages.TabIndex = 31;
-            this.lblStartEndPages.Text = "Start / End";
+            this.lblStartEndPages.Text = "Start/End";
             this.lblStartEndPages.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // label1
@@ -376,6 +381,7 @@
             this.label1.AutoSize = true;
             this.label1.Dock = System.Windows.Forms.DockStyle.Left;
             this.label1.Location = new System.Drawing.Point(0, 0);
+            this.label1.Margin = new System.Windows.Forms.Padding(0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(40, 16);
             this.label1.TabIndex = 30;
@@ -417,6 +423,7 @@
             this.btnGotoPage.TabIndex = 37;
             this.btnGotoPage.Text = "🔍";
             this.btnGotoPage.UseVisualStyleBackColor = true;
+            this.btnGotoPage.Click += new System.EventHandler(this.btnGotoPage_Click);
             // 
             // btnClearFilters
             // 
@@ -516,7 +523,7 @@
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.Panel panel4;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label lblStartEndPages;
+        protected System.Windows.Forms.Label lblStartEndPages;
         private System.Windows.Forms.Panel panel7;
         private System.Windows.Forms.Button btnLast;
         private System.Windows.Forms.Button btnNext;
@@ -524,7 +531,7 @@
         private System.Windows.Forms.Button btnFirst;
         private System.Windows.Forms.Button btnPrevious;
         private System.Windows.Forms.Panel panel5;
-        private System.Windows.Forms.TextBox txtGotoPage;
+        protected System.Windows.Forms.TextBox txtGotoPage;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button btnGotoPage;
     }
