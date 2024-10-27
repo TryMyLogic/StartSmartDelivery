@@ -36,8 +36,8 @@ namespace StartSmartDeliveryForm
             SetSearchOptions(typeof(DriversDTO));
             _driverData = DriversDAO.GetDriversAtPage(2);
 
-            _currentPage = 1; //Always starts at page 1
-            _totalPages = 5; //Gets count from db
+            _currentPage = 1; // Always starts at page 1
+            _totalPages = DriversDAO.GetTotalPages();
             lblStartEndPages.Text = $"{_currentPage}/{_totalPages}";
 
             if (_driverData == null || _driverData.Rows.Count == 0)
@@ -225,19 +225,15 @@ namespace StartSmartDeliveryForm
         protected override void btnFirst_Click(object sender, EventArgs e)
         {
             _currentPage = 1;
-            lblStartEndPages.Text = $"{_currentPage}/{_totalPages}";
-            _driverData = DriversDAO.GetDriversAtPage(_currentPage);
-            dgvMain.DataSource = _driverData;
+            SetPage(_currentPage);
         }
 
         protected override void btnPrevious_Click(object sender, EventArgs e)
         {
-            if (_currentPage > 0)
+            if (_currentPage > 1)
             {
                 _currentPage--;
-                lblStartEndPages.Text = $"{_currentPage}/{_totalPages}";
-                _driverData = DriversDAO.GetDriversAtPage(_currentPage);
-                dgvMain.DataSource = _driverData;
+                SetPage(_currentPage);
             }
         }
 
@@ -246,17 +242,20 @@ namespace StartSmartDeliveryForm
             if (_currentPage < _totalPages)
             {
                 _currentPage++;
-                lblStartEndPages.Text = $"{_currentPage}/{_totalPages}";
-                _driverData = DriversDAO.GetDriversAtPage(_currentPage);
-                dgvMain.DataSource = _driverData;
+                SetPage(_currentPage);
             }
         }
 
         protected override void btnLast_Click(object sender, EventArgs e)
         {
             _currentPage = _totalPages;
-            lblStartEndPages.Text = $"{_currentPage}/{_totalPages}";
-            _driverData = DriversDAO.GetDriversAtPage(_totalPages);
+            SetPage(_currentPage);
+        }
+
+        private void SetPage(int currentPage)
+        {
+            lblStartEndPages.Text = $"{currentPage}/{_totalPages}";
+            _driverData = DriversDAO.GetDriversAtPage(currentPage);
             dgvMain.DataSource = _driverData;
         }
 
@@ -269,15 +268,14 @@ namespace StartSmartDeliveryForm
 
                 if (GotoPage >= 1 && GotoPage <= _totalPages)
                 {
-
                     _currentPage = GotoPage;
-                    lblStartEndPages.Text = $"{_currentPage}/{_totalPages}";
-                    _driverData = DriversDAO.GetDriversAtPage(_currentPage);
-                    dgvMain.DataSource = _driverData;
+                    SetPage(_currentPage);
+                    txtGotoPage.Text = ""; 
                 }
                 else
                 {
                     MessageBox.Show("GotoPage is out of range", "Invalid Number");
+                    txtGotoPage.Text = "";
                     return;
                 }
             }

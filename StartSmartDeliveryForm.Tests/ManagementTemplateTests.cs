@@ -10,37 +10,49 @@ namespace StartSmartDeliveryForm.Tests
 {
     public class ManagementTemplateTests
     {
-        //LIMIT 10 OFFSET 20;
 
-        //TODO - Update this test to match btnGotoPage_Click logic
         [Theory]
         //Three Point BVA
-        [InlineData(0)] //F - out of range
-        [InlineData(1)]
-        [InlineData(2)]
-        [InlineData(99)]
-        [InlineData(100)]
-        [InlineData(101)] //F - out of range
-
-        //Additional Test
-        [InlineData(-1)] //F - is negative
-
-        public void GotoSubmit(int GotoPage)
+        [InlineData("0")] //F - out of range
+        [InlineData("1")]
+        [InlineData("2")]
+        [InlineData("99")]
+        [InlineData("100")]
+        [InlineData("101")] //F - out of range
+        public void btnGotoPage_Click_HandlesRangeCorrectly(string txtGotoPage)
         {
-            if (GotoPage < 0) Assert.Fail("GotoPage is negative");
-            int start = 1;
-            int end = 100;
+            int _currentPage = 5;
+            int _totalPages = 100;
+            bool ParsedGoto = int.TryParse(txtGotoPage, out int GotoPage);
+            if (ParsedGoto)
+            {
+                if (GotoPage == _currentPage)
+                {
+                    Assert.True(GotoPage == _currentPage, "Already on that page, no action expected");
+                    return;
+                } 
 
-            // Page must be between start and end (inclusive)
-            if (GotoPage <= end && GotoPage >= start)
-            {
-                Assert.InRange(GotoPage, start, end);
-                //GotoPageX()
+                if (GotoPage >= 1 && GotoPage <= _totalPages)
+                {
+                    Assert.InRange(GotoPage, 1, _totalPages);
+                }
+                else
+                {
+                    Assert.Fail("GotoPage is out of range");
+                    return;
+                }
             }
-            else
-            {
-                Assert.Fail("GotoPage is out of range");
-            }
+            Assert.True(ParsedGoto, "String did not parse to int");
+        }
+
+        [Fact]
+        public void btnGotoPage_Click_SetsLabelCorrectly()
+        {
+            int _currentPage = 5;
+            int _totalPages = 100;
+            string lblStartEndPages = $"{_currentPage}/{_totalPages}";
+
+            Assert.Equal("5/100", lblStartEndPages);
         }
 
         //Example

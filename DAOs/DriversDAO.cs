@@ -11,6 +11,7 @@ using System.Configuration;
 using StartSmartDeliveryForm.Classes;
 using StartSmartDeliveryForm.DTOs;
 using StartSmartDeliveryForm.Enums;
+using System.Drawing.Printing;
 
 namespace StartSmartDeliveryForm.DAOs
 {
@@ -22,7 +23,8 @@ Decouples the data access code from the rest of the application
 */
     internal static class DriversDAO
     {
-        private static string s_connectionString = DatabaseConfig.ConnectionString;
+        private static readonly string s_connectionString = DatabaseConfig.ConnectionString;
+        private static readonly int s_pageLimit = int.Parse(ConfigurationManager.AppSettings["Pagelimit"]);
 
         public static DataTable GetAllDrivers()
         {
@@ -183,8 +185,8 @@ Decouples the data access code from the rest of the application
 
         public static DataTable GetDriversAtPage(int Page)
         {
-            int Pagelimit = 10;
-            int Offset = (Page-1) * Pagelimit;
+          
+            int Offset = (Page-1) * s_pageLimit;
             DataTable Dt = new DataTable();
 
             using (SqlConnection Connection = new SqlConnection(s_connectionString))
@@ -200,7 +202,7 @@ Decouples the data access code from the rest of the application
                     using (SqlCommand Command = new SqlCommand(Query, Connection))
                     {
                         Command.Parameters.Add(new SqlParameter("@Offset", SqlDbType.Int) { Value = Offset });
-                        Command.Parameters.Add(new SqlParameter("@Pagelimit", SqlDbType.Int) { Value = Pagelimit });
+                        Command.Parameters.Add(new SqlParameter("@Pagelimit", SqlDbType.Int) { Value = s_pageLimit });
 
                         using (SqlDataAdapter Adapter = new SqlDataAdapter(Command))
                         {
@@ -220,6 +222,36 @@ Decouples the data access code from the rest of the application
             }
 
             return Dt;
+        }
+
+        internal static int GetTotalPages()
+        {
+            int recordsCount = 0;
+            int totalPages;
+
+            string query = "SELECT COUNT(DriverID) FROM Drivers";
+
+            using (SqlConnection connection = new SqlConnection(s_connectionString)) // Ensure s_connectionString is defined
+            {
+                try
+                {
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        connection.Open();
+                        recordsCount = (int)command.ExecuteScalar(); // Execute the query and get the total count of records
+                    }
+                }
+                catch (SqlException ex)
+                {
+                    FormConsole.Instance.Log("Error counting records: " + ex.Message);
+                    return recordsCount; // Return 0 pages if an error occurs
+                }
+            }
+
+            //Needs to always round up so all records can be displayed
+            totalPages = (int)Math.Ceiling((double)recordsCount / s_pageLimit);
+
+            return totalPages;
         }
 
     }
