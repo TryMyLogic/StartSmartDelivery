@@ -47,7 +47,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DataLayer\DatabaseConfig.cs" />
     <Compile Include="BusinessLogicLayer\Drivers.cs" />
     <Compile Include="PresentationLayer\DriveManagement\DriverDataForm.cs">
       <SubType>Form</SubType>
@@ -55,7 +54,6 @@
     <Compile Include="PresentationLayer\DriveManagement\DriverDataForm.Designer.cs">
       <DependentUpon>DriverDataForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="SharedLayer\AppConfig.cs" />
     <Compile Include="SharedLayer\FormConsole.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -85,6 +83,7 @@
     <Compile Include="SharedLayer\Enums\LicenseTypeEnum.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SharedLayer\GlobalConstants.cs" />
     <EmbeddedResource Include="PresentationLayer\DriveManagement\DriverDataForm.resx">
       <DependentUpon>DriverDataForm.cs</DependentUpon>
     </EmbeddedResource>

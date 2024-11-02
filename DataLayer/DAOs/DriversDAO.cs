@@ -12,6 +12,7 @@ using StartSmartDeliveryForm.Classes;
 using StartSmartDeliveryForm.DTOs;
 using StartSmartDeliveryForm.Enums;
 using System.Drawing.Printing;
+using StartSmartDeliveryForm.SharedLayer;
 
 namespace StartSmartDeliveryForm.DAOs
 {
@@ -23,14 +24,13 @@ Decouples the data access code from the rest of the application
 */
     internal static class DriversDAO
     {
-        private static readonly string s_connectionString = DatabaseConfig.ConnectionString;
-        private static readonly int s_pageLimit = int.Parse(ConfigurationManager.AppSettings["Pagelimit"]);
+        
 
         public static DataTable GetAllDrivers()
         {
             DataTable Dt = new DataTable();
 
-            using (SqlConnection Connection = new SqlConnection(s_connectionString))
+            using (SqlConnection Connection = new SqlConnection(GlobalConstants.s_connectionString))
             {
                 try
                 {
@@ -60,7 +60,7 @@ Decouples the data access code from the rest of the application
 
         public static int GetEmployeeNoCount(string EmployeeNo)
         {
-            using (SqlConnection Connection = new SqlConnection(s_connectionString))
+            using (SqlConnection Connection = new SqlConnection(GlobalConstants.s_connectionString))
             {
                 try
                 {
@@ -89,7 +89,7 @@ Decouples the data access code from the rest of the application
 
         public static void DeleteDriver(int DriverID)
         {
-            using (SqlConnection Connection = new SqlConnection(s_connectionString))
+            using (SqlConnection Connection = new SqlConnection(GlobalConstants.s_connectionString))
             {
                 try
                 {
@@ -121,7 +121,7 @@ Decouples the data access code from the rest of the application
 
         public static int InsertDriver(DriversDTO driver)
         {
-            using (SqlConnection Connection = new SqlConnection(s_connectionString))
+            using (SqlConnection Connection = new SqlConnection(GlobalConstants.s_connectionString))
             {
                 try
                 {
@@ -156,7 +156,7 @@ Decouples the data access code from the rest of the application
 
         public static void UpdateDriver(DriversDTO driver)
         {
-            using (SqlConnection Connection = new SqlConnection(s_connectionString))
+            using (SqlConnection Connection = new SqlConnection(GlobalConstants.s_connectionString))
             {
                 try
                 {
@@ -186,10 +186,10 @@ Decouples the data access code from the rest of the application
         public static DataTable GetDriversAtPage(int Page)
         {
           
-            int Offset = (Page-1) * s_pageLimit;
+            int Offset = (Page-1) * GlobalConstants.s_pageLimit;
             DataTable Dt = new DataTable();
 
-            using (SqlConnection Connection = new SqlConnection(s_connectionString))
+            using (SqlConnection Connection = new SqlConnection(GlobalConstants.s_connectionString))
             {
                 try
                 {
@@ -202,7 +202,7 @@ Decouples the data access code from the rest of the application
                     using (SqlCommand Command = new SqlCommand(Query, Connection))
                     {
                         Command.Parameters.Add(new SqlParameter("@Offset", SqlDbType.Int) { Value = Offset });
-                        Command.Parameters.Add(new SqlParameter("@Pagelimit", SqlDbType.Int) { Value = s_pageLimit });
+                        Command.Parameters.Add(new SqlParameter("@Pagelimit", SqlDbType.Int) { Value = GlobalConstants.s_pageLimit });
 
                         using (SqlDataAdapter Adapter = new SqlDataAdapter(Command))
                         {
@@ -231,7 +231,7 @@ Decouples the data access code from the rest of the application
 
             string query = "SELECT COUNT(DriverID) FROM Drivers";
 
-            using (SqlConnection connection = new SqlConnection(s_connectionString)) // Ensure s_connectionString is defined
+            using (SqlConnection connection = new SqlConnection(GlobalConstants.s_connectionString)) // Ensure s_connectionString is defined
             {
                 try
                 {
@@ -249,7 +249,7 @@ Decouples the data access code from the rest of the application
             }
 
             //Needs to always round up so all records can be displayed
-            totalPages = (int)Math.Ceiling((double)recordsCount / s_pageLimit);
+            totalPages = (int)Math.Ceiling((double)recordsCount / GlobalConstants.s_pageLimit);
 
             return totalPages;
         }

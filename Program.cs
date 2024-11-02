@@ -1,6 +1,8 @@
 ﻿using StartSmartDeliveryForm.Classes;
+using StartSmartDeliveryForm.SharedLayer;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -17,12 +19,31 @@ namespace StartSmartDeliveryForm
             Application.SetCompatibleTextRenderingDefault(false);
 
             FormConsole.Instance.Show();
-            
-            //Initialize connection to the database
+
+            ////Initialize connection to the database
+            //try
+            //{
+            //    DatabaseConfig.Initialize("StartSmartDB");
+            //    FormConsole.Instance.Log("Database Initialized");
+            //    // Only run the form if the Database connects
+            //    Application.Run(new DriverManagement());
+            //}
+            //catch (InvalidOperationException ex)
+            //{
+            //    FormConsole.Instance.Log(ex.Message);
+            //    MessageBox.Show(ex.ToString());
+            //}
+
             try
             {
-                DatabaseConfig.Initialize("StartSmartDB");
-                FormConsole.Instance.Log("Database Initialized");
+                FormConsole.Instance.Log("Initializing database connection...");
+
+                using (SqlConnection connection = new SqlConnection(GlobalConstants.s_connectionString))
+                {
+                    connection.Open();
+                    FormConsole.Instance.Log("Database Initialized");
+                }
+
                 // Only run the form if the Database connects
                 Application.Run(new DriverManagement());
             }
@@ -31,8 +52,12 @@ namespace StartSmartDeliveryForm
                 FormConsole.Instance.Log(ex.Message);
                 MessageBox.Show(ex.ToString());
             }
+            catch (SqlException ex) 
+            {
+                FormConsole.Instance.Log($"Database connection failed: {ex.Message}");
+                MessageBox.Show(ex.ToString());
+            }
 
-          
         }   
     }
 }

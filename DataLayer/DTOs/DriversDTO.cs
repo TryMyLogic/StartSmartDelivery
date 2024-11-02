@@ -32,7 +32,7 @@ namespace StartSmartDeliveryForm.DTOs
         }
         public DriversDTO(int DriverID, string Name, string Surname, string EmployeeNo, LicenseType LicenseType, bool Availability)
         {
-            this.DriverId = DriverID;
+            DriverId = DriverID;
             this.Name = Name;
             this.Surname = Surname;
             this.EmployeeNo = EmployeeNo;
