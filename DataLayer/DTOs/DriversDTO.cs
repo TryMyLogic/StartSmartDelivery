@@ -12,12 +12,12 @@ namespace StartSmartDeliveryForm.DTOs
      */
     internal class DriversDTO
     {
-        public int DriverId { get; set; }
-        public string Name { get; set; }
-        public string Surname { get; set; }
-        public string EmployeeNo { get; set; }
-        public LicenseType LicenseType { get; set; }
-        public bool Availability { get; set; }
+        public int DriverId { get; }
+        public string Name { get; }
+        public string Surname { get; }
+        public string EmployeeNo { get; }
+        public LicenseType LicenseType { get; }
+        public bool Availability { get; }
 
         public DriversDTO() { }
 
@@ -30,7 +30,7 @@ namespace StartSmartDeliveryForm.DTOs
             this.LicenseType = LicenseType;
             this.Availability = Availability;
         }
-        public DriversDTO(int DriverID,string Name, string Surname, string EmployeeNo, LicenseType LicenseType,bool Availability)
+        public DriversDTO(int DriverID, string Name, string Surname, string EmployeeNo, LicenseType LicenseType, bool Availability)
         {
             this.DriverId = DriverID;
             this.Name = Name;

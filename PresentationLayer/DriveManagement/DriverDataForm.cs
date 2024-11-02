@@ -67,7 +67,7 @@ namespace StartSmartDeliveryForm.DataForms
             else
             {
                 // Only check uniqueness if the field isnt empty && Mode is not edit
-                if (this.Mode == FormMode.Add && !Drivers.IsEmployeeNoUnique(txtEmployeeNo.Text))
+                if (Mode == FormMode.Add && !Drivers.IsEmployeeNoUnique(txtEmployeeNo.Text))
                 {
                     MessageBox.Show("Employee No is not unique.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return false;
@@ -75,13 +75,13 @@ namespace StartSmartDeliveryForm.DataForms
 
             }
 
-            if (!Enum.TryParse(cboLicenseType.Text, out LicenseType licenseType))
+            if (!Enum.TryParse<LicenseType>(cboLicenseType.Text, out _))
             {
                 MessageBox.Show("Please select a valid License Type.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
 
-            if (!bool.TryParse(cboAvailability.Text, out bool availability))
+            if (!bool.TryParse(cboAvailability.Text, out _))
             {
                 MessageBox.Show("Availability must be 'True' or 'False'.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
@@ -110,15 +110,14 @@ namespace StartSmartDeliveryForm.DataForms
         }
         internal DriversDTO GetDriverData()
         {
-            DriversDTO Driver = new DriversDTO();
-            Driver.DriverId = this.DriverId;
-            Driver.Name = txtName.Text;
-            Driver.Surname = txtSurname.Text;
-            Driver.EmployeeNo = txtEmployeeNo.Text;
-            Driver.LicenseType = (LicenseType)Enum.Parse(typeof(LicenseType), cboLicenseType.SelectedItem.ToString());
-            Driver.Availability = bool.Parse(cboAvailability.SelectedItem.ToString());
-
-            return Driver;
+            return new DriversDTO(
+                DriverId,
+                txtName.Text,
+                txtSurname.Text,
+                txtEmployeeNo.Text,
+                (LicenseType)Enum.Parse(typeof(LicenseType), cboLicenseType.SelectedItem.ToString()),
+                bool.Parse(cboAvailability.SelectedItem.ToString())
+            );
         }
     }
 }

@@ -55,6 +55,7 @@
     <Compile Include="PresentationLayer\DriveManagement\DriverDataForm.Designer.cs">
       <DependentUpon>DriverDataForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="SharedLayer\AppConfig.cs" />
     <Compile Include="SharedLayer\FormConsole.cs">
       <SubType>Form</SubType>
     </Compile>

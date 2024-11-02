@@ -70,15 +70,14 @@ namespace StartSmartDeliveryForm
         {
             DataGridViewRow selectedRow = dgvMain.Rows[rowIndex];
 
-            DriversDTO driverData = new DriversDTO
-            {
-                DriverId = int.Parse(selectedRow.Cells["DriverID"].Value.ToString()),
-                Name = selectedRow.Cells["Name"].Value.ToString(),
-                Surname = selectedRow.Cells["Surname"].Value.ToString(),
-                EmployeeNo = selectedRow.Cells["EmployeeNo"].Value.ToString(),
-                LicenseType = (LicenseType)Enum.Parse(typeof(LicenseType), selectedRow.Cells["LicenseType"].Value.ToString()),
-                Availability = bool.Parse(selectedRow.Cells["Availability"].Value.ToString())
-            };
+            DriversDTO driverData = new DriversDTO(
+       int.Parse(selectedRow.Cells["DriverID"].Value.ToString()),
+       selectedRow.Cells["Name"].Value.ToString(),
+       selectedRow.Cells["Surname"].Value.ToString(),
+       selectedRow.Cells["EmployeeNo"].Value.ToString(),
+       (LicenseType)Enum.Parse(typeof(LicenseType), selectedRow.Cells["LicenseType"].Value.ToString()),
+       bool.Parse(selectedRow.Cells["Availability"].Value.ToString())
+   );
 
             DriverDataForm driverDataForm = new DriverDataForm
             {
@@ -270,7 +269,7 @@ namespace StartSmartDeliveryForm
                 {
                     _currentPage = GotoPage;
                     SetPage(_currentPage);
-                    txtGotoPage.Text = ""; 
+                    txtGotoPage.Text = "";
                 }
                 else
                 {
