@@ -10,15 +10,15 @@ namespace StartSmartDeliveryForm.Classes
 
     internal class DatabaseConfig
     {
-        static string _ConnectionString;
+        static string s_connectionString;
 
         // Initialize the connection string from app.config
         public static void Initialize(string ConnectionStringName)
         {
             // Retrieve the connection string from app.config
-            _ConnectionString = ConfigurationManager.ConnectionStrings[ConnectionStringName]?.ConnectionString;
+            s_connectionString = ConfigurationManager.ConnectionStrings[ConnectionStringName]?.ConnectionString;
 
-            if (string.IsNullOrEmpty(_ConnectionString))
+            if (string.IsNullOrEmpty(s_connectionString))
             {
                 throw new InvalidOperationException("Connection string not found in configuration file.");
             }
@@ -28,11 +28,11 @@ namespace StartSmartDeliveryForm.Classes
         {
             get
             {
-                if (string.IsNullOrEmpty(_ConnectionString))
+                if (string.IsNullOrEmpty(s_connectionString))
                 {
                     throw new InvalidOperationException("Connection string not initialized. Call Initialize() first.");
                 }
-                return _ConnectionString;
+                return s_connectionString;
             }
         }
     }

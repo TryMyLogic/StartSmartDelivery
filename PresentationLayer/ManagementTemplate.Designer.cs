@@ -83,13 +83,13 @@
             this.dgvMain.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dgvMain.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvMain.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvMain.Location = new System.Drawing.Point(0, 84);
+            this.dgvMain.Location = new System.Drawing.Point(0, 90);
             this.dgvMain.Margin = new System.Windows.Forms.Padding(0);
             this.dgvMain.Name = "dgvMain";
             this.dgvMain.ReadOnly = true;
             this.dgvMain.RowHeadersWidth = 51;
             this.dgvMain.RowTemplate.Height = 24;
-            this.dgvMain.Size = new System.Drawing.Size(888, 214);
+            this.dgvMain.Size = new System.Drawing.Size(888, 208);
             this.dgvMain.TabIndex = 15;
             this.dgvMain.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvMain_CellContentClick);
             this.dgvMain.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dgvMain_CellFormatting);
@@ -146,7 +146,7 @@
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(0);
-            this.menuStrip1.Size = new System.Drawing.Size(888, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(888, 30);
             this.menuStrip1.TabIndex = 25;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -155,7 +155,7 @@
             this.userToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.changeUserToolStripMenuItem});
             this.userToolStripMenuItem.Name = "userToolStripMenuItem";
-            this.userToolStripMenuItem.Size = new System.Drawing.Size(52, 24);
+            this.userToolStripMenuItem.Size = new System.Drawing.Size(52, 30);
             this.userToolStripMenuItem.Text = "User";
             // 
             // changeUserToolStripMenuItem
@@ -172,7 +172,7 @@
             this.vehicleManagementToolStripMenuItem,
             this.driverManagementToolStripMenuItem});
             this.navigateToolStripMenuItem.Name = "navigateToolStripMenuItem";
-            this.navigateToolStripMenuItem.Size = new System.Drawing.Size(83, 24);
+            this.navigateToolStripMenuItem.Size = new System.Drawing.Size(83, 30);
             this.navigateToolStripMenuItem.Text = "Navigate";
             // 
             // dashboardToolStripMenuItem
@@ -206,7 +206,7 @@
             this.refreshToolStripMenuItem,
             this.reloadToolStripMenuItem});
             this.dataManagementToolStripMenuItem.Name = "dataManagementToolStripMenuItem";
-            this.dataManagementToolStripMenuItem.Size = new System.Drawing.Size(147, 24);
+            this.dataManagementToolStripMenuItem.Size = new System.Drawing.Size(147, 30);
             this.dataManagementToolStripMenuItem.Text = "Data Management";
             // 
             // rollbackToolStripMenuItem
@@ -458,7 +458,7 @@
             this.panel3.Controls.Add(this.btnAddFilters);
             this.panel3.Controls.Add(this.btnClearFilters);
             this.panel3.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panel3.Location = new System.Drawing.Point(0, 24);
+            this.panel3.Location = new System.Drawing.Point(0, 30);
             this.panel3.Margin = new System.Windows.Forms.Padding(0);
             this.panel3.Name = "panel3";
             this.panel3.Padding = new System.Windows.Forms.Padding(0, 10, 0, 10);

@@ -47,56 +47,56 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Classes\DatabaseConfig.cs" />
-    <Compile Include="Classes\Drivers.cs" />
-    <Compile Include="DataForms\DriverDataForm.cs">
+    <Compile Include="DataLayer\DatabaseConfig.cs" />
+    <Compile Include="BusinessLogicLayer\Drivers.cs" />
+    <Compile Include="PresentationLayer\DriveManagement\DriverDataForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="DataForms\DriverDataForm.Designer.cs">
+    <Compile Include="PresentationLayer\DriveManagement\DriverDataForm.Designer.cs">
       <DependentUpon>DriverDataForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormConsole.cs">
+    <Compile Include="SharedLayer\FormConsole.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormConsole.Designer.cs">
+    <Compile Include="SharedLayer\FormConsole.Designer.cs">
       <DependentUpon>FormConsole.cs</DependentUpon>
     </Compile>
-    <Compile Include="DAOs\DriversDAO.cs" />
-    <Compile Include="DriverManagement.cs">
+    <Compile Include="DataLayer\DAOs\DriversDAO.cs" />
+    <Compile Include="PresentationLayer\DriveManagement\DriverManagement.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="DriverManagement.Designer.cs">
+    <Compile Include="PresentationLayer\DriveManagement\DriverManagement.Designer.cs">
       <DependentUpon>DriverManagement.cs</DependentUpon>
     </Compile>
-    <Compile Include="DTOs\DriversDTO.cs" />
-    <Compile Include="Login.cs">
+    <Compile Include="DataLayer\DTOs\DriversDTO.cs" />
+    <Compile Include="PresentationLayer\Login.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Login.Designer.cs">
+    <Compile Include="PresentationLayer\Login.Designer.cs">
       <DependentUpon>Login.cs</DependentUpon>
     </Compile>
-    <Compile Include="ManagementTemplate.cs">
+    <Compile Include="PresentationLayer\ManagementTemplate.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ManagementTemplate.Designer.cs">
+    <Compile Include="PresentationLayer\ManagementTemplate.Designer.cs">
       <DependentUpon>ManagementTemplate.cs</DependentUpon>
     </Compile>
-    <Compile Include="Enums\LicenseTypeEnum.cs" />
+    <Compile Include="SharedLayer\Enums\LicenseTypeEnum.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="DataForms\DriverDataForm.resx">
+    <EmbeddedResource Include="PresentationLayer\DriveManagement\DriverDataForm.resx">
       <DependentUpon>DriverDataForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormConsole.resx">
+    <EmbeddedResource Include="SharedLayer\FormConsole.resx">
       <DependentUpon>FormConsole.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="DriverManagement.resx">
+    <EmbeddedResource Include="PresentationLayer\DriveManagement\DriverManagement.resx">
       <DependentUpon>DriverManagement.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Login.resx">
+    <EmbeddedResource Include="PresentationLayer\Login.resx">
       <DependentUpon>Login.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ManagementTemplate.resx">
+    <EmbeddedResource Include="PresentationLayer\ManagementTemplate.resx">
       <DependentUpon>ManagementTemplate.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -124,10 +124,8 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Images\StartSmartLogo.png" />
+    <Content Include="PresentationLayer\Images\StartSmartLogo.png" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Interfaces\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
