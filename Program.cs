@@ -20,20 +20,6 @@ namespace StartSmartDeliveryForm
 
             FormConsole.Instance.Show();
 
-            ////Initialize connection to the database
-            //try
-            //{
-            //    DatabaseConfig.Initialize("StartSmartDB");
-            //    FormConsole.Instance.Log("Database Initialized");
-            //    // Only run the form if the Database connects
-            //    Application.Run(new DriverManagement());
-            //}
-            //catch (InvalidOperationException ex)
-            //{
-            //    FormConsole.Instance.Log(ex.Message);
-            //    MessageBox.Show(ex.ToString());
-            //}
-
             try
             {
                 FormConsole.Instance.Log("Initializing database connection...");

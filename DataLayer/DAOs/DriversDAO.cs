@@ -224,10 +224,9 @@ Decouples the data access code from the rest of the application
             return Dt;
         }
 
-        internal static int GetTotalPages()
+        internal static int GetRecordCount()
         {
             int recordsCount = 0;
-            int totalPages;
 
             string query = "SELECT COUNT(DriverID) FROM Drivers";
 
@@ -248,11 +247,7 @@ Decouples the data access code from the rest of the application
                 }
             }
 
-            //Needs to always round up so all records can be displayed
-            totalPages = (int)Math.Ceiling((double)recordsCount / GlobalConstants.s_pageLimit);
-
-            return totalPages;
+            return recordsCount;
         }
-
     }
 }

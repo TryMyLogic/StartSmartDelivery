@@ -3,6 +3,7 @@ using StartSmartDeliveryForm.DAOs;
 using StartSmartDeliveryForm.DataForms;
 using StartSmartDeliveryForm.DTOs;
 using StartSmartDeliveryForm.Enums;
+using StartSmartDeliveryForm.SharedLayer;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -21,6 +22,8 @@ namespace StartSmartDeliveryForm
         private int _currentPage;
         private int _totalPages;
         private DataTable _driverData;
+
+        int _recordsCount = DriversDAO.GetRecordCount();
         public DriverManagement()
         {
             InitializeComponent();
@@ -37,7 +40,7 @@ namespace StartSmartDeliveryForm
             _driverData = DriversDAO.GetDriversAtPage(2);
 
             _currentPage = 1; // Always starts at page 1
-            _totalPages = DriversDAO.GetTotalPages();
+            _totalPages = (int)Math.Ceiling((double)_recordsCount / GlobalConstants.s_pageLimit);
             lblStartEndPages.Text = $"{_currentPage}/{_totalPages}";
 
             if (_driverData == null || _driverData.Rows.Count == 0)
@@ -101,6 +104,15 @@ namespace StartSmartDeliveryForm
 
                 //Delete From Database
                 DriversDAO.DeleteDriver(driverID);
+
+                _recordsCount--;
+                _totalPages = (int)Math.Ceiling((double)_recordsCount / GlobalConstants.s_pageLimit);
+                if (_currentPage > _totalPages)
+                {
+                    _currentPage = _totalPages;
+                    SetPage(_currentPage);
+                }
+
             }
         }
 
@@ -126,6 +138,15 @@ namespace StartSmartDeliveryForm
                         newRow["Availability"] = driverDTO.Availability;
 
                         _driverData.Rows.Add(newRow);
+
+                        _recordsCount++;
+                        _totalPages = (int)Math.Ceiling((double)_recordsCount / GlobalConstants.s_pageLimit);
+                        if (_currentPage < _totalPages)
+                        {
+                            _currentPage = _totalPages;
+                            SetPage(_currentPage);
+                        }
+
                     }
                 }
                 else if (form.Mode == FormMode.Edit)
@@ -278,7 +299,7 @@ namespace StartSmartDeliveryForm
                     return;
                 }
             }
-
         }
+
     }
 }
