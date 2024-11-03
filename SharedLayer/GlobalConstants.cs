@@ -10,21 +10,22 @@ namespace StartSmartDeliveryForm.SharedLayer
 {
     internal class GlobalConstants
     {
-        private static readonly IConfiguration _configuration;
+        private static readonly IConfiguration s_configuration;
 
         // Static constructor to initialize configuration
         static GlobalConstants()
         {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../")) // Move up two levels from bin
+            IConfigurationBuilder builder = new ConfigurationBuilder()
+                .SetBasePath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../")) // Move up three levels from bin
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
-            _configuration = builder.Build();
+            s_configuration = builder.Build();
         }
 
-        public static int PageLimit => int.Parse(_configuration["Pagelimit"]);
+        public static int s_pageLimit => int.TryParse(s_configuration["Pagelimit"], out int pageLimit)
+            ? pageLimit: 10; //Default to 10 records per page
 
-        public static string ConnectionString => _configuration["StartSmartDB:ConnectionString"]
+        public static string s_connectionString => s_configuration["StartSmartDB:ConnectionString"]
             ?? throw new InvalidOperationException("Connection string not found in the configuration file.");
     }
 }

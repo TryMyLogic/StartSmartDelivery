@@ -10,8 +10,6 @@ namespace StartSmartDeliveryForm
         {
             ApplicationConfiguration.Initialize();
             FormConsole.Instance.Show();
-            FormConsole.Instance.Log($"Page limit is: {GlobalConstants.PageLimit}");
-
             Application.Run(new DriverManagementForm());
         }
     }
