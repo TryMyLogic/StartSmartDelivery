@@ -1,3 +1,6 @@
+using StartSmartDeliveryForm.PresentationLayer.DriverManagement;
+using StartSmartDeliveryForm.SharedLayer;
+
 namespace StartSmartDeliveryForm
 {
     internal static class Program
@@ -6,7 +9,10 @@ namespace StartSmartDeliveryForm
         static void Main()
         {
             ApplicationConfiguration.Initialize();
-           // Application.Run(new Form1());
+            FormConsole.Instance.Show();
+            FormConsole.Instance.Log($"Page limit is: {GlobalConstants.PageLimit}");
+
+            Application.Run(new DriverManagementForm());
         }
     }
 }
