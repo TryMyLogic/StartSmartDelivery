@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="BusinessLogicLayer\" />
+    <Folder Include="DataLayer\DAOs\" />
+    <Folder Include="DataLayer\DTOs\" />
+    <Folder Include="PresentationLayer\DriverManagement\" />
+    <Folder Include="PresentationLayer\Images\" />
+    <Folder Include="SharedLayer\Enums\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EditorConfigFiles Remove="C:\Users\fudge\source\repos\MajorNameless\StartSmartDelivery\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="C:\Users\fudge\source\repos\MajorNameless\StartSmartDelivery\.editorconfig" />
+  </ItemGroup>
+
+</Project>
