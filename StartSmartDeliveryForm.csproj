@@ -9,7 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="BusinessLogicLayer\" />
     <Folder Include="PresentationLayer\Images\" />
   </ItemGroup>
 
