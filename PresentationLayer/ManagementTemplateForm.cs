@@ -19,9 +19,9 @@ namespace StartSmartDeliveryForm.PresentationLayer
             InitializeComponent();
         }
 
-        private Image ResizeImage(Image img, int width, int height)
+        private static Bitmap ResizeImage(Image img, int width, int height)
         {
-            Bitmap resizedImage = new Bitmap(img, new Size(width, height));
+            Bitmap resizedImage = new(img, new Size(width, height));
             return resizedImage;
         }
 
@@ -303,6 +303,17 @@ namespace StartSmartDeliveryForm.PresentationLayer
 
         }
 
-      
+        private void txtSearchBox_Enter(object sender, EventArgs e)
+        {
+            txtSearchBox.Text = "";
+            txtSearchBox.ForeColor = Color.Black;
+        }
+
+        private void txtSearchBox_Leave(object sender, EventArgs e)
+        {
+            txtSearchBox.Text = "Value for search";
+            txtSearchBox.ForeColor = Color.Gray;
+
+        }
     }
 }

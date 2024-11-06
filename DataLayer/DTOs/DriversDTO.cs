@@ -15,32 +15,12 @@ namespace StartSmartDeliveryForm.DataLayer.DTOs
     Promotes a clear separation between the data structure and business logic, enhancing maintainability and clarity.
     */
 
-    internal class DriversDTO
-    {
-        public int DriverId { get; }
-        public string Name { get; }
-        public string Surname { get; }
-        public string EmployeeNo { get; }
-        public LicenseType LicenseType { get; }
-        public bool Availability { get; }
-
-        public DriversDTO(string Name, string Surname, string EmployeeNo, LicenseType LicenseType, bool Availability)
-        {
-            //DriverID is 0 by default when unassigned
-            this.Name = Name;
-            this.Surname = Surname;
-            this.EmployeeNo = EmployeeNo;
-            this.LicenseType = LicenseType;
-            this.Availability = Availability;
-        }
-        public DriversDTO(int DriverID, string Name, string Surname, string EmployeeNo, LicenseType LicenseType, bool Availability)
-        {
-            DriverId = DriverID;
-            this.Name = Name;
-            this.Surname = Surname;
-            this.EmployeeNo = EmployeeNo;
-            this.LicenseType = LicenseType;
-            this.Availability = Availability;
-        }
-    }
+    internal record DriversDTO(
+      int DriverId, 
+      string Name,
+      string Surname,
+      string EmployeeNo,
+      LicenseType LicenseType,
+      bool Availability
+  );
 }
