@@ -34,11 +34,14 @@
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(761, 479);
+            Margin = new Padding(3, 4, 3, 4);
+            MinimumSize = new Size(779, 500);
             Name = "DriverManagementForm";
             Text = "DriverManagementForm";
             Load += DriverManagementForm_Load;
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion

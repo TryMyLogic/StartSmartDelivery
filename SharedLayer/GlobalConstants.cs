@@ -25,7 +25,7 @@ namespace StartSmartDeliveryForm.SharedLayer
         public static int s_pageLimit => int.TryParse(s_configuration["Pagelimit"], out int pageLimit)
             ? pageLimit: 10; //Default to 10 records per page
 
-        public static string s_connectionString => s_configuration["StartSmartDB:ConnectionString"]
+        public static string s_connectionString => s_configuration["ConnectionStrings:StartSmartDB"]
             ?? throw new InvalidOperationException("Connection string not found in the configuration file.");
     }
 }
