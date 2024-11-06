@@ -315,5 +315,10 @@ namespace StartSmartDeliveryForm.PresentationLayer
             txtSearchBox.ForeColor = Color.Gray;
 
         }
+
+        private void txtStartPage_Enter(object sender, EventArgs e)
+        {
+            BeginInvoke(new Action(() => (sender as TextBox).SelectAll()));
+        }
     }
 }

@@ -285,12 +285,12 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
                 {
                     _currentPage = GotoPage;
                     SetPage(_currentPage);
-                    txtStartPage.Text = "";
+                    txtStartPage.Text = $"{_currentPage}";
                 }
                 else
                 {
                     MessageBox.Show("GotoPage is out of range", "Invalid Number");
-                    txtStartPage.Text = "";
+                    txtStartPage.Text = $"{_currentPage}";
                     return;
                 }
             }

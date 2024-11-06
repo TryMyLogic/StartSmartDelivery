@@ -179,7 +179,7 @@
             tsSearchbar.Name = "tsSearchbar";
             tsSearchbar.Padding = new Padding(0, 3, 0, 7);
             tsSearchbar.RenderMode = ToolStripRenderMode.Professional;
-            tsSearchbar.Size = new Size(767, 62);
+            tsSearchbar.Size = new Size(767, 38);
             tsSearchbar.Stretch = true;
             tsSearchbar.TabIndex = 5;
             tsSearchbar.Text = "toolStrip1";
@@ -422,7 +422,9 @@
             txtStartPage.Name = "txtStartPage";
             txtStartPage.Size = new Size(80, 27);
             txtStartPage.TabIndex = 1;
+            txtStartPage.TabStop = false;
             txtStartPage.TextAlign = HorizontalAlignment.Right;
+            txtStartPage.Enter += txtStartPage_Enter;
             // 
             // lblEndPage
             // 
@@ -457,11 +459,11 @@
             dgvMain.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvMain.Dock = DockStyle.Fill;
             dgvMain.ImeMode = ImeMode.NoControl;
-            dgvMain.Location = new Point(0, 107);
+            dgvMain.Location = new Point(0, 83);
             dgvMain.Name = "dgvMain";
             dgvMain.ReadOnly = true;
             dgvMain.RowHeadersWidth = 51;
-            dgvMain.Size = new Size(767, 268);
+            dgvMain.Size = new Size(767, 292);
             dgvMain.TabIndex = 7;
             dgvMain.CellContentClick += dgvMain_CellContentClick;
             // 
