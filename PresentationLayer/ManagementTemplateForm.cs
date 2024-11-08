@@ -202,7 +202,7 @@ namespace StartSmartDeliveryForm.PresentationLayer
         2. The column name for any Enum column have the same name as the 
            Enum itself.
          */
-        public static string SearchEnumColumn(string selectedOption, string searchTerm)
+        public static string SearchEnumColumn(string selectedOption, string searchTerm, bool isCaseSensitive = false)
         {
             if (string.IsNullOrEmpty(searchTerm))
             {
@@ -216,109 +216,143 @@ namespace StartSmartDeliveryForm.PresentationLayer
             }
             FormConsole.Instance.Log("enumType" + EnumType);
 
-            // Check if the SearchTerm is found within the Enum 
-            if (Enum.IsDefined(EnumType, searchTerm))
+            if (isCaseSensitive)
             {
-                object enumValue = Enum.Parse(EnumType, searchTerm);
-                return $"{selectedOption} = {(int)enumValue}";
+                if (Enum.IsDefined(EnumType, searchTerm))
+                {
+                    try
+                    {
+                        object enumValue = Enum.Parse(EnumType, searchTerm, false); // False for case-sensitive
+                        return $"{selectedOption} = {(int)enumValue}";
+                    }
+                    catch (ArgumentException ex)
+                    {
+                        FormConsole.Instance.Log($"Error parsing enum value: {ex.Message}");
+                        return string.Empty;
+                    }
+                }
+                else
+                {
+                    FormConsole.Instance.Log($"Invalid {selectedOption} search term.");
+                    return string.Empty;
+                }
             }
             else
             {
-                FormConsole.Instance.Log($"Invalid {selectedOption} search term.");
-                return string.Empty;
+                string[] enumNames = Enum.GetNames(EnumType); 
+                bool isValidEnum = enumNames.Any(name =>
+                    string.Equals(name, searchTerm, isCaseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase)
+                );
+
+                if (!isValidEnum)
+                {
+                    FormConsole.Instance.Log($"Invalid {selectedOption} search term.");
+                    return string.Empty;
+                }
+                
+                try
+                {
+                    object enumValue = Enum.Parse(EnumType, searchTerm, true); // True for case-insensitive
+                    return $"{selectedOption} = {(int)enumValue}";
+                }
+                catch (ArgumentException)
+                {
+                    FormConsole.Instance.Log($"Invalid {selectedOption} search term.");
+                    return string.Empty;
+                }
             }
         }
 
-    //Required by Children:
-    protected virtual void btnAdd_Click(object sender, EventArgs e)
-    {
-
-    }
-
-    protected virtual void btnEdit_Click(int RowIndex)
-    {
-
-    }
-
-    protected virtual void btnDelete_Click(int RowIndex)
-    {
-
-    }
-
-    protected virtual void refreshToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-
-    }
-
-    protected virtual void reloadToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-
-    }
-
-    protected virtual void rollbackToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-
-    }
-
-    protected virtual void dgvMain_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
-    {
-
-    }
-
-    protected virtual void btnFirst_Click(object sender, EventArgs e)
-    {
-
-    }
-
-    protected virtual void btnPrevious_Click(object sender, EventArgs e)
-    {
-
-    }
-
-    protected virtual void btnNext_Click(object sender, EventArgs e)
-    {
-
-    }
-
-    protected virtual void btnLast_Click(object sender, EventArgs e)
-    {
-
-    }
-
-    protected virtual void btnGotoPage_Click(object sender, EventArgs e)
-    {
-
-    }
-
-    protected virtual void btnPrint_Click(object sender, EventArgs e)
-    {
-
-    }
-
-    private void txtSearchBox_Enter(object sender, EventArgs e)
-    {
-        if (txtSearchBox.Text == "Value for search")
+        //Required by Children:
+        protected virtual void btnAdd_Click(object sender, EventArgs e)
         {
-            txtSearchBox.Text = "";
-            txtSearchBox.ForeColor = Color.Black;
-        }
-    }
 
-    private void txtSearchBox_Leave(object sender, EventArgs e)
-    {
-        if (string.IsNullOrWhiteSpace(txtSearchBox.Text))
+        }
+
+        protected virtual void btnEdit_Click(int RowIndex)
         {
-            txtSearchBox.Text = "Value for search";
-            txtSearchBox.ForeColor = Color.Gray;
+
         }
+
+        protected virtual void btnDelete_Click(int RowIndex)
+        {
+
+        }
+
+        protected virtual void refreshToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        protected virtual void reloadToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        protected virtual void rollbackToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        protected virtual void dgvMain_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        {
+
+        }
+
+        protected virtual void btnFirst_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        protected virtual void btnPrevious_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        protected virtual void btnNext_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        protected virtual void btnLast_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        protected virtual void btnGotoPage_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        protected virtual void btnPrint_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void txtSearchBox_Enter(object sender, EventArgs e)
+        {
+            if (txtSearchBox.Text == "Value for search")
+            {
+                txtSearchBox.Text = "";
+                txtSearchBox.ForeColor = Color.Black;
+            }
+        }
+
+        private void txtSearchBox_Leave(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtSearchBox.Text))
+            {
+                txtSearchBox.Text = "Value for search";
+                txtSearchBox.ForeColor = Color.Gray;
+            }
+        }
+
+
+        private void txtStartPage_Enter(object sender, EventArgs e)
+        {
+            BeginInvoke(new Action(() => (sender as System.Windows.Forms.TextBox).SelectAll()));
+        }
+
+
     }
-
-
-    private void txtStartPage_Enter(object sender, EventArgs e)
-    {
-        BeginInvoke(new Action(() => (sender as System.Windows.Forms.TextBox).SelectAll()));
-    }
-
-
-}
 }
