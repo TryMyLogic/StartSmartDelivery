@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using StartSmartDeliveryForm.SharedLayer;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace StartSmartDeliveryForm.PresentationLayer
 {
@@ -135,6 +136,12 @@ namespace StartSmartDeliveryForm.PresentationLayer
             string SelectedOption = cboSearchOptions.SelectedItem.ToString();
             string SearchTerm = txtSearchBox.Text.Trim();
 
+            //Allows for resetting datagridview search
+            if (SearchTerm == "Value for search")
+            {
+                SearchTerm = "";
+            }
+
             if (!string.IsNullOrEmpty(SearchTerm))
             {
                 DataTable dataTable = (DataTable)dgvMain.DataSource;
@@ -158,13 +165,12 @@ namespace StartSmartDeliveryForm.PresentationLayer
                         //If it isnt an enum. handle as a normal int
 
                         //TODO
-
                     }
                     else if (ColumnType == typeof(bool)) // Handle boolean column
                     {
                         if (bool.TryParse(SearchTerm, out bool BoolSearchTerm))
                         {
-                            FilterExpression = $"{SelectedOption} = {BoolSearchTerm.ToString().ToLower()}"; // Ensure proper case for boolean
+                            FilterExpression = $"{SelectedOption} = {BoolSearchTerm.ToString().ToLower()}"; 
                         }
                         else if (SearchTerm == "1")
                         {
@@ -177,7 +183,7 @@ namespace StartSmartDeliveryForm.PresentationLayer
                         else
                         {
                             FormConsole.Instance.Log("Invalid boolean search term.");
-                            return; // Early exit for invalid boolean
+                            return; 
                         }
                     }
                     else
@@ -186,7 +192,6 @@ namespace StartSmartDeliveryForm.PresentationLayer
                         return;
                     }
 
-                    // Apply the filter
                     dataTable.DefaultView.RowFilter = FilterExpression;
                     FormConsole.Instance.Log($"Filter applied: {FilterExpression}");
                 }
@@ -305,20 +310,28 @@ namespace StartSmartDeliveryForm.PresentationLayer
 
         private void txtSearchBox_Enter(object sender, EventArgs e)
         {
-            txtSearchBox.Text = "";
-            txtSearchBox.ForeColor = Color.Black;
+            if (txtSearchBox.Text == "Value for search")
+            {
+                txtSearchBox.Text = "";
+                txtSearchBox.ForeColor = Color.Black; 
+            }
         }
 
         private void txtSearchBox_Leave(object sender, EventArgs e)
         {
-            txtSearchBox.Text = "Value for search";
-            txtSearchBox.ForeColor = Color.Gray;
-
+            if (string.IsNullOrWhiteSpace(txtSearchBox.Text))
+            {
+                txtSearchBox.Text = "Value for search";
+                txtSearchBox.ForeColor = Color.Gray; 
+            }
         }
+
 
         private void txtStartPage_Enter(object sender, EventArgs e)
         {
-            BeginInvoke(new Action(() => (sender as TextBox).SelectAll()));
+            BeginInvoke(new Action(() => (sender as System.Windows.Forms.TextBox).SelectAll()));
         }
+
+      
     }
 }

@@ -32,11 +32,11 @@
             // 
             // DriverManagementForm
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(761, 479);
-            Margin = new Padding(3, 4, 3, 4);
-            MinimumSize = new Size(779, 500);
+            ClientSize = new Size(672, 359);
+            Margin = new Padding(3, 3, 3, 3);
+            MinimumSize = new Size(684, 385);
             Name = "DriverManagementForm";
             Text = "DriverManagementForm";
             Load += DriverManagementForm_Load;

@@ -53,12 +53,12 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 
         protected override HashSet<string> GetExcludedColumns()
         {
-            return new HashSet<string> { "DriverID" }; // By default, exclude nothing.
+            return ["DriverID"]; // By default, exclude nothing.
         }
 
         protected override void btnAdd_Click(object sender, EventArgs e)
         {
-            DriverDataForm driverDataForm = new DriverDataForm();
+            DriverDataForm driverDataForm = new();
             driverDataForm.SubmitClicked += DriverDataForm_SubmitClicked;
             driverDataForm.Show();
         }
@@ -67,7 +67,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
         {
             DataGridViewRow selectedRow = dgvMain.Rows[rowIndex];
 
-            DriversDTO driverData = new DriversDTO(
+            DriversDTO driverData = new(
        int.Parse(selectedRow.Cells["DriverID"].Value.ToString()),
        selectedRow.Cells["Name"].Value.ToString(),
        selectedRow.Cells["Surname"].Value.ToString(),
@@ -76,7 +76,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
        bool.Parse(selectedRow.Cells["Availability"].Value.ToString())
    );
 
-            DriverDataForm driverDataForm = new DriverDataForm
+            DriverDataForm driverDataForm = new()
             {
                 Mode = FormMode.Edit
             };
