@@ -136,80 +136,64 @@ namespace StartSmartDeliveryForm.PresentationLayer
             string SelectedOption = cboSearchOptions.SelectedItem.ToString();
             string SearchTerm = txtSearchBox.Text.Trim();
 
-            //Allows for resetting datagridview search
-            if (SearchTerm == "Value for search")
+            DataTable dgvDataTable = (DataTable)dgvMain.DataSource;
+            ApplyFilter(dgvDataTable, SelectedOption, SearchTerm);
+        }
+
+        public static void ApplyFilter(DataTable dataTable, string selectedOption, string searchTerm)
+        {
+            if (dataTable == null || string.IsNullOrEmpty(selectedOption))
             {
-                SearchTerm = "";
+                FormConsole.Instance.Log("Invalid parameters for filtering.");
+                return;
             }
 
-            if (!string.IsNullOrEmpty(SearchTerm))
+            string filterExpression = BuildFilterExpression(dataTable, selectedOption, searchTerm);
+
+            if (!string.IsNullOrEmpty(filterExpression))
             {
-                DataTable dataTable = (DataTable)dgvMain.DataSource;
-
-                if (dataTable != null)
-                {
-                    // Escape single quotes in the search term
-                    SearchTerm = SearchTerm.Replace("'", "''");
-
-                    Type ColumnType = dataTable.Columns[SelectedOption].DataType;
-
-                    string FilterExpression;
-                    FormConsole.Instance.Log("Type: " + ColumnType);
-                    if (ColumnType == typeof(string))
-                    {
-                        FilterExpression = $"{SelectedOption} LIKE '%{SearchTerm}%'";
-                    }
-                    else if (ColumnType == typeof(int))
-                    {
-                        FilterExpression = SearchEnumColumn(SelectedOption, SearchTerm);
-                        //If it isnt an enum. handle as a normal int
-
-                        //TODO
-                    }
-                    else if (ColumnType == typeof(bool)) // Handle boolean column
-                    {
-                        if (bool.TryParse(SearchTerm, out bool BoolSearchTerm))
-                        {
-                            FilterExpression = $"{SelectedOption} = {BoolSearchTerm.ToString().ToLower()}"; 
-                        }
-                        else if (SearchTerm == "1")
-                        {
-                            FilterExpression = $"{SelectedOption} = true";
-                        }
-                        else if (SearchTerm == "0")
-                        {
-                            FilterExpression = $"{SelectedOption} = false";
-                        }
-                        else
-                        {
-                            FormConsole.Instance.Log("Invalid boolean search term.");
-                            return; 
-                        }
-                    }
-                    else
-                    {
-                        FormConsole.Instance.Log("Unsupported data type for filtering.");
-                        return;
-                    }
-
-                    dataTable.DefaultView.RowFilter = FilterExpression;
-                    FormConsole.Instance.Log($"Filter applied: {FilterExpression}");
-                }
-                else
-                {
-                    FormConsole.Instance.Log("No data source found for DataGridView.");
-                }
+                dataTable.DefaultView.RowFilter = filterExpression;
+                FormConsole.Instance.Log($"Filter applied: {filterExpression}");
             }
             else
             {
-                FormConsole.Instance.Log("Search term is empty, removing filter.");
+                dataTable.DefaultView.RowFilter = string.Empty;  // Reset filter if expression is empty
+                FormConsole.Instance.Log("Filter removed.");
+            }
+        }
 
-                var dataTable = (DataTable)dgvMain.DataSource;
-                if (dataTable != null)
+        public static string BuildFilterExpression(DataTable dataTable, string selectedOption, string searchTerm)
+        {
+            searchTerm = searchTerm.Replace("'", "''");
+            Type columnType = dataTable.Columns[selectedOption].DataType;
+            string filterExpression = "";
+
+            if (columnType == typeof(string))
+            {
+                filterExpression = $"{selectedOption} LIKE '%{searchTerm}%'";
+            }
+            else if (columnType == typeof(int))
+            {
+                filterExpression = SearchEnumColumn(selectedOption, searchTerm);
+
+                //TODO - Handle normal int
+            }
+            else if (columnType == typeof(bool))
+            {
+                if (bool.TryParse(searchTerm, out bool boolSearchTerm))
                 {
-                    dataTable.DefaultView.RowFilter = string.Empty;  // Reset the filter
+                    filterExpression = $"{selectedOption} = {boolSearchTerm.ToString().ToLower()}";
+                }
+                else if (searchTerm == "1")
+                {
+                    filterExpression = $"{selectedOption} = true";
+                }
+                else if (searchTerm == "0")
+                {
+                    filterExpression = $"{selectedOption} = false";
                 }
             }
+            return filterExpression;
         }
 
         /*
@@ -218,120 +202,123 @@ namespace StartSmartDeliveryForm.PresentationLayer
         2. The column name for any Enum column have the same name as the 
            Enum itself.
          */
-        private static string SearchEnumColumn(string selectedOption, string searchTerm)
+        public static string SearchEnumColumn(string selectedOption, string searchTerm)
         {
-            var EnumType = Type.GetType($"StartSmartDeliveryForm.Enums.{selectedOption}", false);
+            if (string.IsNullOrEmpty(searchTerm))
+            {
+                return string.Empty;
+            }
 
+            Type? EnumType = Type.GetType($"StartSmartDeliveryForm.SharedLayer.Enums.{selectedOption}", false);
+            if (EnumType == null || !EnumType.IsEnum)
+            {
+                return string.Empty;
+            }
             FormConsole.Instance.Log("enumType" + EnumType);
-            if (EnumType != null && EnumType.IsEnum)
+
+            // Check if the SearchTerm is found within the Enum 
+            if (Enum.IsDefined(EnumType, searchTerm))
             {
-                // Check if the SearchTerm is found within the Enum 
-                if (Enum.IsDefined(EnumType, searchTerm))
-                {
-                    object enumValue = Enum.Parse(EnumType, searchTerm);
-                    return $"{selectedOption} = {(int)enumValue}";
-                }
-                else
-                {
-                    FormConsole.Instance.Log($"Invalid {selectedOption} search term.");
-                    return string.Empty;
-                }
+                object enumValue = Enum.Parse(EnumType, searchTerm);
+                return $"{selectedOption} = {(int)enumValue}";
             }
-
-            // Return empty if not an enum
-            return string.Empty;
-        }
-
-        //Required by Children:
-        protected virtual void btnAdd_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        protected virtual void btnEdit_Click(int RowIndex)
-        {
-
-        }
-
-        protected virtual void btnDelete_Click(int RowIndex)
-        {
-
-        }
-
-        protected virtual void refreshToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        protected virtual void reloadToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        protected virtual void rollbackToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        protected virtual void dgvMain_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
-        {
-
-        }
-
-        protected virtual void btnFirst_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        protected virtual void btnPrevious_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        protected virtual void btnNext_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        protected virtual void btnLast_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        protected virtual void btnGotoPage_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        protected virtual void btnPrint_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void txtSearchBox_Enter(object sender, EventArgs e)
-        {
-            if (txtSearchBox.Text == "Value for search")
+            else
             {
-                txtSearchBox.Text = "";
-                txtSearchBox.ForeColor = Color.Black; 
+                FormConsole.Instance.Log($"Invalid {selectedOption} search term.");
+                return string.Empty;
             }
         }
 
-        private void txtSearchBox_Leave(object sender, EventArgs e)
-        {
-            if (string.IsNullOrWhiteSpace(txtSearchBox.Text))
-            {
-                txtSearchBox.Text = "Value for search";
-                txtSearchBox.ForeColor = Color.Gray; 
-            }
-        }
+    //Required by Children:
+    protected virtual void btnAdd_Click(object sender, EventArgs e)
+    {
 
-
-        private void txtStartPage_Enter(object sender, EventArgs e)
-        {
-            BeginInvoke(new Action(() => (sender as System.Windows.Forms.TextBox).SelectAll()));
-        }
-
-      
     }
+
+    protected virtual void btnEdit_Click(int RowIndex)
+    {
+
+    }
+
+    protected virtual void btnDelete_Click(int RowIndex)
+    {
+
+    }
+
+    protected virtual void refreshToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+
+    }
+
+    protected virtual void reloadToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+
+    }
+
+    protected virtual void rollbackToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+
+    }
+
+    protected virtual void dgvMain_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+    {
+
+    }
+
+    protected virtual void btnFirst_Click(object sender, EventArgs e)
+    {
+
+    }
+
+    protected virtual void btnPrevious_Click(object sender, EventArgs e)
+    {
+
+    }
+
+    protected virtual void btnNext_Click(object sender, EventArgs e)
+    {
+
+    }
+
+    protected virtual void btnLast_Click(object sender, EventArgs e)
+    {
+
+    }
+
+    protected virtual void btnGotoPage_Click(object sender, EventArgs e)
+    {
+
+    }
+
+    protected virtual void btnPrint_Click(object sender, EventArgs e)
+    {
+
+    }
+
+    private void txtSearchBox_Enter(object sender, EventArgs e)
+    {
+        if (txtSearchBox.Text == "Value for search")
+        {
+            txtSearchBox.Text = "";
+            txtSearchBox.ForeColor = Color.Black;
+        }
+    }
+
+    private void txtSearchBox_Leave(object sender, EventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(txtSearchBox.Text))
+        {
+            txtSearchBox.Text = "Value for search";
+            txtSearchBox.ForeColor = Color.Gray;
+        }
+    }
+
+
+    private void txtStartPage_Enter(object sender, EventArgs e)
+    {
+        BeginInvoke(new Action(() => (sender as System.Windows.Forms.TextBox).SelectAll()));
+    }
+
+
+}
 }
