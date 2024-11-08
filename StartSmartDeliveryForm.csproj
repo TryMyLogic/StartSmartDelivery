@@ -11,6 +11,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="StartSmartDelivery.Tests\**" />
+    <Compile Remove="StartSmartDeliveryForm.Tests\**" />
+    <EmbeddedResource Remove="StartSmartDelivery.Tests\**" />
+    <EmbeddedResource Remove="StartSmartDeliveryForm.Tests\**" />
+    <None Remove="StartSmartDelivery.Tests\**" />
+    <None Remove="StartSmartDeliveryForm.Tests\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="PresentationLayer\Images\" />
   </ItemGroup>
 
