@@ -14,42 +14,38 @@ namespace StartSmartDeliveryForm.Tests
     {
         [Theory]
         //Valid 
-        [InlineData("DriverID", "1", false, "DriverID = 1")]
-        [InlineData("Name", "John", false, "Name LIKE '%John%'")]
-        [InlineData("LicenseType", "Code8", false, "LicenseType = 1")]
-        [InlineData("Availability", "True", false, "Availability = true")]
+        [InlineData("DriverID", "1", "DriverID = 1")]
+        [InlineData("Name", "John", "Name LIKE '%John%'")]
+        [InlineData("LicenseType", "Code8",     "LicenseType = 1")]
+        [InlineData("Availability", "True", "Availability = true")]
 
         //Invalid returns empty string
-        [InlineData("DriverID", "", false, "")]
-        [InlineData("Name", "", false, "")]
-        [InlineData("LicenseType", "", false, "")]
-        [InlineData("Availability", "", false, "")]
-
-        //Enum case sensitivity
-        [InlineData("LicenseType", "code8", true, "")]
-        //False already done above
+        [InlineData("DriverID", "", "")]
+        [InlineData("Name", "", "")]
+        [InlineData("LicenseType", "", "")]
+        [InlineData("Availability", "", "")]
 
         //Boolean as numbers and weird cases
-        [InlineData("Availability", "TrUe", false, "Availability = true")]
-        [InlineData("Availability", "False", false, "Availability = false")]
-        [InlineData("Availability", "1", false, "Availability = true")]
-        [InlineData("Availability", "0", false, "Availability = false")]
+        [InlineData("Availability", "TrUe", "Availability = true")]
+        [InlineData("Availability", "False", "Availability = false")]
+        [InlineData("Availability", "1", "Availability = true")]
+        [InlineData("Availability", "0", "Availability = false")]
 
         //Case sensitive string matching
-        [InlineData("Name", "JoHn", true, "Name LIKE '%JoHn%'")]
+        [InlineData("Name", "JoHn", "Name LIKE '%JoHn%'")]
 
         //Invalid column
-        [InlineData("InvalidColumn", "Test", false, "")]
+        [InlineData("InvalidColumn", "Test", "")]
 
         //Special characters
-        [InlineData("Name", "O'Reilly", false, "Name LIKE '%O''Reilly%'")]
-        [InlineData("Name", "O'Riley", false, "Name LIKE '%O''Riley%'")]
+        [InlineData("Name", "O'Reilly", "Name LIKE '%O''Reilly%'")]
+        [InlineData("Name", "O'Riley", "Name LIKE '%O''Riley%'")]
 
         //Null input
-        [InlineData("Name", null, false, "")]
-        [InlineData("Name", "null", false, "Name LIKE '%null%'")]
+        [InlineData("Name", null,  "")]
+        [InlineData("Name", "null",  "Name LIKE '%null%'")]
 
-        public void BuildFilterExpression_ShouldReturnCorrectExpression(string selectedOption, string searchTerm, bool isCaseSensitive, string expectedExpression)
+        public void BuildFilterExpression_ShouldReturnCorrectExpression(string selectedOption, string searchTerm, string expectedExpression)
         {
             // Arrange
             DataTable dataTable = new();
@@ -61,7 +57,7 @@ namespace StartSmartDeliveryForm.Tests
             dataTable.Rows.Add(1, "John", (int)LicenseType.Code8, true);
 
             // Act
-            string filterExpression = ManagementTemplateForm.BuildFilterExpression(dataTable, selectedOption, searchTerm, isCaseSensitive);
+            string filterExpression = ManagementTemplateForm.BuildFilterExpression(dataTable, selectedOption, searchTerm);
 
             // Assert
             Assert.Equal(expectedExpression, filterExpression);
@@ -69,41 +65,38 @@ namespace StartSmartDeliveryForm.Tests
 
         [Theory]
         //Invalid Enum Name
-        [InlineData("LicenseType", "NonExistentName",false, "")]
+        [InlineData("LicenseType", "NonExistentName", "")]
 
         //Invalid Enum Type
-        [InlineData("NonExistentType", "Code8", false, "")]
+        [InlineData("NonExistentType", "Code8",  "")]
 
         //Empty Search Term
-        [InlineData("LicenseType", "", false, "")]
+        [InlineData("LicenseType", "", "")]
 
         //Null Search Term
-        [InlineData("LicenseType", null, false, "")]
+        [InlineData("LicenseType", null,  "")]
 
         //Whitespace Search Term
-        [InlineData("LicenseType", "   ", false, "")]
+        [InlineData("LicenseType", "   ", "")]
 
         //Partial Match (not allowed for Enums)
-        [InlineData("LicenseType", "Code", false, "")]
+        [InlineData("LicenseType", "Code", "")]
 
         //Special Characters
-        [InlineData("LicenseType", "@Code8!", false,"")]
+        [InlineData("LicenseType", "@Code8!", "")]
 
         // Numeric String (assuming it doesn't match any enum)
-        [InlineData("LicenseType", "1234", false, "")]
-
-        //Case sensitivity check (is case insensitive by default)
-        [InlineData("LicenseType", "CoDe8", false,"LicenseType = 1")]
+        [InlineData("LicenseType", "1234",  "")]
 
         //Valid Enum Name and Type (for LicenseType)
-        [InlineData("LicenseType", "Code8", false,"LicenseType = 1")]
-        [InlineData("LicenseType","Code10", false, "LicenseType = 2")]
-        [InlineData("LicenseType", "Code14", false, "LicenseType = 3")]
+        [InlineData("LicenseType", "Code8", "LicenseType = 1")]
+        [InlineData("LicenseType","Code10",  "LicenseType = 2")]
+        [InlineData("LicenseType", "Code14",  "LicenseType = 3")]
 
-        public void SearchEnumColumn_ShouldReturnEnumValueIfExists(string selectedOption,string searchTerm,bool isCaseSensitive, string expectedResult)
+        public void SearchEnumColumn_ShouldReturnEnumValueIfExists(string selectedOption,string searchTerm, string expectedResult)
         {
             // Act
-            string result = ManagementTemplateForm.SearchEnumColumn(selectedOption,searchTerm,isCaseSensitive);
+            string result = ManagementTemplateForm.SearchEnumColumn(selectedOption,searchTerm);
 
             //Assert
             Assert.Equal(expectedResult, result);

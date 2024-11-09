@@ -151,7 +151,7 @@ namespace StartSmartDeliveryForm.PresentationLayer
 
             //TODO - Get input from matchcase button. By Default, search is not case sensitive
             bool isCaseSensitive = false;
-            string filterExpression = BuildFilterExpression(dataTable, selectedOption, searchTerm, isCaseSensitive);
+            string filterExpression = BuildFilterExpression(dataTable, selectedOption, searchTerm);
 
             if (!string.IsNullOrEmpty(filterExpression))
             {
@@ -165,11 +165,11 @@ namespace StartSmartDeliveryForm.PresentationLayer
             }
         }
 
-        public static string BuildFilterExpression(DataTable dataTable, string selectedOption, string searchTerm, bool isCaseSensitive)
+        public static string BuildFilterExpression(DataTable dataTable, string selectedOption, string searchTerm)
         {
             string filterExpression = "";
 
-            if (searchTerm.IsNullOrEmpty())
+            if (string.IsNullOrEmpty(searchTerm))
             {
                 return filterExpression;
             }
@@ -181,7 +181,6 @@ namespace StartSmartDeliveryForm.PresentationLayer
 
             searchTerm = searchTerm.Replace("'", "''");
             Type columnType = dataTable.Columns[selectedOption].DataType;
-          
 
             if (columnType == typeof(string))
             {
@@ -189,11 +188,11 @@ namespace StartSmartDeliveryForm.PresentationLayer
             }
             else if (columnType == typeof(int))
             {
-                filterExpression = SearchEnumColumn(selectedOption, searchTerm, isCaseSensitive);
+                filterExpression = SearchEnumColumn(selectedOption, searchTerm);
 
                 if (filterExpression != string.Empty)
                 {
-                    return filterExpression; //Its an enum that has already been set
+                    return filterExpression; // Enum value found, return immediately
                 }
 
                 if (int.TryParse(searchTerm, out int intSearchTerm))
@@ -202,7 +201,7 @@ namespace StartSmartDeliveryForm.PresentationLayer
                 }
                 else
                 {
-                    filterExpression = "";  
+                    filterExpression = "";
                 }
             }
             else if (columnType == typeof(bool))
@@ -229,7 +228,7 @@ namespace StartSmartDeliveryForm.PresentationLayer
         2. The column name for any Enum column have the same name as the 
            Enum itself.
          */
-        public static string SearchEnumColumn(string selectedOption, string searchTerm, bool isCaseSensitive)
+        public static string SearchEnumColumn(string selectedOption, string searchTerm)
         {
             if (string.IsNullOrEmpty(searchTerm))
             {
@@ -243,52 +242,29 @@ namespace StartSmartDeliveryForm.PresentationLayer
             }
             FormConsole.Instance.Log("enumType" + EnumType);
 
-            if (isCaseSensitive)
+            string[] enumNames = Enum.GetNames(EnumType);
+            bool isValidEnum = enumNames.Any(name =>
+                string.Equals(name, searchTerm, StringComparison.OrdinalIgnoreCase)
+            );
+
+            if (!isValidEnum)
             {
-                if (Enum.IsDefined(EnumType, searchTerm))
-                {
-                    try
-                    {
-                        object enumValue = Enum.Parse(EnumType, searchTerm, false); // False for case-sensitive
-                        return $"{selectedOption} = {(int)enumValue}";
-                    }
-                    catch (ArgumentException ex)
-                    {
-                        FormConsole.Instance.Log($"Error parsing enum value: {ex.Message}");
-                        return string.Empty;
-                    }
-                }
-                else
-                {
-                    FormConsole.Instance.Log($"Invalid {selectedOption} search term.");
-                    return string.Empty;
-                }
+                FormConsole.Instance.Log($"Invalid {selectedOption} search term.");
+                return string.Empty;
             }
-            else
+
+            try
             {
-                string[] enumNames = Enum.GetNames(EnumType);
-                bool isValidEnum = enumNames.Any(name =>
-                    string.Equals(name, searchTerm, isCaseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase)
-                );
-
-                if (!isValidEnum)
-                {
-                    FormConsole.Instance.Log($"Invalid {selectedOption} search term.");
-                    return string.Empty;
-                }
-
-                try
-                {
-                    object enumValue = Enum.Parse(EnumType, searchTerm, true); // True for case-insensitive
-                    return $"{selectedOption} = {(int)enumValue}";
-                }
-                catch (ArgumentException)
-                {
-                    FormConsole.Instance.Log($"Invalid {selectedOption} search term.");
-                    return string.Empty;
-                }
+                object enumValue = Enum.Parse(EnumType, searchTerm, true); // Always case-insensitive
+                return $"{selectedOption} = {(int)enumValue}";
+            }
+            catch (ArgumentException)
+            {
+                FormConsole.Instance.Log($"Invalid {selectedOption} search term.");
+                return string.Empty;
             }
         }
+
 
         //Required by Children:
         protected virtual void btnAdd_Click(object sender, EventArgs e)
