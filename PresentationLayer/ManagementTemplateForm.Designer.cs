@@ -39,13 +39,13 @@
             driverManagementToolStripMenuItem = new ToolStripMenuItem();
             dataManagementToolStripMenuItem = new ToolStripMenuItem();
             rollbackToolStripMenuItem = new ToolStripMenuItem();
-            refreshToolStripMenuItem = new ToolStripMenuItem();
             reloadToolStripMenuItem = new ToolStripMenuItem();
             pnlGap = new Panel();
             tsSearchbar = new ToolStrip();
             toolStripLabel1 = new ToolStripLabel();
             cboSearchOptions = new ToolStripComboBox();
             txtSearchBox = new ToolStripTextBox();
+            btnRefresh = new ToolStripButton();
             btnMatchCase = new ToolStripButton();
             btnSearch = new ToolStripButton();
             tableLayoutPanelBottom = new TableLayoutPanel();
@@ -83,7 +83,7 @@
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Padding = new Padding(5, 2, 0, 2);
-            menuStrip1.Size = new Size(671, 24);
+            menuStrip1.Size = new Size(696, 24);
             menuStrip1.TabIndex = 0;
             menuStrip1.Text = "menuStrip1";
             // 
@@ -133,7 +133,7 @@
             // 
             // dataManagementToolStripMenuItem
             // 
-            dataManagementToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { rollbackToolStripMenuItem, refreshToolStripMenuItem, reloadToolStripMenuItem });
+            dataManagementToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { rollbackToolStripMenuItem, reloadToolStripMenuItem });
             dataManagementToolStripMenuItem.Name = "dataManagementToolStripMenuItem";
             dataManagementToolStripMenuItem.Size = new Size(117, 20);
             dataManagementToolStripMenuItem.Text = "Data Management";
@@ -141,21 +141,14 @@
             // rollbackToolStripMenuItem
             // 
             rollbackToolStripMenuItem.Name = "rollbackToolStripMenuItem";
-            rollbackToolStripMenuItem.Size = new Size(119, 22);
+            rollbackToolStripMenuItem.Size = new Size(180, 22);
             rollbackToolStripMenuItem.Text = "Rollback";
             rollbackToolStripMenuItem.Click += rollbackToolStripMenuItem_Click;
-            // 
-            // refreshToolStripMenuItem
-            // 
-            refreshToolStripMenuItem.Name = "refreshToolStripMenuItem";
-            refreshToolStripMenuItem.Size = new Size(119, 22);
-            refreshToolStripMenuItem.Text = "Refresh";
-            refreshToolStripMenuItem.Click += refreshToolStripMenuItem_Click;
             // 
             // reloadToolStripMenuItem
             // 
             reloadToolStripMenuItem.Name = "reloadToolStripMenuItem";
-            reloadToolStripMenuItem.Size = new Size(119, 22);
+            reloadToolStripMenuItem.Size = new Size(180, 22);
             reloadToolStripMenuItem.Text = "Reload";
             reloadToolStripMenuItem.Click += reloadToolStripMenuItem_Click;
             // 
@@ -166,20 +159,20 @@
             pnlGap.Location = new Point(0, 24);
             pnlGap.Margin = new Padding(0);
             pnlGap.Name = "pnlGap";
-            pnlGap.Size = new Size(671, 11);
+            pnlGap.Size = new Size(696, 11);
             pnlGap.TabIndex = 4;
             // 
             // tsSearchbar
             // 
             tsSearchbar.BackColor = Color.AntiqueWhite;
             tsSearchbar.ImageScalingSize = new Size(20, 20);
-            tsSearchbar.Items.AddRange(new ToolStripItem[] { toolStripLabel1, cboSearchOptions, txtSearchBox, btnMatchCase, btnSearch });
+            tsSearchbar.Items.AddRange(new ToolStripItem[] { toolStripLabel1, cboSearchOptions, txtSearchBox, btnRefresh, btnMatchCase, btnSearch });
             tsSearchbar.LayoutStyle = ToolStripLayoutStyle.Flow;
             tsSearchbar.Location = new Point(0, 35);
             tsSearchbar.Name = "tsSearchbar";
             tsSearchbar.Padding = new Padding(0, 2, 0, 5);
             tsSearchbar.RenderMode = ToolStripRenderMode.Professional;
-            tsSearchbar.Size = new Size(671, 54);
+            tsSearchbar.Size = new Size(696, 35);
             tsSearchbar.Stretch = true;
             tsSearchbar.TabIndex = 5;
             tsSearchbar.Text = "toolStrip1";
@@ -209,6 +202,16 @@
             txtSearchBox.Tag = "";
             txtSearchBox.Text = "Value for search";
             txtSearchBox.Enter += txtSearchBox_Enter;
+            // 
+            // btnRefresh
+            // 
+            btnRefresh.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            btnRefresh.Image = (Image)resources.GetObject("btnRefresh.Image");
+            btnRefresh.ImageTransparentColor = Color.Magenta;
+            btnRefresh.Name = "btnRefresh";
+            btnRefresh.Size = new Size(24, 24);
+            btnRefresh.Text = "Refresh datagridview";
+            btnRefresh.Click += btnRefresh_Click;
             // 
             // btnMatchCase
             // 
@@ -251,7 +254,7 @@
             tableLayoutPanelBottom.RowCount = 2;
             tableLayoutPanelBottom.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
             tableLayoutPanelBottom.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-            tableLayoutPanelBottom.Size = new Size(671, 78);
+            tableLayoutPanelBottom.Size = new Size(696, 78);
             tableLayoutPanelBottom.TabIndex = 6;
             // 
             // tableLayoutPanelBottomInnerRight
@@ -261,13 +264,13 @@
             tableLayoutPanelBottomInnerRight.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             tableLayoutPanelBottomInnerRight.Controls.Add(btnAdd, 0, 0);
             tableLayoutPanelBottomInnerRight.Dock = DockStyle.Fill;
-            tableLayoutPanelBottomInnerRight.Location = new Point(451, 41);
+            tableLayoutPanelBottomInnerRight.Location = new Point(463, 41);
             tableLayoutPanelBottomInnerRight.Margin = new Padding(3, 2, 3, 2);
             tableLayoutPanelBottomInnerRight.Name = "tableLayoutPanelBottomInnerRight";
             tableLayoutPanelBottomInnerRight.RowCount = 1;
             tableLayoutPanelBottomInnerRight.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
             tableLayoutPanelBottomInnerRight.RowStyles.Add(new RowStyle(SizeType.Absolute, 35F));
-            tableLayoutPanelBottomInnerRight.Size = new Size(217, 35);
+            tableLayoutPanelBottomInnerRight.Size = new Size(230, 35);
             tableLayoutPanelBottomInnerRight.TabIndex = 9;
             // 
             // btnAdd
@@ -277,7 +280,7 @@
             tableLayoutPanelBottomInnerRight.SetColumnSpan(btnAdd, 2);
             btnAdd.FlatStyle = FlatStyle.Flat;
             btnAdd.ForeColor = Color.Black;
-            btnAdd.Location = new Point(48, 6);
+            btnAdd.Location = new Point(55, 6);
             btnAdd.Margin = new Padding(3, 2, 35, 2);
             btnAdd.Name = "btnAdd";
             btnAdd.Size = new Size(88, 22);
@@ -292,10 +295,10 @@
             flowLayoutPanel1.Controls.Add(btnNext);
             flowLayoutPanel1.Controls.Add(btnLast);
             flowLayoutPanel1.Dock = DockStyle.Fill;
-            flowLayoutPanel1.Location = new Point(451, 2);
+            flowLayoutPanel1.Location = new Point(463, 2);
             flowLayoutPanel1.Margin = new Padding(3, 2, 3, 2);
             flowLayoutPanel1.Name = "flowLayoutPanel1";
-            flowLayoutPanel1.Size = new Size(217, 35);
+            flowLayoutPanel1.Size = new Size(230, 35);
             flowLayoutPanel1.TabIndex = 6;
             // 
             // btnNext
@@ -337,7 +340,7 @@
             flowLayoutPanel2.Location = new Point(3, 2);
             flowLayoutPanel2.Margin = new Padding(3, 2, 3, 2);
             flowLayoutPanel2.Name = "flowLayoutPanel2";
-            flowLayoutPanel2.Size = new Size(217, 35);
+            flowLayoutPanel2.Size = new Size(229, 35);
             flowLayoutPanel2.TabIndex = 7;
             // 
             // btnPrevious
@@ -346,7 +349,7 @@
             btnPrevious.FlatStyle = FlatStyle.Flat;
             btnPrevious.ForeColor = Color.Black;
             btnPrevious.Image = (Image)resources.GetObject("btnPrevious.Image");
-            btnPrevious.Location = new Point(126, 2);
+            btnPrevious.Location = new Point(138, 2);
             btnPrevious.Margin = new Padding(3, 2, 3, 2);
             btnPrevious.Name = "btnPrevious";
             btnPrevious.Size = new Size(88, 22);
@@ -361,7 +364,7 @@
             btnFirst.FlatStyle = FlatStyle.Flat;
             btnFirst.ForeColor = Color.Black;
             btnFirst.Image = (Image)resources.GetObject("btnFirst.Image");
-            btnFirst.Location = new Point(32, 2);
+            btnFirst.Location = new Point(44, 2);
             btnFirst.Margin = new Padding(3, 2, 3, 2);
             btnFirst.Name = "btnFirst";
             btnFirst.Size = new Size(88, 22);
@@ -383,7 +386,7 @@
             tableLayoutPanelBottomInnerLeft.RowCount = 1;
             tableLayoutPanelBottomInnerLeft.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
             tableLayoutPanelBottomInnerLeft.RowStyles.Add(new RowStyle(SizeType.Absolute, 35F));
-            tableLayoutPanelBottomInnerLeft.Size = new Size(217, 35);
+            tableLayoutPanelBottomInnerLeft.Size = new Size(229, 35);
             tableLayoutPanelBottomInnerLeft.TabIndex = 8;
             // 
             // btnPrint
@@ -392,7 +395,7 @@
             tableLayoutPanelBottomInnerLeft.SetColumnSpan(btnPrint, 2);
             btnPrint.FlatStyle = FlatStyle.Flat;
             btnPrint.ForeColor = Color.Black;
-            btnPrint.Location = new Point(80, 6);
+            btnPrint.Location = new Point(86, 6);
             btnPrint.Margin = new Padding(35, 2, 3, 2);
             btnPrint.Name = "btnPrint";
             btnPrint.Size = new Size(88, 22);
@@ -409,7 +412,7 @@
             flowLayoutPanel3.Controls.Add(lblEndPage);
             flowLayoutPanel3.Controls.Add(btnGotoPage);
             flowLayoutPanel3.Dock = DockStyle.Fill;
-            flowLayoutPanel3.Location = new Point(226, 2);
+            flowLayoutPanel3.Location = new Point(238, 2);
             flowLayoutPanel3.Margin = new Padding(3, 2, 3, 2);
             flowLayoutPanel3.Name = "flowLayoutPanel3";
             flowLayoutPanel3.Size = new Size(219, 35);
@@ -469,12 +472,12 @@
             dgvMain.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvMain.Dock = DockStyle.Fill;
             dgvMain.ImeMode = ImeMode.NoControl;
-            dgvMain.Location = new Point(0, 89);
+            dgvMain.Location = new Point(0, 70);
             dgvMain.Margin = new Padding(3, 2, 3, 2);
             dgvMain.Name = "dgvMain";
             dgvMain.ReadOnly = true;
             dgvMain.RowHeadersWidth = 51;
-            dgvMain.Size = new Size(671, 194);
+            dgvMain.Size = new Size(696, 213);
             dgvMain.TabIndex = 7;
             dgvMain.CellContentClick += dgvMain_CellContentClick;
             // 
@@ -483,7 +486,7 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.White;
-            ClientSize = new Size(671, 361);
+            ClientSize = new Size(696, 361);
             Controls.Add(dgvMain);
             Controls.Add(tableLayoutPanelBottom);
             Controls.Add(tsSearchbar);
@@ -547,7 +550,7 @@
         private ToolStripMenuItem vehicleManagementToolStripMenuItem;
         private ToolStripMenuItem driverManagementToolStripMenuItem;
         private ToolStripMenuItem rollbackToolStripMenuItem;
-        private ToolStripMenuItem refreshToolStripMenuItem;
         private ToolStripMenuItem reloadToolStripMenuItem;
+        private ToolStripButton btnRefresh;
     }
 }

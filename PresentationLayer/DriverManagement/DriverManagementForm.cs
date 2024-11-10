@@ -164,7 +164,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             }
         }
 
-        protected override void refreshToolStripMenuItem_Click(object sender, EventArgs e)
+        protected override void btnRefresh_Click(object sender, EventArgs e)
         {
             var dataTable = (DataTable)dgvMain.DataSource;
 

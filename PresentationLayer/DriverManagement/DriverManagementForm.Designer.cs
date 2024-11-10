@@ -34,8 +34,8 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(672, 359);
-            Margin = new Padding(3, 3, 3, 3);
+            ClientSize = new Size(695, 359);
+            Margin = new Padding(3);
             MinimumSize = new Size(684, 385);
             Name = "DriverManagementForm";
             Text = "DriverManagementForm";

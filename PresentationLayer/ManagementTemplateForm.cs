@@ -260,7 +260,7 @@ namespace StartSmartDeliveryForm.PresentationLayer
 
         }
 
-        protected virtual void refreshToolStripMenuItem_Click(object sender, EventArgs e)
+        protected virtual void btnRefresh_Click(object sender, EventArgs e)
         {
 
         }
