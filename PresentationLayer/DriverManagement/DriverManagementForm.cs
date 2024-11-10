@@ -32,7 +32,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             _driverData = DriversDAO.GetDriversAtPage(2);
 
             _currentPage = 1; // Always starts at page 1
-            _totalPages = (int)Math.Ceiling((double)_recordsCount / GlobalConstants.s_pageLimit);
+            _totalPages = (int)Math.Ceiling((double)_recordsCount / GlobalConstants.s_recordLimit);
 
             txtStartPage.Text = $"{_currentPage}";
             lblEndPage.Text = $"/{_totalPages}";
@@ -100,7 +100,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
                 DriversDAO.DeleteDriver(driverID);
 
                 _recordsCount--;
-                _totalPages = (int)Math.Ceiling((double)_recordsCount / GlobalConstants.s_pageLimit);
+                _totalPages = (int)Math.Ceiling((double)_recordsCount / GlobalConstants.s_recordLimit);
                 if (_currentPage > _totalPages)
                 {
                     _currentPage = _totalPages;
@@ -134,7 +134,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
                         _driverData.Rows.Add(newRow);
 
                         _recordsCount++;
-                        _totalPages = (int)Math.Ceiling((double)_recordsCount / GlobalConstants.s_pageLimit);
+                        _totalPages = (int)Math.Ceiling((double)_recordsCount / GlobalConstants.s_recordLimit);
                         if (_currentPage < _totalPages)
                         {
                             _currentPage = _totalPages;

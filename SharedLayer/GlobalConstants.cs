@@ -22,8 +22,8 @@ namespace StartSmartDeliveryForm.SharedLayer
             s_configuration = builder.Build();
         }
 
-        public static int s_pageLimit => int.TryParse(s_configuration["Pagelimit"], out int pageLimit)
-            ? pageLimit: 10; //Default to 10 records per page
+        public static int s_recordLimit => int.TryParse(s_configuration["RecordLimit"], out int pageLimit)
+            ? pageLimit: 20; //Default to 20 records per page
 
         public static string s_connectionString => s_configuration["ConnectionStrings:StartSmartDB"]
             ?? throw new InvalidOperationException("Connection string not found in the configuration file.");

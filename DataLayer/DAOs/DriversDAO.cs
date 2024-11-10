@@ -187,7 +187,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
         public static DataTable? GetDriversAtPage(int Page)
         {
 
-            int Offset = (Page - 1) * GlobalConstants.s_pageLimit;
+            int Offset = (Page - 1) * GlobalConstants.s_recordLimit;
             DataTable Dt = new();
 
             using (SqlConnection Connection = new(GlobalConstants.s_connectionString))
@@ -203,7 +203,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
                     using (SqlCommand Command = new(Query, Connection))
                     {
                         Command.Parameters.Add(new SqlParameter("@Offset", SqlDbType.Int) { Value = Offset });
-                        Command.Parameters.Add(new SqlParameter("@Pagelimit", SqlDbType.Int) { Value = GlobalConstants.s_pageLimit });
+                        Command.Parameters.Add(new SqlParameter("@Pagelimit", SqlDbType.Int) { Value = GlobalConstants.s_recordLimit });
 
                         using (SqlDataAdapter Adapter = new(Command))
                         {
