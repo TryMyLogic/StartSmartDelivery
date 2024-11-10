@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.IdentityModel.Tokens;
 using StartSmartDeliveryForm.SharedLayer;
+using StartSmartDeliveryForm.SharedLayer.Enums;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace StartSmartDeliveryForm.PresentationLayer
@@ -136,135 +137,112 @@ namespace StartSmartDeliveryForm.PresentationLayer
         {
             string SelectedOption = cboSearchOptions.SelectedItem.ToString();
             string SearchTerm = txtSearchBox.Text.Trim();
-
-            DataTable dgvDataTable = (DataTable)dgvMain.DataSource;
-            ApplyFilter(dgvDataTable, SelectedOption, SearchTerm);
+            ApplyFilter((DataTable)dgvMain.DataSource, SelectedOption, SearchTerm);
         }
 
-        public static void ApplyFilter(DataTable dataTable, string selectedOption, string searchTerm)
+        public bool isCaseSensitive = false; //Not case sensitive by default
+        public void ApplyFilter(DataTable dataTable, string selectedOption, string searchTerm)
         {
+            FormConsole.Instance.Log(searchTerm);
+
             if (dataTable == null || string.IsNullOrEmpty(selectedOption))
             {
+                // Refresh dgv or show an error message
                 FormConsole.Instance.Log("Invalid parameters for filtering.");
                 return;
             }
 
-            //TODO - Get input from matchcase button. By Default, search is not case sensitive
-            bool isCaseSensitive = false;
-            string filterExpression = BuildFilterExpression(dataTable, selectedOption, searchTerm);
+            // null is a possible value for certain database tables. Do not filter it out
+            if (string.IsNullOrEmpty(searchTerm) && searchTerm != null)
+            {
+                FormConsole.Instance.Log("Empty parameters for filtering.");
+                return;
+            }
 
-            if (!string.IsNullOrEmpty(filterExpression))
+            List<DataRow> filteredRows = FilterRows(dataTable, selectedOption, searchTerm, isCaseSensitive);
+
+            DataTable filteredData = dataTable.Clone(); //Does not clone data, only the schema
+            foreach (DataRow row in filteredRows)
             {
-                dataTable.DefaultView.RowFilter = filterExpression;
-                FormConsole.Instance.Log($"Filter applied: {filterExpression}");
+                filteredData.Rows.Add(row.ItemArray);  // Add the filtered rows directly to the DataTable
             }
-            else
-            {
-                dataTable.DefaultView.RowFilter = string.Empty;  // Reset filter if expression is empty
-                FormConsole.Instance.Log("Filter removed.");
-            }
+
+            dgvMain.DataSource = filteredData;
+
+            FormConsole.Instance.Log($"Filtered {filteredRows.Count} rows for '{selectedOption}' with search term '{searchTerm}' (CaseSensitive: {isCaseSensitive}).");
         }
 
-        public static string BuildFilterExpression(DataTable dataTable, string selectedOption, string searchTerm)
+        public static List<DataRow> FilterRows(DataTable dataTable, string selectedOption, string searchTerm, bool isCaseSensitive)
         {
-            string filterExpression = "";
+            // Return an empty list if the search term is null/empty or if the column does not exist
+            if (string.IsNullOrEmpty(searchTerm) || !dataTable.Columns.Contains(selectedOption))
+                return new List<DataRow>();
 
-            if (string.IsNullOrEmpty(searchTerm))
-            {
-                return filterExpression;
-            }
-
-            if (!dataTable.Columns.Contains(selectedOption))
-            {
-                return filterExpression;
-            }
-
-            searchTerm = searchTerm.Replace("'", "''");
             Type columnType = dataTable.Columns[selectedOption].DataType;
 
+            if (columnType == typeof(int))
+            {
+                //Handle enum with case sensitivity
+                if (Enum.TryParse(typeof(LicenseType), searchTerm, !isCaseSensitive, out var enumValue))
+                {
+                    int enumIntValue = (int)enumValue;
+                    return dataTable.AsEnumerable()
+                                    .Where(row => row.Field<int?>(selectedOption) == enumIntValue)
+                                    .ToList();
+                }
+                return new List<DataRow>();
+            }
+
+            // Handle string columns with case sensitivity and partial matching
             if (columnType == typeof(string))
             {
-                filterExpression = $"{selectedOption} LIKE '%{searchTerm}%'";
-            }
-            else if (columnType == typeof(int))
-            {
-                filterExpression = SearchEnumColumn(selectedOption, searchTerm);
+                return dataTable.AsEnumerable()
+                                .Where(row =>
+                                {
+                                    var fieldValue = row.Field<string>(selectedOption);
+                                    if (fieldValue == null) return false;
 
-                if (filterExpression != string.Empty)
+                                    return isCaseSensitive
+                                        ? fieldValue.Contains(searchTerm)
+                                        : fieldValue.IndexOf(searchTerm, StringComparison.OrdinalIgnoreCase) >= 0;
+                                })
+                                .ToList();
+            }
+
+            if (columnType == typeof(bool))
+            {
+                bool? boolSearchTerm = null;
+
+                // Need to explicity look for accepted values else any unknown value resolves as true.
+                if (searchTerm.Equals("1", StringComparison.OrdinalIgnoreCase))
                 {
-                    return filterExpression; // Enum value found, return immediately
+                    boolSearchTerm = true;
+                }
+                else if (searchTerm.Equals("0", StringComparison.OrdinalIgnoreCase))
+                {
+                    boolSearchTerm = false;
+                }
+                else if (searchTerm.Equals("true", StringComparison.OrdinalIgnoreCase))
+                {
+                    boolSearchTerm = true;
+                }
+                else if (searchTerm.Equals("false", StringComparison.OrdinalIgnoreCase))
+                {
+                    boolSearchTerm = false;
                 }
 
-                if (int.TryParse(searchTerm, out int intSearchTerm))
+                if (boolSearchTerm == null)
                 {
-                    filterExpression = $"{selectedOption} = {intSearchTerm}";
+                    return new List<DataRow>();
                 }
-                else
-                {
-                    filterExpression = "";
-                }
+
+                return dataTable.AsEnumerable()
+                                .Where(row => row.Field<bool>(selectedOption) == boolSearchTerm)
+                                .ToList();
             }
-            else if (columnType == typeof(bool))
-            {
-                if (bool.TryParse(searchTerm, out bool boolSearchTerm))
-                {
-                    filterExpression = $"{selectedOption} = {boolSearchTerm.ToString().ToLower()}";
-                }
-                else if (searchTerm == "1")
-                {
-                    filterExpression = $"{selectedOption} = true";
-                }
-                else if (searchTerm == "0")
-                {
-                    filterExpression = $"{selectedOption} = false";
-                }
-            }
-            return filterExpression;
+
+            return new List<DataRow>();
         }
-
-        /*
-        Note: The SearchEnum function works on the assumption that
-        1. The namespace for Enums is the same across the board
-        2. The column name for any Enum column have the same name as the 
-           Enum itself.
-         */
-        public static string SearchEnumColumn(string selectedOption, string searchTerm)
-        {
-            if (string.IsNullOrEmpty(searchTerm))
-            {
-                return string.Empty;
-            }
-
-            Type? EnumType = Type.GetType($"StartSmartDeliveryForm.SharedLayer.Enums.{selectedOption}", false);
-            if (EnumType == null || !EnumType.IsEnum)
-            {
-                return string.Empty;
-            }
-            FormConsole.Instance.Log("enumType" + EnumType);
-
-            string[] enumNames = Enum.GetNames(EnumType);
-            bool isValidEnum = enumNames.Any(name =>
-                string.Equals(name, searchTerm, StringComparison.OrdinalIgnoreCase)
-            );
-
-            if (!isValidEnum)
-            {
-                FormConsole.Instance.Log($"Invalid {selectedOption} search term.");
-                return string.Empty;
-            }
-
-            try
-            {
-                object enumValue = Enum.Parse(EnumType, searchTerm, true); // Always case-insensitive
-                return $"{selectedOption} = {(int)enumValue}";
-            }
-            catch (ArgumentException)
-            {
-                FormConsole.Instance.Log($"Invalid {selectedOption} search term.");
-                return string.Empty;
-            }
-        }
-
 
         //Required by Children:
         protected virtual void btnAdd_Click(object sender, EventArgs e)
@@ -356,6 +334,33 @@ namespace StartSmartDeliveryForm.PresentationLayer
             BeginInvoke(new Action(() => (sender as System.Windows.Forms.TextBox).SelectAll()));
         }
 
+        private void btnMatchCase_Click(object sender, EventArgs e)
+        {
+            isCaseSensitive = !isCaseSensitive;
 
+            if (isCaseSensitive)
+            {
+                btnMatchCase.BackColor = Color.White;
+            }
+            else
+            {
+                btnMatchCase.BackColor = SoftBeige;
+            }
+        }
+
+        //Required by xUnit Tests. Will only be usable during development
+
+#if DEBUG
+        public void OverrideDatagridView(DataTable table)
+        {
+            dgvMain.DataSource = table;
+        }
+
+
+        public DataTable GetDatagridViewTable()
+        {
+            return (DataTable)dgvMain.DataSource;
+        }
+#endif
     }
 }
