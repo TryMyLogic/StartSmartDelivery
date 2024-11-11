@@ -54,6 +54,31 @@ namespace StartSmartDeliveryForm.PresentationLayer
             btnLast.Image = ResizeImage(btnLast.Image, 20, 20);
         }
 
+        //DO NOT use this in the ManagementTemplateForm_Load.It interferes with children initialization, breaking the child designer. 
+        protected void AdjustDataGridViewHeight(DataGridView dataGridView)
+        {
+            // Set the maximum record limit to 30 or the global constant, whichever is smaller
+            int records = Math.Min(GlobalConstants.s_recordLimit, 30); // Select the minimum of the two values
+
+            // Get the row height
+            int rowHeight = dataGridView.RowTemplate.Height;
+
+            // Calculate the required height for the DataGridView (rows + column headers)
+            int requiredHeight = rowHeight * (records + 1) + dataGridView.ColumnHeadersHeight + 2;
+
+            // Calculate the new height for the parent container (form or panel)
+            int formHeightWithoutDataGridView = dataGridView.Parent.Height - dataGridView.Height;
+
+            // Adjust the new height to fit the calculated required height
+            int newHeight = formHeightWithoutDataGridView + requiredHeight;
+
+            // Set the new height of the parent container (Form or Panel)
+            dataGridView.Parent.Height = newHeight;
+
+            // Optionally log the values for debugging
+            FormConsole.Instance.Log($"Row Height: {rowHeight}, Column Headers Height: {dataGridView.ColumnHeadersHeight}, New Height: {newHeight}");
+        }
+
         private void ManagementTemplateForm_Load(object sender, EventArgs e)
         {
             SetTheme();
