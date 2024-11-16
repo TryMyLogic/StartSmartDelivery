@@ -11,11 +11,11 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
 {
     internal class Driver
     {
-        public string Name { get; set; }
-        public string Surname { get; set; }
-        public string EmployeeNo { get; set; }
-        public LicenseType LicenseType { get; set; }
-        public bool Availability { get; set; }
+        public required string Name { get; set; }
+        public required string Surname { get; set; }
+        public required string EmployeeNo { get; set; }
+        public required LicenseType LicenseType { get; set; }
+        public required bool Availability { get; set; }
 
         public static bool IsEmployeeNoUnique(string EmployeeNo)
         {

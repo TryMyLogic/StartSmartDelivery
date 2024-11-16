@@ -94,7 +94,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
         }
 
         public delegate void SubmitEventHandler(object sender, EventArgs e);
-        public event SubmitEventHandler SubmitClicked;
+        public event SubmitEventHandler? SubmitClicked; 
         private void btnSubmit_Click(object sender, EventArgs e)
         {
             if (ValidForm())
@@ -111,15 +111,18 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             cboLicenseType.SelectedIndex = -1;
             cboAvailability.SelectedIndex = 0;
         }
+
+
         internal DriversDTO GetDriverData()
         {
+            //Valid form ensures data here is never null and can be succefully parsed
             return new DriversDTO(
                 DriverId,
                 txtName.Text,
                 txtSurname.Text,
                 txtEmployeeNo.Text,
-                (LicenseType)Enum.Parse(typeof(LicenseType), cboLicenseType.SelectedItem.ToString()),
-                bool.Parse(cboAvailability.SelectedItem.ToString())
+                (LicenseType)Enum.Parse(typeof(LicenseType), cboLicenseType.SelectedItem!.ToString()!),
+                bool.Parse(cboAvailability.SelectedItem!.ToString()!)
             );
         }
     }

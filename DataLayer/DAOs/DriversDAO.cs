@@ -37,7 +37,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
 
                             if (Dt.Columns.Contains("DriverID"))
                             {
-                                DataColumn[] PrimaryKeyColumns = [Dt.Columns["DriverID"]];
+                                DataColumn[] PrimaryKeyColumns = [Dt.Columns["DriverID"]!];
                                 Dt.PrimaryKey = PrimaryKeyColumns;
                             }
                             else
@@ -209,7 +209,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
                         {
                             Adapter.Fill(Dt);
 
-                            DataColumn[] PrimaryKeyColumns = [Dt.Columns["DriverID"]];
+                            DataColumn[] PrimaryKeyColumns = [Dt.Columns["DriverID"]!];
                             Dt.PrimaryKey = PrimaryKeyColumns;
                         }
                     }

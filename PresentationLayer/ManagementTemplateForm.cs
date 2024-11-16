@@ -50,8 +50,15 @@ namespace StartSmartDeliveryForm.PresentationLayer
             btnAdd.FlatAppearance.BorderSize = 0;
 
             //Prevents image from touching borders
-            btnFirst.Image = ResizeImage(btnFirst.Image, 20, 20);
-            btnLast.Image = ResizeImage(btnLast.Image, 20, 20);
+            if (btnFirst.Image != null)
+            {
+                btnFirst.Image = ResizeImage(btnFirst.Image, 20, 20);
+            }
+
+            if (btnLast.Image != null)
+            {
+                btnLast.Image = ResizeImage(btnLast.Image, 20, 20);
+            }
         }
 
         private void ManagementTemplateForm_Load(object sender, EventArgs e)
@@ -135,27 +142,31 @@ namespace StartSmartDeliveryForm.PresentationLayer
 
         private void btnSearch_Click(object sender, EventArgs e)
         {
-            string SelectedOption = cboSearchOptions.SelectedItem.ToString();
+            string? SelectedOption = cboSearchOptions.SelectedItem?.ToString();
             string SearchTerm = txtSearchBox.Text.Trim();
-            ApplyFilter((DataTable)dgvMain.DataSource, SelectedOption, SearchTerm);
+
+            if (SelectedOption != null)
+            {
+                ApplyFilter((DataTable)dgvMain.DataSource, SelectedOption, SearchTerm);
+            }
+            else
+            {
+                FormConsole.Instance.Log("Search coloumn was not set properly");
+            }
         }
 
         public bool isCaseSensitive = false; //Not case sensitive by default
-        public void ApplyFilter(DataTable dataTable, string selectedOption, string searchTerm)
+        public void ApplyFilter(DataTable dataTable, string selectedOption, string? searchTerm)
         {
-            FormConsole.Instance.Log(searchTerm);
+            if (searchTerm != null)
+            {
+                FormConsole.Instance.Log(searchTerm);
+            }
 
             if (dataTable == null || string.IsNullOrEmpty(selectedOption))
             {
                 // Refresh dgv or show an error message
                 FormConsole.Instance.Log("Invalid parameters for filtering.");
-                return;
-            }
-
-            // null is a possible value for certain database tables. Do not filter it out
-            if (string.IsNullOrEmpty(searchTerm) && searchTerm != null)
-            {
-                FormConsole.Instance.Log("Empty parameters for filtering.");
                 return;
             }
 
@@ -172,41 +183,39 @@ namespace StartSmartDeliveryForm.PresentationLayer
             FormConsole.Instance.Log($"Filtered {filteredRows.Count} rows for '{selectedOption}' with search term '{searchTerm}' (CaseSensitive: {isCaseSensitive}).");
         }
 
-        public static List<DataRow> FilterRows(DataTable dataTable, string selectedOption, string searchTerm, bool isCaseSensitive)
+        public static List<DataRow> FilterRows(DataTable dataTable, string selectedOption, string? searchTerm, bool isCaseSensitive)
         {
             // Return an empty list if the search term is null/empty or if the column does not exist
+            // null is a possible value for certain database tables. IsNullOrEmpty wont filter out "null"
             if (string.IsNullOrEmpty(searchTerm) || !dataTable.Columns.Contains(selectedOption))
-                return new List<DataRow>();
+                return [];
 
-            Type columnType = dataTable.Columns[selectedOption].DataType;
+            Type columnType = dataTable.Columns[selectedOption]!.DataType;
 
             if (columnType == typeof(int))
             {
                 //Handle enum with case sensitivity
-                if (Enum.TryParse(typeof(LicenseType), searchTerm, !isCaseSensitive, out var enumValue))
+                if (Enum.TryParse(typeof(LicenseType), searchTerm, !isCaseSensitive, out object? enumValue) && enumValue != null)
                 {
                     int enumIntValue = (int)enumValue;
-                    return dataTable.AsEnumerable()
-                                    .Where(row => row.Field<int?>(selectedOption) == enumIntValue)
-                                    .ToList();
+                    return [.. dataTable.AsEnumerable().Where(row => row.Field<int?>(selectedOption) == enumIntValue)];
                 }
-                return new List<DataRow>();
+                return [];
             }
 
             // Handle string columns with case sensitivity and partial matching
             if (columnType == typeof(string))
             {
-                return dataTable.AsEnumerable()
+                return [.. dataTable.AsEnumerable()
                                 .Where(row =>
                                 {
-                                    var fieldValue = row.Field<string>(selectedOption);
+                                    string fieldValue = row.Field<string>(selectedOption)!;
                                     if (fieldValue == null) return false;
 
                                     return isCaseSensitive
                                         ? fieldValue.Contains(searchTerm)
-                                        : fieldValue.IndexOf(searchTerm, StringComparison.OrdinalIgnoreCase) >= 0;
-                                })
-                                .ToList();
+                                        : fieldValue.Contains(searchTerm, StringComparison.OrdinalIgnoreCase);
+                                })];
             }
 
             if (columnType == typeof(bool))
@@ -233,15 +242,13 @@ namespace StartSmartDeliveryForm.PresentationLayer
 
                 if (boolSearchTerm == null)
                 {
-                    return new List<DataRow>();
+                    return [];
                 }
 
-                return dataTable.AsEnumerable()
-                                .Where(row => row.Field<bool>(selectedOption) == boolSearchTerm)
-                                .ToList();
+                return [.. dataTable.AsEnumerable().Where(row => row.Field<bool>(selectedOption) == boolSearchTerm)];
             }
 
-            return new List<DataRow>();
+            return [];
         }
 
         //Required by Children:
@@ -331,7 +338,10 @@ namespace StartSmartDeliveryForm.PresentationLayer
 
         private void txtStartPage_Enter(object sender, EventArgs e)
         {
-            BeginInvoke(new Action(() => (sender as System.Windows.Forms.TextBox).SelectAll()));
+            if (sender is System.Windows.Forms.TextBox textBox)
+            {
+                BeginInvoke(new Action(() => textBox.SelectAll()));
+            }
         }
 
         private void btnMatchCase_Click(object sender, EventArgs e)

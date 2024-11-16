@@ -31,7 +31,7 @@ namespace StartSmartDeliveryForm.Tests
 
         // Null input
         [InlineData("DriverID", null, 0)]
-        public void ApplyFilter_ShouldFilterDriverID(string selectedOption, string searchTerm, int expectedRowCount)
+        public void ApplyFilter_ShouldFilterDriverID(string selectedOption, string? searchTerm, int expectedRowCount)
         {
             // Arrange
             DataTable dataTable = new();
@@ -50,7 +50,7 @@ namespace StartSmartDeliveryForm.Tests
 
             // Act
             form.ApplyFilter(form.GetDatagridViewTable(), selectedOption, searchTerm);
-            List<DataRow> filteredRows = form.GetDatagridViewTable().AsEnumerable().Where(row => row.RowState != DataRowState.Deleted).ToList();
+            List<DataRow> filteredRows = [.. form.GetDatagridViewTable().AsEnumerable().Where(row => row.RowState != DataRowState.Deleted)];
 
             Assert.Equal(expectedRowCount, filteredRows.Count);
             if (expectedRowCount > 0)
@@ -93,7 +93,7 @@ namespace StartSmartDeliveryForm.Tests
 
             // Act
             form.ApplyFilter(form.GetDatagridViewTable(), selectedOption, searchTerm);
-            List<DataRow> filteredRows = form.GetDatagridViewTable().AsEnumerable().Where(row => row.RowState != DataRowState.Deleted).ToList();
+            List<DataRow> filteredRows = [.. form.GetDatagridViewTable().AsEnumerable().Where(row => row.RowState != DataRowState.Deleted)];
 
             // Assert 
             Assert.Equal(expectedRowCount, filteredRows.Count);
@@ -118,7 +118,7 @@ namespace StartSmartDeliveryForm.Tests
 
         // Null input
         [InlineData("LicenseType", null, false, 0)]
-        public void ApplyFilter_ShouldFilterLicenseType(string selectedOption, string searchTerm, bool isCaseSensitive, int expectedRowCount)
+        public void ApplyFilter_ShouldFilterLicenseType(string selectedOption, string? searchTerm, bool isCaseSensitive, int expectedRowCount)
         {
             // Arrange
             DataTable dataTable = new();
@@ -137,7 +137,7 @@ namespace StartSmartDeliveryForm.Tests
 
             // Act
             form.ApplyFilter(form.GetDatagridViewTable(), selectedOption, searchTerm);
-            List<DataRow> filteredRows = form.GetDatagridViewTable().AsEnumerable().Where(row => row.RowState != DataRowState.Deleted).ToList();
+            List<DataRow> filteredRows = [.. form.GetDatagridViewTable().AsEnumerable().Where(row => row.RowState != DataRowState.Deleted)];
 
             // Assert 
             Assert.Equal(expectedRowCount, filteredRows.Count);
@@ -163,7 +163,7 @@ namespace StartSmartDeliveryForm.Tests
 
         // Null input
         [InlineData("Availability", null, false, 0)]
-        public void ApplyFilter_ShouldFilterAvailability(string selectedOption, string searchTerm, bool isCaseSensitive, int expectedRowCount)
+        public void ApplyFilter_ShouldFilterAvailability(string selectedOption, string? searchTerm, bool isCaseSensitive, int expectedRowCount)
         {
             // Arrange
             DataTable dataTable = new();
@@ -183,11 +183,11 @@ namespace StartSmartDeliveryForm.Tests
 
             // Act
             form.ApplyFilter(form.GetDatagridViewTable(), selectedOption, searchTerm);
-            List<DataRow> filteredRows = form.GetDatagridViewTable().AsEnumerable().Where(row => row.RowState != DataRowState.Deleted).ToList();
+            List<DataRow> filteredRows = [.. form.GetDatagridViewTable().AsEnumerable().Where(row => row.RowState != DataRowState.Deleted)];
 
             // Assert 
             Assert.Equal(expectedRowCount, filteredRows.Count);
-            if (expectedRowCount > 0)
+            if (expectedRowCount > 0 && searchTerm != null)
             {
                 bool expectedBoolValue =
            searchTerm.Equals("True", StringComparison.OrdinalIgnoreCase) || searchTerm.Equals("1", StringComparison.OrdinalIgnoreCase);
@@ -232,7 +232,7 @@ namespace StartSmartDeliveryForm.Tests
         [InlineData("Name", null, false, null)] //searchTerm would never be null but testing anyways
         [InlineData("Name", "null", false, "null")] //For tables that allow null inputs
 
-        public void FilterRows_ShouldReturnCorrectRows(string selectedOption, string searchTerm, bool isCaseSensitive, object? expectedValue)
+        public void FilterRows_ShouldReturnCorrectRows(string selectedOption, string? searchTerm, bool isCaseSensitive, object? expectedValue)
         {
             // Arrange
             DataTable dataTable = new();
@@ -248,7 +248,7 @@ namespace StartSmartDeliveryForm.Tests
 
 
             // Act
-            var filteredRows = ManagementTemplateForm.FilterRows(dataTable, selectedOption, searchTerm, isCaseSensitive);
+            List<DataRow> filteredRows = ManagementTemplateForm.FilterRows(dataTable, selectedOption, searchTerm, isCaseSensitive);
 
             // Assert
             if (expectedValue == null)
@@ -260,7 +260,8 @@ namespace StartSmartDeliveryForm.Tests
                 // Expect no matches, so filteredRows should be empty
                 Assert.Empty(filteredRows);
             }
-            else if (selectedOption == "Availability" && searchTerm.Equals("False", StringComparison.OrdinalIgnoreCase) || searchTerm.Equals("0"))
+            else if (searchTerm != null && selectedOption == "Availability" &&
+                    (searchTerm.Equals("False", StringComparison.OrdinalIgnoreCase) || searchTerm.Equals("0")))
             {
                 Assert.Equal(2, filteredRows.Count);
             }

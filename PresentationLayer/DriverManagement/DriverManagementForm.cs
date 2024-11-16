@@ -24,12 +24,13 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
         public DriverManagementForm()
         {
             InitializeComponent();
+            _driverData = new DataTable(); //Empty table by default
         }
 
         private void DriverManagementForm_Load(object sender, EventArgs e)
         {
             SetSearchOptions(typeof(DriversDTO));
-            _driverData = DriversDAO.GetDriversAtPage(2);
+            _driverData = DriversDAO.GetDriversAtPage(2) ?? new DataTable();
 
             _currentPage = 1; // Always starts at page 1
             _totalPages = (int)Math.Ceiling((double)_recordsCount / GlobalConstants.s_recordLimit);
@@ -67,36 +68,58 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
         {
             DataGridViewRow selectedRow = dgvMain.Rows[rowIndex];
 
-            DriversDTO driverData = new(
-       int.Parse(selectedRow.Cells["DriverID"].Value.ToString()),
-       selectedRow.Cells["Name"].Value.ToString(),
-       selectedRow.Cells["Surname"].Value.ToString(),
-       selectedRow.Cells["EmployeeNo"].Value.ToString(),
-       (LicenseType)Enum.Parse(typeof(LicenseType), selectedRow.Cells["LicenseType"].Value.ToString()),
-       bool.Parse(selectedRow.Cells["Availability"].Value.ToString())
-   );
+            object DriverID = selectedRow.Cells["DriverID"].Value;
+            object Name = selectedRow.Cells["Name"].Value;
+            object Surname = selectedRow.Cells["Surname"].Value;
+            object EmployeeNo = selectedRow.Cells["EmployeeNo"].Value;
+            object LicenseType = selectedRow.Cells["LicenseType"].Value;
+            object Availability = selectedRow.Cells["Availability"].Value;
 
-            DriverDataForm driverDataForm = new()
+            if (DriverID != null &&
+                Name != null &&
+                Surname != null &&
+                EmployeeNo != null &&
+                LicenseType != null &&
+                Availability != null &&
+                int.TryParse(DriverID.ToString(), out int driverID) &&
+                Enum.TryParse(LicenseType.ToString(), out LicenseType license) &&
+                bool.TryParse(Availability.ToString(), out bool availability))
             {
-                Mode = FormMode.Edit
-            };
+                DriversDTO driverData = new(
+                    driverID,
+                    Name.ToString()!,
+                    Surname.ToString()!,
+                    EmployeeNo.ToString()!,
+                    license,
+                    availability
+                );
 
-            driverDataForm.InitializeEditing(driverData);
-            driverDataForm.SubmitClicked += DriverDataForm_SubmitClicked;
-            driverDataForm.Show();
+                DriverDataForm driverDataForm = new()
+                {
+                    Mode = FormMode.Edit
+                };
+
+                driverDataForm.InitializeEditing(driverData);
+                driverDataForm.SubmitClicked += DriverDataForm_SubmitClicked;
+                driverDataForm.Show();
+            }
+            else
+            {
+                MessageBox.Show("An error occurred. Edit form could not be initialized due to invalid data.");
+            }
         }
+
 
         protected override void btnDelete_Click(int rowIndex)
         {
             DataGridViewRow selectedRow = dgvMain.Rows[rowIndex];
-            int driverID = int.Parse(selectedRow.Cells["DriverID"].Value.ToString());
-            DialogResult result = MessageBox.Show("Are you sure?", "Delete Row", MessageBoxButtons.YesNo);
-            if (result == DialogResult.Yes)
-            {
-                // Delete From Data Table
-                _driverData.Rows.RemoveAt(rowIndex);
 
-                //Delete From Database
+            object DriverID = selectedRow.Cells["DriverID"].Value;
+
+            DialogResult result = MessageBox.Show("Are you sure?", "Delete Row", MessageBoxButtons.YesNo);
+            if (result == DialogResult.Yes && int.TryParse(DriverID.ToString(), out int driverID))
+            {
+                _driverData.Rows.RemoveAt(rowIndex);
                 DriversDAO.DeleteDriver(driverID);
 
                 _recordsCount--;
@@ -106,7 +129,6 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
                     _currentPage = _totalPages;
                     SetPage(_currentPage);
                 }
-
             }
         }
 
@@ -117,47 +139,50 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             {
                 DriversDTO driverDTO = form.GetDriverData();
 
-                if (form.Mode == FormMode.Add)
+                if (driverDTO != null)
                 {
-                    int newDriverId = DriversDAO.InsertDriver(driverDTO);
-
-                    if (newDriverId != -1) // Check for success
+                    if (form.Mode == FormMode.Add)
                     {
-                        DataRow newRow = _driverData.NewRow();
-                        newRow["DriverID"] = newDriverId;
-                        newRow["Name"] = driverDTO.Name;
-                        newRow["Surname"] = driverDTO.Surname;
-                        newRow["EmployeeNo"] = driverDTO.EmployeeNo;
-                        newRow["LicenseType"] = driverDTO.LicenseType;
-                        newRow["Availability"] = driverDTO.Availability;
+                        int newDriverId = DriversDAO.InsertDriver(driverDTO);
 
-                        _driverData.Rows.Add(newRow);
-
-                        _recordsCount++;
-                        _totalPages = (int)Math.Ceiling((double)_recordsCount / GlobalConstants.s_recordLimit);
-                        if (_currentPage < _totalPages)
+                        if (newDriverId != -1) // Check for success
                         {
-                            _currentPage = _totalPages;
-                            SetPage(_currentPage);
+                            DataRow newRow = _driverData.NewRow();
+                            newRow["DriverID"] = newDriverId;
+                            newRow["Name"] = driverDTO.Name;
+                            newRow["Surname"] = driverDTO.Surname;
+                            newRow["EmployeeNo"] = driverDTO.EmployeeNo;
+                            newRow["LicenseType"] = driverDTO.LicenseType;
+                            newRow["Availability"] = driverDTO.Availability;
+
+                            _driverData.Rows.Add(newRow);
+
+                            _recordsCount++;
+                            _totalPages = (int)Math.Ceiling((double)_recordsCount / GlobalConstants.s_recordLimit);
+                            if (_currentPage < _totalPages)
+                            {
+                                _currentPage = _totalPages;
+                                SetPage(_currentPage);
+                            }
+
+                        }
+                    }
+                    else if (form.Mode == FormMode.Edit)
+                    {
+                        DataRow? rowToUpdate = _driverData.Rows.Find(driverDTO.DriverId); // Assuming EmployeeNo is the primary key
+
+                        if (rowToUpdate != null)
+                        {
+                            rowToUpdate["Name"] = driverDTO.Name;
+                            rowToUpdate["Surname"] = driverDTO.Surname;
+                            rowToUpdate["EmployeeNo"] = driverDTO.EmployeeNo;
+                            rowToUpdate["LicenseType"] = driverDTO.LicenseType;
+                            rowToUpdate["Availability"] = driverDTO.Availability;
                         }
 
+                        DriversDAO.UpdateDriver(driverDTO);
+                        form.Close();
                     }
-                }
-                else if (form.Mode == FormMode.Edit)
-                {
-                    DataRow rowToUpdate = _driverData.Rows.Find(driverDTO.DriverId); // Assuming EmployeeNo is the primary key
-
-                    if (rowToUpdate != null)
-                    {
-                        rowToUpdate["Name"] = driverDTO.Name;
-                        rowToUpdate["Surname"] = driverDTO.Surname;
-                        rowToUpdate["EmployeeNo"] = driverDTO.EmployeeNo;
-                        rowToUpdate["LicenseType"] = driverDTO.LicenseType;
-                        rowToUpdate["Availability"] = driverDTO.Availability;
-                    }
-
-                    DriversDAO.UpdateDriver(driverDTO);
-                    form.Close();
                 }
 
                 form.ClearData(); //Clear form for next batch of data
@@ -174,7 +199,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
                 dataTable.DefaultView.RowFilter = string.Empty;  // Clear any applied filters
             }
 
-            //Rebind
+            // Rebind
             dgvMain.DataSource = null;
             dgvMain.DataSource = _driverData;
 
@@ -186,7 +211,6 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             dgvMain.Columns["Edit"].DisplayIndex = 5;
             dgvMain.Columns["Delete"].DisplayIndex = 6;
 
-            // Hide the DriverID column
             dgvMain.Columns["DriverID"].Visible = false;
 
             MessageBox.Show("Succesfully Refreshed", "Refresh Status");
@@ -194,8 +218,8 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 
         protected override void reloadToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            //Refetch data and Rebind
-            _driverData = DriversDAO.GetAllDrivers();
+            //Refetch data and rebind
+            _driverData = DriversDAO.GetAllDrivers() ?? new DataTable();
             dgvMain.DataSource = null;
             dgvMain.DataSource = _driverData;
 
@@ -207,7 +231,6 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             dgvMain.Columns["Edit"].DisplayIndex = 5;
             dgvMain.Columns["Delete"].DisplayIndex = 6;
 
-            // Hide the DriverID column
             dgvMain.Columns["DriverID"].Visible = false;
 
             MessageBox.Show("Succesfully Reloaded", "Reload Status");
@@ -270,7 +293,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             txtStartPage.Text = $"{_currentPage}";
             lblEndPage.Text = $"/{_totalPages}";
 
-            _driverData = DriversDAO.GetDriversAtPage(currentPage);
+            _driverData = DriversDAO.GetDriversAtPage(currentPage) ?? new DataTable();
             dgvMain.DataSource = _driverData;
         }
 
@@ -279,7 +302,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             bool ParsedGoto = int.TryParse(txtStartPage.Text, out int GotoPage);
             if (ParsedGoto)
             {
-                if (GotoPage == _currentPage) return; //Already on that page. Do nothing
+                if (GotoPage == _currentPage) return;
 
                 if (GotoPage >= 1 && GotoPage <= _totalPages)
                 {
