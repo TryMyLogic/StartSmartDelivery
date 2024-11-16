@@ -29,6 +29,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 
         private void DriverManagementForm_Load(object sender, EventArgs e)
         {
+            AdjustDataGridViewHeight(dgvMain);
             SetSearchOptions(typeof(DriversDTO));
             _driverData = DriversDAO.GetDriversAtPage(2) ?? new DataTable();
 
