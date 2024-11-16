@@ -31,7 +31,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
         {
             AdjustDataGridViewHeight(dgvMain);
             SetSearchOptions(typeof(DriversDTO));
-            _driverData = DriversDAO.GetDriversAtPage(2) ?? new DataTable();
+            _driverData = DriversDAO.GetDriversAtPage(1) ?? new DataTable();
 
             _currentPage = 1; // Always starts at page 1
             _totalPages = (int)Math.Ceiling((double)_recordsCount / GlobalConstants.s_recordLimit);

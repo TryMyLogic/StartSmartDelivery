@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using StartSmartDeliveryForm.BusinessLogicLayer;
@@ -20,7 +21,10 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
     }
     public partial class DriverDataForm : Form
     {
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int DriverId { get; set; }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public FormMode Mode { get; set; }
 
         public DriverDataForm()
@@ -29,6 +33,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
         }
 
         public static readonly Color SoftBeige = Color.FromArgb(240, 221, 188);
+
         private void DriverDataForm_Load(object sender, EventArgs e)
         {
             cboAvailability.SelectedIndex = 0;  //Is true by default

@@ -62,7 +62,7 @@ namespace StartSmartDeliveryForm.PresentationLayer
         }
 
         //DO NOT use this in the ManagementTemplateForm_Load.It interferes with children initialization, breaking the child designer. 
-        protected void AdjustDataGridViewHeight(DataGridView dataGridView)
+        protected static void AdjustDataGridViewHeight(DataGridView dataGridView)
         {
             // Set the maximum record limit to 30 or the global constant, whichever is smaller
             int records = Math.Min(GlobalConstants.s_recordLimit, 30); // Select the minimum of the two values
