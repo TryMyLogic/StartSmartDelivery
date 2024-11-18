@@ -320,5 +320,12 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             }
         }
 
+        protected override void btnPrint_Click(object sender, EventArgs e)
+        {
+            PrintDriverDataForm preview = new();
+
+            //Unlike Show, it blocks execution on main form till complete
+            preview.ShowDialog();
+        }
     }
 }
