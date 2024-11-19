@@ -307,6 +307,11 @@ namespace StartSmartDeliveryForm.PresentationLayer
 
         }
 
+        protected virtual void printAllPagesByRowCountToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
         protected virtual void dgvMain_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
 
@@ -396,6 +401,8 @@ namespace StartSmartDeliveryForm.PresentationLayer
         {
             return (DataTable)dgvMain.DataSource;
         }
+
+      
 #endif
     }
 }

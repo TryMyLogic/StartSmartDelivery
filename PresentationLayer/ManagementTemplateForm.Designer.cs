@@ -40,6 +40,7 @@
             dataManagementToolStripMenuItem = new ToolStripMenuItem();
             rollbackToolStripMenuItem = new ToolStripMenuItem();
             reloadToolStripMenuItem = new ToolStripMenuItem();
+            printAllPagesByRowCountToolStripMenuItem = new ToolStripMenuItem();
             pnlGap = new Panel();
             tsSearchbar = new ToolStrip();
             toolStripLabel1 = new ToolStripLabel();
@@ -133,7 +134,7 @@
             // 
             // dataManagementToolStripMenuItem
             // 
-            dataManagementToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { rollbackToolStripMenuItem, reloadToolStripMenuItem });
+            dataManagementToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { rollbackToolStripMenuItem, reloadToolStripMenuItem, printAllPagesByRowCountToolStripMenuItem });
             dataManagementToolStripMenuItem.Name = "dataManagementToolStripMenuItem";
             dataManagementToolStripMenuItem.Size = new Size(117, 20);
             dataManagementToolStripMenuItem.Text = "Data Management";
@@ -141,16 +142,23 @@
             // rollbackToolStripMenuItem
             // 
             rollbackToolStripMenuItem.Name = "rollbackToolStripMenuItem";
-            rollbackToolStripMenuItem.Size = new Size(180, 22);
+            rollbackToolStripMenuItem.Size = new Size(234, 22);
             rollbackToolStripMenuItem.Text = "Rollback";
             rollbackToolStripMenuItem.Click += rollbackToolStripMenuItem_Click;
             // 
             // reloadToolStripMenuItem
             // 
             reloadToolStripMenuItem.Name = "reloadToolStripMenuItem";
-            reloadToolStripMenuItem.Size = new Size(180, 22);
+            reloadToolStripMenuItem.Size = new Size(234, 22);
             reloadToolStripMenuItem.Text = "Reload";
             reloadToolStripMenuItem.Click += reloadToolStripMenuItem_Click;
+            // 
+            // printAllPagesByRowCountToolStripMenuItem
+            // 
+            printAllPagesByRowCountToolStripMenuItem.Name = "printAllPagesByRowCountToolStripMenuItem";
+            printAllPagesByRowCountToolStripMenuItem.Size = new Size(234, 22);
+            printAllPagesByRowCountToolStripMenuItem.Text = "Print all pages (By Row Count)";
+            printAllPagesByRowCountToolStripMenuItem.Click += printAllPagesByRowCountToolStripMenuItem_Click;
             // 
             // pnlGap
             // 
@@ -552,5 +560,6 @@
         private ToolStripMenuItem rollbackToolStripMenuItem;
         private ToolStripMenuItem reloadToolStripMenuItem;
         private ToolStripButton btnRefresh;
+        private ToolStripMenuItem printAllPagesByRowCountToolStripMenuItem;
     }
 }

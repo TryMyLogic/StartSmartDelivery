@@ -241,6 +241,12 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
         {
 
         }
+        
+        protected override void printAllPagesByRowCountToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            PrintDriverDataForm preview = new(_totalPages);
+            preview.ShowDialog();
+        }
 
         protected override void dgvMain_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
@@ -318,6 +324,13 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
                     return;
                 }
             }
+        }
+
+        protected override void btnPrint_Click(object sender, EventArgs e)
+        {
+            PrintDriverDataForm preview = new(dgvMain);
+            //Unlike Show, it blocks execution on main form till complete
+            preview.ShowDialog();
         }
 
     }
