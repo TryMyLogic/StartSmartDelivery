@@ -18,7 +18,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
     {
         private int _currentPage = 1;
         private readonly int _totalPages;
-        private readonly DataGridView _dataGridView;
+        private readonly DataGridView? _dataGridView;
 
         // TODO - Print all databases pages, ensuring each page contains as many records (within reason)
         public PrintDriverDataForm()
@@ -26,7 +26,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             InitializeComponent();
             printPreviewControl.Document = printDocument;
 
-           // _totalPages = (int)Math.Ceiling((double)_recordsCount / GlobalConstants.s_recordLimit);
+            // _totalPages = (int)Math.Ceiling((double)_recordsCount / GlobalConstants.s_recordLimit);
         }
 
         // Used for printing all the database pages, according to the appsettings row count
@@ -51,7 +51,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 
         private void PrintDriverDataForm_Load(object sender, EventArgs e)
         {
-            if(_totalPages == 1)
+            if (_totalPages == 1)
             {
                 btnPrevious.Hide();
                 btnNext.Hide();
@@ -60,6 +60,11 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 
         private void printDocument_PrintPage(object sender, PrintPageEventArgs e)
         {
+            if (e.Graphics == null)
+            {
+                FormConsole.Instance.Log("e.Graphics was null"); // Shouldnt get here in most cases.
+                return;
+            }
             // Header text
             string pageHeaderText = "Driver Data Report";
             var pageHeaderFont = new Font("Arial", 12, FontStyle.Bold);
@@ -68,14 +73,19 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             e.Graphics.DrawString(pageHeaderText, pageHeaderFont, Brushes.Black,
                                    e.MarginBounds.Left, headerY);
 
-            DataTable dataTable;
-            if (_dataGridView != null)
+            DataTable? dataTable;
+            if (_dataGridView != null && _dataGridView.DataSource is DataTable dt)
             {
-                dataTable = (DataTable)_dataGridView.DataSource;
+                dataTable = dt;
             }
             else
             {
                 dataTable = DriversDAO.GetDriversAtPage(_currentPage);
+                if (dataTable == null)
+                {
+                    FormConsole.Instance.Log("GetDriversAtPage returned null datatable");
+                    return;
+                }
             }
 
             var font = new Font("Arial", 10);
@@ -83,7 +93,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             float x = e.MarginBounds.Left;
             float y = e.MarginBounds.Top;
             float columnWidth = e.MarginBounds.Width / dataTable.Columns.Count;
-            float padding = 5f; 
+            float padding = 5f;
 
             foreach (DataColumn column in dataTable.Columns)
             {
@@ -105,17 +115,17 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
                 x = e.MarginBounds.Left; // Reset x for each row
 
                 float maxRowHeight = 0; // Ensures height consistency
-                foreach (object cell in row.ItemArray)
+                foreach (object? cell in row.ItemArray)
                 {
                     string cellText = cell?.ToString() ?? "";
                     float availableWidth = columnWidth - (2 * padding);
-                    SizeF cellSize = e.Graphics.MeasureString(cellText, font, (int)availableWidth); 
+                    SizeF cellSize = e.Graphics.MeasureString(cellText, font, (int)availableWidth);
                     maxRowHeight = Math.Max(maxRowHeight, cellSize.Height);
                 }
 
                 maxRowHeight += padding * 2; // Padding on top and bottom of each cell
 
-                foreach (object cell in row.ItemArray)
+                foreach (object? cell in row.ItemArray)
                 {
                     string cellText = cell?.ToString() ?? "";
                     float availableWidth = columnWidth - (2 * padding); // width for wrapping text without padding
@@ -136,7 +146,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
                 y += maxRowHeight; // Move down for the next row
             }
 
-            if(_totalPages != 1)
+            if (_totalPages != 1)
             {
                 // Footer text with page number
                 Font footerFont = new("Arial", 10, FontStyle.Italic);
@@ -146,7 +156,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
                 e.Graphics.DrawString(footerText, footerFont, Brushes.Black,
                 e.MarginBounds.Right - footerSize.Width, footerY);
             }
-         
+
             if (_currentPage < _totalPages)
             {
                 _currentPage++;

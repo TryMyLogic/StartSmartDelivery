@@ -61,29 +61,25 @@ namespace StartSmartDeliveryForm.PresentationLayer
             }
         }
 
-        //DO NOT use this in the ManagementTemplateForm_Load.It interferes with children initialization, breaking the child designer. 
+        //DO NOT use this in the ManagementTemplateForm_Load. It interferes with children initialization, breaking the child designer. 
         protected static void AdjustDataGridViewHeight(DataGridView dataGridView)
         {
-            // Set the maximum record limit to 30 or the global constant, whichever is smaller
+            if(dataGridView == null)
+            {
+                return;
+            }
+
             int records = Math.Min(GlobalConstants.s_recordLimit, 30); // Select the minimum of the two values
 
-            // Get the row height
             int rowHeight = dataGridView.RowTemplate.Height;
+            int dgvRequiredHeight = rowHeight * (records + 1) + dataGridView.ColumnHeadersHeight + 2;
 
-            // Calculate the required height for the DataGridView (rows + column headers)
-            int requiredHeight = rowHeight * (records + 1) + dataGridView.ColumnHeadersHeight + 2;
-
-            // Calculate the new height for the parent container (form or panel)
-            int formHeightWithoutDataGridView = dataGridView.Parent.Height - dataGridView.Height;
-
-            // Adjust the new height to fit the calculated required height
-            int newHeight = formHeightWithoutDataGridView + requiredHeight;
-
-            // Set the new height of the parent container (Form or Panel)
-            dataGridView.Parent.Height = newHeight;
-
-            // Optionally log the values for debugging
-            FormConsole.Instance.Log($"Row Height: {rowHeight}, Column Headers Height: {dataGridView.ColumnHeadersHeight}, New Height: {newHeight}");
+            if (dataGridView.Parent != null)
+            {
+                int formHeightWithoutDataGridView = dataGridView.Parent.Height - dataGridView.Height;
+                dataGridView.Parent.Height = formHeightWithoutDataGridView + dgvRequiredHeight;
+                FormConsole.Instance.Log($"Row Height: {rowHeight}, Column Headers Height: {dataGridView.ColumnHeadersHeight}, New Height: {formHeightWithoutDataGridView + dgvRequiredHeight}");
+            }
         }
 
         private void ManagementTemplateForm_Load(object sender, EventArgs e)
@@ -167,12 +163,24 @@ namespace StartSmartDeliveryForm.PresentationLayer
 
         private void btnSearch_Click(object sender, EventArgs e)
         {
+            DataTable? dataTable = null;
+            if (dgvMain.DataSource is DataTable dt)
+            {
+                dataTable = dt;
+            }
+
+            if (dataTable == null)
+            {
+                FormConsole.Instance.Log("Datatable is null. Cannot search through it");
+                return;
+            }
+
             string? SelectedOption = cboSearchOptions.SelectedItem?.ToString();
             string SearchTerm = txtSearchBox.Text.Trim();
 
             if (SelectedOption != null)
             {
-                ApplyFilter((DataTable)dgvMain.DataSource, SelectedOption, SearchTerm);
+                ApplyFilter(dataTable, SelectedOption, SearchTerm);
             }
             else
             {
@@ -392,9 +400,21 @@ namespace StartSmartDeliveryForm.PresentationLayer
         }
 
 
-        public DataTable GetDatagridViewTable()
+        public DataTable? GetDatagridViewTable()
         {
-            return (DataTable)dgvMain.DataSource;
+            DataTable? dataTable = null;
+            if (dgvMain.DataSource is DataTable dt)
+            {
+                dataTable = dt;
+            }
+
+            // Remove any filters that were applied
+            if (dataTable == null)
+            {
+                return null;
+            }
+
+            return dataTable;
         }
 #endif
     }
