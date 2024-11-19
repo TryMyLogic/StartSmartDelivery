@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using StartSmartDeliveryForm.BusinessLogicLayer;
 using StartSmartDeliveryForm.DataLayer.DAOs;
 using StartSmartDeliveryForm.DataLayer.DTOs;
 using StartSmartDeliveryForm.SharedLayer;
@@ -17,27 +18,31 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 {
     public partial class DriverManagementForm : ManagementTemplateForm
     {
-        private int _currentPage;
-        private int _totalPages;
+
         private DataTable _driverData;
-        int _recordsCount = DriversDAO.GetRecordCount();
+        private readonly PaginationManager _paginationManager;
         public DriverManagementForm()
         {
             InitializeComponent();
             _driverData = new DataTable(); //Empty table by default
+
+            _paginationManager = new PaginationManager("Drivers");
+            _paginationManager.PageChanged += OnPageChanged;
+        }
+
+        public void OnPageChanged(int currentPage)
+        {
+            _driverData = DriversDAO.GetDriversAtPage(currentPage) ?? new DataTable();
+            dgvMain.DataSource = _driverData;
+            txtStartPage.Text = $"{_paginationManager.CurrentPage}";
+            lblEndPage.Text = $"/{_paginationManager.TotalPages}";
         }
 
         private void DriverManagementForm_Load(object sender, EventArgs e)
         {
             AdjustDataGridViewHeight(dgvMain);
             SetSearchOptions(typeof(DriversDTO));
-            _driverData = DriversDAO.GetDriversAtPage(2) ?? new DataTable();
-
-            _currentPage = 1; // Always starts at page 1
-            _totalPages = (int)Math.Ceiling((double)_recordsCount / GlobalConstants.s_recordLimit);
-
-            txtStartPage.Text = $"{_currentPage}";
-            lblEndPage.Text = $"/{_totalPages}";
+            _paginationManager.GoToFirstPage();
 
             if (_driverData == null || _driverData.Rows.Count == 0)
             {
@@ -49,7 +54,11 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
                 AddEditDeleteButtons();
 
                 // Hide the Primary Key Column from User
-                dgvMain.Columns["DriverID"].Visible = false;
+                DataGridViewColumn? driverColumn = dgvMain.Columns["DriverID"];
+                if (driverColumn != null)
+                {
+                    driverColumn.Visible = false;
+                }
             }
         }
 
@@ -69,12 +78,12 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
         {
             DataGridViewRow selectedRow = dgvMain.Rows[rowIndex];
 
-            object DriverID = selectedRow.Cells["DriverID"].Value;
-            object Name = selectedRow.Cells["Name"].Value;
-            object Surname = selectedRow.Cells["Surname"].Value;
-            object EmployeeNo = selectedRow.Cells["EmployeeNo"].Value;
-            object LicenseType = selectedRow.Cells["LicenseType"].Value;
-            object Availability = selectedRow.Cells["Availability"].Value;
+            object? DriverID = selectedRow.Cells["DriverID"].Value;
+            object? Name = selectedRow.Cells["Name"].Value;
+            object? Surname = selectedRow.Cells["Surname"].Value;
+            object? EmployeeNo = selectedRow.Cells["EmployeeNo"].Value;
+            object? LicenseType = selectedRow.Cells["LicenseType"].Value;
+            object? Availability = selectedRow.Cells["Availability"].Value;
 
             if (DriverID != null &&
                 Name != null &&
@@ -110,26 +119,21 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             }
         }
 
-
         protected override void btnDelete_Click(int rowIndex)
         {
             DataGridViewRow selectedRow = dgvMain.Rows[rowIndex];
 
-            object DriverID = selectedRow.Cells["DriverID"].Value;
+            object? DriverID = selectedRow.Cells["DriverID"].Value;
 
             DialogResult result = MessageBox.Show("Are you sure?", "Delete Row", MessageBoxButtons.YesNo);
-            if (result == DialogResult.Yes && int.TryParse(DriverID.ToString(), out int driverID))
+            if (result == DialogResult.Yes && int.TryParse(DriverID?.ToString(), out int driverID))
             {
                 _driverData.Rows.RemoveAt(rowIndex);
                 DriversDAO.DeleteDriver(driverID);
 
-                _recordsCount--;
-                _totalPages = (int)Math.Ceiling((double)_recordsCount / GlobalConstants.s_recordLimit);
-                if (_currentPage > _totalPages)
-                {
-                    _currentPage = _totalPages;
-                    SetPage(_currentPage);
-                }
+                _paginationManager.UpdateRecordCount(_paginationManager.RecordCount - 1);
+                _paginationManager.EnsureValidPage();
+
             }
         }
 
@@ -156,15 +160,11 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
                             newRow["LicenseType"] = driverDTO.LicenseType;
                             newRow["Availability"] = driverDTO.Availability;
 
+                            FormConsole.Instance.Log($"Before: {_driverData.Rows.Count}");
                             _driverData.Rows.Add(newRow);
 
-                            _recordsCount++;
-                            _totalPages = (int)Math.Ceiling((double)_recordsCount / GlobalConstants.s_recordLimit);
-                            if (_currentPage < _totalPages)
-                            {
-                                _currentPage = _totalPages;
-                                SetPage(_currentPage);
-                            }
+                            _paginationManager.UpdateRecordCount(_paginationManager.RecordCount + 1);
+                            _paginationManager.GoToLastPage(); // Allows user to see successful insert
 
                         }
                     }
@@ -190,9 +190,40 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             }
         }
 
+        private void SetDataGridViewColumns()
+        {
+            DataGridViewColumn? nameCol = dgvMain.Columns["Name"];
+            DataGridViewColumn? surnameCol = dgvMain.Columns["Surname"];
+            DataGridViewColumn? employeeNoCol = dgvMain.Columns["EmployeeNo"];
+            DataGridViewColumn? licenseTypeCol = dgvMain.Columns["LicenseType"];
+            DataGridViewColumn? availabilityCol = dgvMain.Columns["Availability"];
+            DataGridViewColumn? editCol = dgvMain.Columns["Edit"];
+            DataGridViewColumn? deleteCol = dgvMain.Columns["Delete"];
+            DataGridViewColumn? driverIDCol = dgvMain.Columns["DriverID"];
+
+            if (nameCol != null && surnameCol != null && employeeNoCol != null &&
+                licenseTypeCol != null && availabilityCol != null &&
+                editCol != null && deleteCol != null && driverIDCol != null)
+            {
+                nameCol.DisplayIndex = 0;
+                surnameCol.DisplayIndex = 1;
+                employeeNoCol.DisplayIndex = 2;
+                licenseTypeCol.DisplayIndex = 3;
+                availabilityCol.DisplayIndex = 4;
+                editCol.DisplayIndex = 5;
+                deleteCol.DisplayIndex = 6;
+
+                driverIDCol.Visible = false;
+            }
+        }
+
         protected override void btnRefresh_Click(object sender, EventArgs e)
         {
-            var dataTable = (DataTable)dgvMain.DataSource;
+            DataTable? dataTable = null;
+            if (dgvMain.DataSource is DataTable dt)
+            {
+                dataTable = dt;
+            }
 
             // Remove any filters that were applied
             if (dataTable != null)
@@ -203,16 +234,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             // Rebind
             dgvMain.DataSource = null;
             dgvMain.DataSource = _driverData;
-
-            dgvMain.Columns["Name"].DisplayIndex = 0;
-            dgvMain.Columns["Surname"].DisplayIndex = 1;
-            dgvMain.Columns["EmployeeNo"].DisplayIndex = 2;
-            dgvMain.Columns["LicenseType"].DisplayIndex = 3;
-            dgvMain.Columns["Availability"].DisplayIndex = 4;
-            dgvMain.Columns["Edit"].DisplayIndex = 5;
-            dgvMain.Columns["Delete"].DisplayIndex = 6;
-
-            dgvMain.Columns["DriverID"].Visible = false;
+            SetDataGridViewColumns();
 
             MessageBox.Show("Succesfully Refreshed", "Refresh Status");
         }
@@ -223,16 +245,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             _driverData = DriversDAO.GetAllDrivers() ?? new DataTable();
             dgvMain.DataSource = null;
             dgvMain.DataSource = _driverData;
-
-            dgvMain.Columns["Name"].DisplayIndex = 0;
-            dgvMain.Columns["Surname"].DisplayIndex = 1;
-            dgvMain.Columns["EmployeeNo"].DisplayIndex = 2;
-            dgvMain.Columns["LicenseType"].DisplayIndex = 3;
-            dgvMain.Columns["Availability"].DisplayIndex = 4;
-            dgvMain.Columns["Edit"].DisplayIndex = 5;
-            dgvMain.Columns["Delete"].DisplayIndex = 6;
-
-            dgvMain.Columns["DriverID"].Visible = false;
+            SetDataGridViewColumns();
 
             MessageBox.Show("Succesfully Reloaded", "Reload Status");
         }
@@ -240,12 +253,6 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
         protected override void rollbackToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
-        }
-        
-        protected override void printAllPagesByRowCountToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            PrintDriverDataForm preview = new(_totalPages);
-            preview.ShowDialog();
         }
 
         protected override void dgvMain_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
@@ -267,41 +274,22 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 
         protected override void btnFirst_Click(object sender, EventArgs e)
         {
-            _currentPage = 1;
-            SetPage(_currentPage);
+            _paginationManager.GoToFirstPage();
         }
 
         protected override void btnPrevious_Click(object sender, EventArgs e)
         {
-            if (_currentPage > 1)
-            {
-                _currentPage--;
-                SetPage(_currentPage);
-            }
+            _paginationManager.GoToPreviousPage();
         }
 
         protected override void btnNext_Click(object sender, EventArgs e)
         {
-            if (_currentPage < _totalPages)
-            {
-                _currentPage++;
-                SetPage(_currentPage);
-            }
+            _paginationManager.GoToNextPage();
         }
 
         protected override void btnLast_Click(object sender, EventArgs e)
         {
-            _currentPage = _totalPages;
-            SetPage(_currentPage);
-        }
-
-        private void SetPage(int currentPage)
-        {
-            txtStartPage.Text = $"{_currentPage}";
-            lblEndPage.Text = $"/{_totalPages}";
-
-            _driverData = DriversDAO.GetDriversAtPage(currentPage) ?? new DataTable();
-            dgvMain.DataSource = _driverData;
+            _paginationManager.GoToLastPage();
         }
 
         protected override void btnGotoPage_Click(object sender, EventArgs e)
@@ -309,18 +297,16 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             bool ParsedGoto = int.TryParse(txtStartPage.Text, out int GotoPage);
             if (ParsedGoto)
             {
-                if (GotoPage == _currentPage) return;
 
-                if (GotoPage >= 1 && GotoPage <= _totalPages)
+                if (GotoPage == _paginationManager.CurrentPage) return;
+
+                if (GotoPage >= 1 && GotoPage <= _paginationManager.TotalPages)
                 {
-                    _currentPage = GotoPage;
-                    SetPage(_currentPage);
-                    txtStartPage.Text = $"{_currentPage}";
+                    _paginationManager.GoToPage(GotoPage);
                 }
                 else
                 {
-                    MessageBox.Show("GotoPage is out of range", "Invalid Number");
-                    txtStartPage.Text = $"{_currentPage}";
+                    MessageBox.Show("Page number is out of range", "Invalid Number");
                     return;
                 }
             }
@@ -328,10 +314,10 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 
         protected override void btnPrint_Click(object sender, EventArgs e)
         {
-            PrintDriverDataForm preview = new(dgvMain);
+            PrintDriverDataForm preview = new(dgvMain); // Prints only 1 page. 
+
             //Unlike Show, it blocks execution on main form till complete
             preview.ShowDialog();
         }
-
     }
 }
