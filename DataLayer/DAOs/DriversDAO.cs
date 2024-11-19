@@ -44,8 +44,6 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
                             {
                                 throw new InvalidOperationException("The DataTable must contain the 'DriverID' column.");
                             }
-
-                           
                         }
                     }
                 }

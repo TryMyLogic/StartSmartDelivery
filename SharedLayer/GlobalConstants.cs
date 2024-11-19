@@ -8,7 +8,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace StartSmartDeliveryForm.SharedLayer
 {
-    internal class GlobalConstants
+    public class GlobalConstants
     {
         private static readonly IConfiguration s_configuration;
 

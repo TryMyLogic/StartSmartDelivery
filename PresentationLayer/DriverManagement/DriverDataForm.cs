@@ -75,7 +75,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             else
             {
                 // Only check uniqueness if the field isnt empty && Mode is not edit
-                if (Mode == FormMode.Add && !Driver.IsEmployeeNoUnique(txtEmployeeNo.Text))
+                if (Mode == FormMode.Add && !Drivers.IsEmployeeNoUnique(txtEmployeeNo.Text))
                 {
                     MessageBox.Show("Employee No is not unique.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return false;

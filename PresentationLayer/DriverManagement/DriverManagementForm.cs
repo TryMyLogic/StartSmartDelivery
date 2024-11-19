@@ -114,7 +114,6 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             }
         }
 
-
         protected override void btnDelete_Click(int rowIndex)
         {
             DataGridViewRow selectedRow = dgvMain.Rows[rowIndex];
@@ -194,6 +193,33 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             }
         }
 
+        private void SetDataGridViewColumns()
+        {
+            DataGridViewColumn? nameCol = dgvMain.Columns["Name"];
+            DataGridViewColumn? surnameCol = dgvMain.Columns["Surname"];
+            DataGridViewColumn? employeeNoCol = dgvMain.Columns["EmployeeNo"];
+            DataGridViewColumn? licenseTypeCol = dgvMain.Columns["LicenseType"];
+            DataGridViewColumn? availabilityCol = dgvMain.Columns["Availability"];
+            DataGridViewColumn? editCol = dgvMain.Columns["Edit"];
+            DataGridViewColumn? deleteCol = dgvMain.Columns["Delete"];
+            DataGridViewColumn? driverIDCol = dgvMain.Columns["DriverID"];
+
+            if (nameCol != null && surnameCol != null && employeeNoCol != null &&
+                licenseTypeCol != null && availabilityCol != null &&
+                editCol != null && deleteCol != null && driverIDCol != null)
+            {
+                nameCol.DisplayIndex = 0;
+                surnameCol.DisplayIndex = 1;
+                employeeNoCol.DisplayIndex = 2;
+                licenseTypeCol.DisplayIndex = 3;
+                availabilityCol.DisplayIndex = 4;
+                editCol.DisplayIndex = 5;
+                deleteCol.DisplayIndex = 6;
+
+                driverIDCol.Visible = false;
+            }
+        }
+
         protected override void btnRefresh_Click(object sender, EventArgs e)
         {
             DataTable? dataTable = null;
@@ -211,30 +237,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             // Rebind
             dgvMain.DataSource = null;
             dgvMain.DataSource = _driverData;
-
-            DataGridViewColumn? nameCol = dgvMain.Columns["Name"];
-            DataGridViewColumn? surnameCol = dgvMain.Columns["Surname"];
-            DataGridViewColumn? employeeNoCol = dgvMain.Columns["EmployeeNo"];
-            DataGridViewColumn? licenseTypeCol = dgvMain.Columns["LicenseType"];
-            DataGridViewColumn? availabilityCol = dgvMain.Columns["Availability"];
-            DataGridViewColumn? editCol = dgvMain.Columns["Edit"];
-            DataGridViewColumn? deleteCol = dgvMain.Columns["Delete"];
-            DataGridViewColumn? driverIDCol = dgvMain.Columns["DriverID"];
-
-            if (nameCol != null && surnameCol != null && employeeNoCol != null &&
-                licenseTypeCol != null && availabilityCol != null &&
-                editCol != null && deleteCol != null && driverIDCol != null)
-            {
-                nameCol.DisplayIndex = 0;
-                surnameCol.DisplayIndex = 1;
-                employeeNoCol.DisplayIndex = 2;
-                licenseTypeCol.DisplayIndex = 3;
-                availabilityCol.DisplayIndex = 4;
-                editCol.DisplayIndex = 5;
-                deleteCol.DisplayIndex = 6;
-
-                driverIDCol.Visible = false;
-            }
+            SetDataGridViewColumns();
 
             MessageBox.Show("Succesfully Refreshed", "Refresh Status");
         }
@@ -245,30 +248,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             _driverData = DriversDAO.GetAllDrivers() ?? new DataTable();
             dgvMain.DataSource = null;
             dgvMain.DataSource = _driverData;
-
-            DataGridViewColumn? nameCol = dgvMain.Columns["Name"];
-            DataGridViewColumn? surnameCol = dgvMain.Columns["Surname"];
-            DataGridViewColumn? employeeNoCol = dgvMain.Columns["EmployeeNo"];
-            DataGridViewColumn? licenseTypeCol = dgvMain.Columns["LicenseType"];
-            DataGridViewColumn? availabilityCol = dgvMain.Columns["Availability"];
-            DataGridViewColumn? editCol = dgvMain.Columns["Edit"];
-            DataGridViewColumn? deleteCol = dgvMain.Columns["Delete"];
-            DataGridViewColumn? driverIDCol = dgvMain.Columns["DriverID"];
-
-            if (nameCol != null && surnameCol != null && employeeNoCol != null &&
-                licenseTypeCol != null && availabilityCol != null &&
-                editCol != null && deleteCol != null && driverIDCol != null)
-            {
-                nameCol.DisplayIndex = 0;
-                surnameCol.DisplayIndex = 1;
-                employeeNoCol.DisplayIndex = 2;
-                licenseTypeCol.DisplayIndex = 3;
-                availabilityCol.DisplayIndex = 4;
-                editCol.DisplayIndex = 5;
-                deleteCol.DisplayIndex = 6;
-
-                driverIDCol.Visible = false;
-            }
+            SetDataGridViewColumns();
 
             MessageBox.Show("Succesfully Reloaded", "Reload Status");
         }
@@ -358,7 +338,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 
         protected override void btnPrint_Click(object sender, EventArgs e)
         {
-            PrintDriverDataForm preview = new(5);
+            PrintDriverDataForm preview = new(dgvMain); // Prints only 1 page. 
 
             //Unlike Show, it blocks execution on main form till complete
             preview.ShowDialog();
