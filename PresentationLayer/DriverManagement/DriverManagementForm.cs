@@ -154,32 +154,23 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
                         if (newDriverId != -1) // Check for success
                         {
                             DataRow newRow = _driverData.NewRow();
-                            newRow[DriverColumns.DriverID] = newDriverId;
-                            newRow[DriverColumns.Name] = driverDTO.Name;
-                            newRow[DriverColumns.Surname] = driverDTO.Surname;
-                            newRow[DriverColumns.EmployeeNo] = driverDTO.EmployeeNo;
-                            newRow[DriverColumns.LicenseType] = driverDTO.LicenseType;
-                            newRow[DriverColumns.Availability] = driverDTO.Availability;
+                            PopulateDataRow(newRow, driverDTO);
+                            newRow[DriverColumns.DriverID] = newDriverId; 
 
                             _driverData.Rows.Add(newRow);
-
                             _paginationManager.UpdateRecordCount(_paginationManager.RecordCount + 1);
                             _paginationManager.GoToLastPage(); // Allows user to see successful insert
-
                         }
                     }
                     else if (form.Mode == FormMode.Edit)
                     {
                         DataRow? rowToUpdate = _driverData.Rows.Find(driverDTO.DriverID); // Assuming EmployeeNo is the primary key
-
-                        if (rowToUpdate != null)
+                        if (rowToUpdate == null)
                         {
-                            rowToUpdate[DriverColumns.Name] = driverDTO.Name;
-                            rowToUpdate[DriverColumns.Surname] = driverDTO.Surname;
-                            rowToUpdate[DriverColumns.EmployeeNo] = driverDTO.EmployeeNo;
-                            rowToUpdate[DriverColumns.LicenseType] = driverDTO.LicenseType;
-                            rowToUpdate[DriverColumns.Availability] = driverDTO.Availability;
+                            FormConsole.Instance.Log("Row not found for update.");
+                            return;
                         }
+                        PopulateDataRow(rowToUpdate, driverDTO);
 
                         DriversDAO.UpdateDriver(driverDTO);
                         form.Close();
@@ -188,6 +179,15 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 
                 form.ClearData(); //Clear form for next batch of data
             }
+        }
+
+        private static void PopulateDataRow(DataRow row, DriversDTO driverDTO)
+        {
+            row[DriverColumns.Name] = driverDTO.Name;
+            row[DriverColumns.Surname] = driverDTO.Surname;
+            row[DriverColumns.EmployeeNo] = driverDTO.EmployeeNo;
+            row[DriverColumns.LicenseType] = driverDTO.LicenseType;
+            row[DriverColumns.Availability] = driverDTO.Availability;
         }
 
         private void SetDataGridViewColumns()
