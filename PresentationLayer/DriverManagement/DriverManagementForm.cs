@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using StartSmartDeliveryForm.BusinessLogicLayer;
+using StartSmartDeliveryForm.DataLayer;
 using StartSmartDeliveryForm.DataLayer.DAOs;
 using StartSmartDeliveryForm.DataLayer.DTOs;
 using StartSmartDeliveryForm.SharedLayer;
@@ -54,7 +55,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
                 AddEditDeleteButtons();
 
                 // Hide the Primary Key Column from User
-                DataGridViewColumn? driverColumn = dgvMain.Columns["DriverID"];
+                DataGridViewColumn? driverColumn = dgvMain.Columns[DriverColumns.DriverID];
                 if (driverColumn != null)
                 {
                     driverColumn.Visible = false;
@@ -64,7 +65,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 
         protected override HashSet<string> GetExcludedColumns()
         {
-            return ["DriverID"]; // By default, exclude nothing.
+            return [DriverColumns.DriverID]; // By default, exclude nothing.
         }
 
         protected override void btnAdd_Click(object sender, EventArgs e)
@@ -78,12 +79,12 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
         {
             DataGridViewRow selectedRow = dgvMain.Rows[rowIndex];
 
-            object? DriverID = selectedRow.Cells["DriverID"].Value;
-            object? Name = selectedRow.Cells["Name"].Value;
-            object? Surname = selectedRow.Cells["Surname"].Value;
-            object? EmployeeNo = selectedRow.Cells["EmployeeNo"].Value;
-            object? LicenseType = selectedRow.Cells["LicenseType"].Value;
-            object? Availability = selectedRow.Cells["Availability"].Value;
+            object? DriverID = selectedRow.Cells[DriverColumns.DriverID].Value;
+            object? Name = selectedRow.Cells[DriverColumns.Name].Value;
+            object? Surname = selectedRow.Cells[DriverColumns.Surname].Value;
+            object? EmployeeNo = selectedRow.Cells[DriverColumns.EmployeeNo].Value;
+            object? LicenseType = selectedRow.Cells[DriverColumns.LicenseType].Value;
+            object? Availability = selectedRow.Cells[DriverColumns.Availability].Value;
 
             if (DriverID != null &&
                 Name != null &&
@@ -123,7 +124,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
         {
             DataGridViewRow selectedRow = dgvMain.Rows[rowIndex];
 
-            object? DriverID = selectedRow.Cells["DriverID"].Value;
+            object? DriverID = selectedRow.Cells[DriverColumns.DriverID].Value;
 
             DialogResult result = MessageBox.Show("Are you sure?", "Delete Row", MessageBoxButtons.YesNo);
             if (result == DialogResult.Yes && int.TryParse(DriverID?.ToString(), out int driverID))
@@ -153,12 +154,12 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
                         if (newDriverId != -1) // Check for success
                         {
                             DataRow newRow = _driverData.NewRow();
-                            newRow["DriverID"] = newDriverId;
-                            newRow["Name"] = driverDTO.Name;
-                            newRow["Surname"] = driverDTO.Surname;
-                            newRow["EmployeeNo"] = driverDTO.EmployeeNo;
-                            newRow["LicenseType"] = driverDTO.LicenseType;
-                            newRow["Availability"] = driverDTO.Availability;
+                            newRow[DriverColumns.DriverID] = newDriverId;
+                            newRow[DriverColumns.Name] = driverDTO.Name;
+                            newRow[DriverColumns.Surname] = driverDTO.Surname;
+                            newRow[DriverColumns.EmployeeNo] = driverDTO.EmployeeNo;
+                            newRow[DriverColumns.LicenseType] = driverDTO.LicenseType;
+                            newRow[DriverColumns.Availability] = driverDTO.Availability;
 
                             _driverData.Rows.Add(newRow);
 
@@ -173,11 +174,11 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 
                         if (rowToUpdate != null)
                         {
-                            rowToUpdate["Name"] = driverDTO.Name;
-                            rowToUpdate["Surname"] = driverDTO.Surname;
-                            rowToUpdate["EmployeeNo"] = driverDTO.EmployeeNo;
-                            rowToUpdate["LicenseType"] = driverDTO.LicenseType;
-                            rowToUpdate["Availability"] = driverDTO.Availability;
+                            rowToUpdate[DriverColumns.Name] = driverDTO.Name;
+                            rowToUpdate[DriverColumns.Surname] = driverDTO.Surname;
+                            rowToUpdate[DriverColumns.EmployeeNo] = driverDTO.EmployeeNo;
+                            rowToUpdate[DriverColumns.LicenseType] = driverDTO.LicenseType;
+                            rowToUpdate[DriverColumns.Availability] = driverDTO.Availability;
                         }
 
                         DriversDAO.UpdateDriver(driverDTO);
@@ -191,14 +192,14 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 
         private void SetDataGridViewColumns()
         {
-            DataGridViewColumn? nameCol = dgvMain.Columns["Name"];
-            DataGridViewColumn? surnameCol = dgvMain.Columns["Surname"];
-            DataGridViewColumn? employeeNoCol = dgvMain.Columns["EmployeeNo"];
-            DataGridViewColumn? licenseTypeCol = dgvMain.Columns["LicenseType"];
-            DataGridViewColumn? availabilityCol = dgvMain.Columns["Availability"];
-            DataGridViewColumn? editCol = dgvMain.Columns["Edit"];
-            DataGridViewColumn? deleteCol = dgvMain.Columns["Delete"];
-            DataGridViewColumn? driverIDCol = dgvMain.Columns["DriverID"];
+            DataGridViewColumn? nameCol = dgvMain.Columns[DriverColumns.Name];
+            DataGridViewColumn? surnameCol = dgvMain.Columns[DriverColumns.Surname];
+            DataGridViewColumn? employeeNoCol = dgvMain.Columns[DriverColumns.EmployeeNo];
+            DataGridViewColumn? licenseTypeCol = dgvMain.Columns[DriverColumns.LicenseType];
+            DataGridViewColumn? availabilityCol = dgvMain.Columns[DriverColumns.Availability];
+            DataGridViewColumn? editCol = dgvMain.Columns[DriverColumns.Edit];
+            DataGridViewColumn? deleteCol = dgvMain.Columns[DriverColumns.Delete];
+            DataGridViewColumn? driverIDCol = dgvMain.Columns[DriverColumns.DriverID];
 
             if (nameCol != null && surnameCol != null && employeeNoCol != null &&
                 licenseTypeCol != null && availabilityCol != null &&
@@ -256,7 +257,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 
         protected override void dgvMain_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            if (dgvMain.Columns[e.ColumnIndex].Name == "LicenseType" && e.Value != null)
+            if (dgvMain.Columns[e.ColumnIndex].Name == DriverColumns.LicenseType && e.Value != null)
             {
                 try
                 {
