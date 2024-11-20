@@ -8,24 +8,28 @@ using Microsoft.Extensions.Configuration;
 
 namespace StartSmartDeliveryForm.SharedLayer
 {
-    internal class GlobalConstants
+    public class GlobalConstants
     {
-        private static readonly IConfiguration s_configuration;
-
-        // Static constructor to initialize configuration
-        static GlobalConstants()
+        // Is not loaded until it is accessed for the first time
+        private static readonly Lazy<IConfiguration> s_configuration = new(() =>
         {
             IConfigurationBuilder builder = new ConfigurationBuilder()
-                .SetBasePath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../")) // Move up three levels from bin
+                .SetBasePath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../"))
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
-            s_configuration = builder.Build();
-        }
+            return builder.Build();
+        });
 
-        public static int s_recordLimit => int.TryParse(s_configuration["RecordLimit"], out int pageLimit)
-            ? pageLimit: 20; //Default to 20 records per page
+        public static IConfiguration Configuration => s_configuration.Value;
 
-        public static string s_connectionString => s_configuration["ConnectionStrings:StartSmartDB"]
+        public static int s_recordLimit => int.TryParse(Configuration["RecordLimit"], out int pageLimit)
+            ? pageLimit : 20;
+
+        public static string s_connectionString => Configuration["ConnectionStrings:StartSmartDB"]
             ?? throw new InvalidOperationException("Connection string not found in the configuration file.");
+
+        public static readonly Color MintGreen = Color.FromArgb(73, 173, 72);
+        public static readonly Color SoftBeige = Color.FromArgb(240, 221, 188);
     }
+
 }

@@ -28,19 +28,17 @@ namespace StartSmartDeliveryForm.PresentationLayer
             return resizedImage;
         }
 
-        public static readonly Color MintGreen = Color.FromArgb(73, 173, 72);
-        public static readonly Color SoftBeige = Color.FromArgb(240, 221, 188);
         public void SetTheme()
         {
-            tsSearchbar.BackColor = SoftBeige;
-            pnlGap.BackColor = SoftBeige;
+            tsSearchbar.BackColor = GlobalConstants.SoftBeige;
+            pnlGap.BackColor = GlobalConstants.SoftBeige;
 
-            btnFirst.BackColor = MintGreen;
-            btnPrevious.BackColor = MintGreen;
-            btnNext.BackColor = MintGreen;
-            btnLast.BackColor = MintGreen;
-            btnPrint.BackColor = SoftBeige;
-            btnAdd.BackColor = SoftBeige;
+            btnFirst.BackColor = GlobalConstants.MintGreen;
+            btnPrevious.BackColor = GlobalConstants.MintGreen;
+            btnNext.BackColor = GlobalConstants.MintGreen;
+            btnLast.BackColor = GlobalConstants.MintGreen;
+            btnPrint.BackColor = GlobalConstants.SoftBeige;
+            btnAdd.BackColor = GlobalConstants.SoftBeige;
 
             btnFirst.FlatAppearance.BorderSize = 0;
             btnPrevious.FlatAppearance.BorderSize = 0;
@@ -62,7 +60,7 @@ namespace StartSmartDeliveryForm.PresentationLayer
         }
 
         //DO NOT use this in the ManagementTemplateForm_Load.It interferes with children initialization, breaking the child designer. 
-        protected void AdjustDataGridViewHeight(DataGridView dataGridView)
+        protected static void AdjustDataGridViewHeight(DataGridView dataGridView)
         {
             // Set the maximum record limit to 30 or the global constant, whichever is smaller
             int records = Math.Min(GlobalConstants.s_recordLimit, 30); // Select the minimum of the two values
@@ -384,7 +382,7 @@ namespace StartSmartDeliveryForm.PresentationLayer
             }
             else
             {
-                btnMatchCase.BackColor = SoftBeige;
+                btnMatchCase.BackColor = GlobalConstants.SoftBeige;
             }
         }
 

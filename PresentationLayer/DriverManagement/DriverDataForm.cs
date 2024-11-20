@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using StartSmartDeliveryForm.BusinessLogicLayer;
 using StartSmartDeliveryForm.DataLayer.DTOs;
+using StartSmartDeliveryForm.SharedLayer;
 using StartSmartDeliveryForm.SharedLayer.Enums;
 
 namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
@@ -28,11 +29,10 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             InitializeComponent();
         }
 
-        public static readonly Color SoftBeige = Color.FromArgb(240, 221, 188);
         private void DriverDataForm_Load(object sender, EventArgs e)
         {
             cboAvailability.SelectedIndex = 0;  //Is true by default
-            btnSubmit.BackColor = SoftBeige;
+            btnSubmit.BackColor = GlobalConstants.SoftBeige;
             btnSubmit.FlatAppearance.BorderSize = 0;
         }
 
