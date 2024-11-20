@@ -143,7 +143,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
         {
             if (sender is DriverDataForm form)
             {
-                DriversDTO driverDTO = form.GetDriverData();
+                DriversDTO driverDTO = form.GetData();
 
                 if (driverDTO != null)
                 {

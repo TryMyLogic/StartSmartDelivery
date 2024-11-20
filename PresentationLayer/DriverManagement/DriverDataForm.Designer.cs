@@ -37,7 +37,6 @@
             label4 = new Label();
             label5 = new Label();
             cboAvailability = new ComboBox();
-            btnSubmit = new Button();
             cboLicenseType = new ComboBox();
             SuspendLayout();
             // 
@@ -80,7 +79,7 @@
             label3.AutoSize = true;
             label3.Location = new Point(167, 62);
             label3.Name = "label3";
-            label3.Size = new Size(70, 15);
+            label3.Size = new Size(71, 15);
             label3.TabIndex = 6;
             label3.Text = "LicenseType";
             // 
@@ -121,18 +120,6 @@
             cboAvailability.Size = new Size(132, 23);
             cboAvailability.TabIndex = 9;
             // 
-            // btnSubmit
-            // 
-            btnSubmit.FlatStyle = FlatStyle.Flat;
-            btnSubmit.Location = new Point(112, 156);
-            btnSubmit.Margin = new Padding(3, 2, 3, 2);
-            btnSubmit.Name = "btnSubmit";
-            btnSubmit.Size = new Size(82, 22);
-            btnSubmit.TabIndex = 10;
-            btnSubmit.Text = "Submit";
-            btnSubmit.UseVisualStyleBackColor = true;
-            btnSubmit.Click += btnSubmit_Click;
-            // 
             // cboLicenseType
             // 
             cboLicenseType.FlatStyle = FlatStyle.Flat;
@@ -150,7 +137,6 @@
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(312, 188);
             Controls.Add(cboLicenseType);
-            Controls.Add(btnSubmit);
             Controls.Add(cboAvailability);
             Controls.Add(label5);
             Controls.Add(label3);
@@ -179,7 +165,6 @@
         private Label label4;
         private Label label5;
         private ComboBox cboAvailability;
-        private Button btnSubmit;
         private ComboBox cboLicenseType;
     }
 }

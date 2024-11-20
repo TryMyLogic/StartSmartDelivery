@@ -8,21 +8,17 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using StartSmartDeliveryForm.BusinessLogicLayer;
+using StartSmartDeliveryForm.DataLayer.DAOs;
 using StartSmartDeliveryForm.DataLayer.DTOs;
 using StartSmartDeliveryForm.SharedLayer;
 using StartSmartDeliveryForm.SharedLayer.Enums;
 
 namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 {
-    public enum FormMode
+
+    public partial class DriverDataForm : DataFormTemplate
     {
-        Add,
-        Edit
-    }
-    public partial class DriverDataForm : Form
-    {
-        public int DriverId { get; set; }
-        public FormMode Mode { get; set; }
+        public int DriverID { get; set; }
 
         public DriverDataForm()
         {
@@ -32,22 +28,9 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
         private void DriverDataForm_Load(object sender, EventArgs e)
         {
             cboAvailability.SelectedIndex = 0;  //Is true by default
-            btnSubmit.BackColor = GlobalConstants.SoftBeige;
-            btnSubmit.FlatAppearance.BorderSize = 0;
         }
 
-        internal void InitializeEditing(DriversDTO DriverData)
-        {
-            DriverId = DriverData.DriverID;
-            // Populate form with existing driver data for editing
-            txtName.Text = DriverData.Name;
-            txtSurname.Text = DriverData.Surname;
-            txtEmployeeNo.Text = DriverData.EmployeeNo;
-            cboLicenseType.SelectedItem = DriverData.LicenseType.ToString();
-            cboAvailability.SelectedItem = DriverData.Availability.ToString();
-        }
-
-        private bool ValidForm()
+        protected override bool ValidForm()
         {
             if (!DataFormValidator.IsValidString(txtName.Text, "Name")) return false;
 
@@ -69,17 +52,19 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             return true;
         }
 
-        public delegate void SubmitEventHandler(object sender, EventArgs e);
-        public event SubmitEventHandler? SubmitClicked; 
-        private void btnSubmit_Click(object sender, EventArgs e)
+        internal override void InitializeEditing(object DriverData)
         {
-            if (ValidForm())
-            {
-                SubmitClicked?.Invoke(this, EventArgs.Empty);
-            }
+            DriversDTO driverData = (DriversDTO)DriverData;
+            DriverID = driverData.DriverID;
+            // Populate form with existing driver data for editing
+            txtName.Text = driverData.Name;
+            txtSurname.Text = driverData.Surname;
+            txtEmployeeNo.Text = driverData.EmployeeNo;
+            cboLicenseType.SelectedItem = driverData.LicenseType.ToString();
+            cboAvailability.SelectedItem = driverData.Availability.ToString();
         }
 
-        internal void ClearData()
+        internal override void ClearData()
         {
             txtName.Clear();
             txtSurname.Clear();
@@ -88,12 +73,11 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             cboAvailability.SelectedIndex = 0;
         }
 
-
-        internal DriversDTO GetDriverData()
+        internal override DriversDTO GetData()
         {
             //Valid form ensures data here is never null and can be succefully parsed
             return new DriversDTO(
-                DriverId,
+                DriverID,
                 txtName.Text,
                 txtSurname.Text,
                 txtEmployeeNo.Text,
