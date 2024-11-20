@@ -174,6 +174,20 @@ namespace StartSmartDeliveryForm.PresentationLayer
             }
         }
 
+        private void btnMatchCase_Click(object sender, EventArgs e)
+        {
+            isCaseSensitive = !isCaseSensitive;
+
+            if (isCaseSensitive)
+            {
+                btnMatchCase.BackColor = Color.White;
+            }
+            else
+            {
+                btnMatchCase.BackColor = GlobalConstants.SoftBeige;
+            }
+        }
+
         public bool isCaseSensitive = false; //Not case sensitive by default
         public void ApplyFilter(DataTable dataTable, string selectedOption, string? searchTerm)
         {
@@ -270,77 +284,6 @@ namespace StartSmartDeliveryForm.PresentationLayer
             return [];
         }
 
-        //Required by Children:
-        protected virtual void btnAdd_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        protected virtual void btnEdit_Click(int RowIndex)
-        {
-
-        }
-
-        protected virtual void btnDelete_Click(int RowIndex)
-        {
-
-        }
-
-        protected virtual void btnRefresh_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        protected virtual void reloadToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        protected virtual void rollbackToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        protected virtual void printAllPagesByRowCountToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        protected virtual void dgvMain_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
-        {
-
-        }
-
-        protected virtual void btnFirst_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        protected virtual void btnPrevious_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        protected virtual void btnNext_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        protected virtual void btnLast_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        protected virtual void btnGotoPage_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        protected virtual void btnPrint_Click(object sender, EventArgs e)
-        {
-
-        }
-
         private void txtSearchBox_Enter(object sender, EventArgs e)
         {
             if (txtSearchBox.Text == "Value for search")
@@ -359,7 +302,6 @@ namespace StartSmartDeliveryForm.PresentationLayer
             }
         }
 
-
         private void txtStartPage_Enter(object sender, EventArgs e)
         {
             if (sender is System.Windows.Forms.TextBox textBox)
@@ -368,22 +310,23 @@ namespace StartSmartDeliveryForm.PresentationLayer
             }
         }
 
-        private void btnMatchCase_Click(object sender, EventArgs e)
-        {
-            isCaseSensitive = !isCaseSensitive;
-
-            if (isCaseSensitive)
-            {
-                btnMatchCase.BackColor = Color.White;
-            }
-            else
-            {
-                btnMatchCase.BackColor = GlobalConstants.SoftBeige;
-            }
-        }
+        //Required by Children:
+        protected virtual void btnAdd_Click(object sender, EventArgs e) { }
+        protected virtual void btnEdit_Click(int RowIndex) { }
+        protected virtual void btnDelete_Click(int RowIndex) { }
+        protected virtual void btnRefresh_Click(object sender, EventArgs e) { }
+        protected virtual void reloadToolStripMenuItem_Click(object sender, EventArgs e) { }
+        protected virtual void rollbackToolStripMenuItem_Click(object sender, EventArgs e) { }
+        protected virtual void printAllPagesByRowCountToolStripMenuItem_Click(object sender, EventArgs e) { }
+        protected virtual void dgvMain_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e) { }
+        protected virtual void btnFirst_Click(object sender, EventArgs e) { }
+        protected virtual void btnPrevious_Click(object sender, EventArgs e) { }
+        protected virtual void btnNext_Click(object sender, EventArgs e) { }
+        protected virtual void btnLast_Click(object sender, EventArgs e) { }
+        protected virtual void btnGotoPage_Click(object sender, EventArgs e) { }
+        protected virtual void btnPrint_Click(object sender, EventArgs e) { }
 
         //Required by xUnit Tests. Will only be usable during development
-
 #if DEBUG
         public void OverrideDatagridView(DataTable table)
         {
@@ -395,8 +338,6 @@ namespace StartSmartDeliveryForm.PresentationLayer
         {
             return (DataTable)dgvMain.DataSource;
         }
-
-      
 #endif
     }
 }
