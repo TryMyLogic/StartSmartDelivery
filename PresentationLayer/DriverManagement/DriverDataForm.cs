@@ -38,7 +38,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 
         internal void InitializeEditing(DriversDTO DriverData)
         {
-            DriverId = DriverData.DriverId;
+            DriverId = DriverData.DriverID;
             // Populate form with existing driver data for editing
             txtName.Text = DriverData.Name;
             txtSurname.Text = DriverData.Surname;

@@ -16,7 +16,7 @@ namespace StartSmartDeliveryForm.DataLayer.DTOs
     */
 
     internal record DriversDTO(
-      int DriverId, 
+      int DriverID, 
       string Name,
       string Surname,
       string EmployeeNo,

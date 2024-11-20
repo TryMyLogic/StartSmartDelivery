@@ -160,7 +160,6 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
                             newRow["LicenseType"] = driverDTO.LicenseType;
                             newRow["Availability"] = driverDTO.Availability;
 
-                            FormConsole.Instance.Log($"Before: {_driverData.Rows.Count}");
                             _driverData.Rows.Add(newRow);
 
                             _paginationManager.UpdateRecordCount(_paginationManager.RecordCount + 1);
@@ -170,7 +169,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
                     }
                     else if (form.Mode == FormMode.Edit)
                     {
-                        DataRow? rowToUpdate = _driverData.Rows.Find(driverDTO.DriverId); // Assuming EmployeeNo is the primary key
+                        DataRow? rowToUpdate = _driverData.Rows.Find(driverDTO.DriverID); // Assuming EmployeeNo is the primary key
 
                         if (rowToUpdate != null)
                         {

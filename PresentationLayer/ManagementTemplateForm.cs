@@ -142,10 +142,6 @@ namespace StartSmartDeliveryForm.PresentationLayer
             // Add Edit and Delete buttons
             dgvMain.Columns.Add(editButtonColumn);
             dgvMain.Columns.Add(deleteButtonColumn);
-
-            // Prevent buttons from getting too large
-            //   dgvMain.Columns["Edit"].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
-            //  dgvMain.Columns["Delete"].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
         }
 
         private void dgvMain_CellContentClick(object sender, DataGridViewCellEventArgs e)
