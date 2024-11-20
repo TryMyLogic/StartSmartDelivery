@@ -49,46 +49,22 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 
         private bool ValidForm()
         {
+            if (!DataFormValidator.IsValidString(txtName.Text, "Name")) return false;
 
-            if (string.IsNullOrWhiteSpace(txtName.Text))
-            {
-                MessageBox.Show("Name field cannot be empty.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
+            if (!DataFormValidator.IsValidString(txtSurname.Text, "Surname")) return false;
 
-            if (string.IsNullOrWhiteSpace(txtSurname.Text))
+            if (!DataFormValidator.IsValidString(txtEmployeeNo.Text, "EmployeeNo"))
             {
-                MessageBox.Show("Surname field cannot be empty.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
-
-            if (string.IsNullOrWhiteSpace(txtEmployeeNo.Text))
-            {
-                MessageBox.Show("Employee No field cannot be empty.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
-            else
-            {
-                // Only check uniqueness if the field isnt empty && Mode is not edit
+                // Only check uniqueness if the field isn't empty && Mode is not edit
                 if (Mode == FormMode.Add && !Driver.IsEmployeeNoUnique(txtEmployeeNo.Text))
                 {
                     MessageBox.Show("Employee No is not unique.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return false;
                 }
-
             }
 
-            if (!Enum.TryParse<LicenseType>(cboLicenseType.Text, out _))
-            {
-                MessageBox.Show("Please select a valid License Type.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
-
-            if (!bool.TryParse(cboAvailability.Text, out _))
-            {
-                MessageBox.Show("Availability must be 'True' or 'False'.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
+            if (!DataFormValidator.IsValidEnumValue<LicenseType>(cboLicenseType.Text, "License Type")) return false;
+            if (!DataFormValidator.IsValidBoolValue(cboAvailability.Text, "Availability")) return false;
 
             return true;
         }
