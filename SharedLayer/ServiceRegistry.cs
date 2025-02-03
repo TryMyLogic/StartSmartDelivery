@@ -30,10 +30,12 @@ namespace StartSmartDeliveryForm.SharedLayer
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .Build();
 
+            string selectedConnectionString = configuration.GetConnectionString("StartSmartDB");
+
             // Dependency injection container
             ServiceProvider serviceProvider = new ServiceCollection()
                 .AddSingleton<IConfiguration>(configuration)  // Inject configuration globally
-                .AddScoped<DriversDAO>()
+                .AddScoped<DriversDAO>(provider => new DriversDAO(configuration, selectedConnectionString))
                 .AddScoped<PaginationManager>()
                 .AddScoped<DriverManagementForm>()
                 .AddScoped<PrintDriverDataForm>()

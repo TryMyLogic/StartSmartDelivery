@@ -19,10 +19,12 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
     public partial class DriverDataForm : DataFormTemplate
     {
         public int DriverID { get; set; }
+        private readonly DriversDAO _driversDAO;
 
-        public DriverDataForm()
+        public DriverDataForm(DriversDAO driversDAO)
         {
             InitializeComponent();
+            _driversDAO = driversDAO;
         }
 
         private void DriverDataForm_Load(object sender, EventArgs e)
@@ -32,14 +34,17 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 
         protected override bool ValidForm()
         {
+
             if (!DataFormValidator.IsValidString(txtName.Text, "Name")) return false;
 
             if (!DataFormValidator.IsValidString(txtSurname.Text, "Surname")) return false;
 
             if (!DataFormValidator.IsValidString(txtEmployeeNo.Text, "EmployeeNo"))
             {
+                Driver driver = new(_driversDAO);
+
                 // Only check uniqueness if the field isn't empty && Mode is not edit
-                if (Mode == FormMode.Add && !Driver.IsEmployeeNoUnique(txtEmployeeNo.Text))
+                if (Mode == FormMode.Add && !driver.IsEmployeeNoUnique(txtEmployeeNo.Text))
                 {
                     MessageBox.Show("Employee No is not unique.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return false;

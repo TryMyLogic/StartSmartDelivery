@@ -71,7 +71,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 
         protected override void btnAdd_Click(object sender, EventArgs e)
         {
-            DriverDataForm driverDataForm = new();
+            DriverDataForm driverDataForm = new(_driversDAO);
             driverDataForm.SubmitClicked += DriverDataForm_SubmitClicked;
             driverDataForm.Show();
         }
@@ -106,7 +106,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
                     availability
                 );
 
-                DriverDataForm driverDataForm = new()
+                DriverDataForm driverDataForm = new(_driversDAO)
                 {
                     Mode = FormMode.Edit
                 };

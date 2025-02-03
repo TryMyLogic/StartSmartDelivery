@@ -17,14 +17,10 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
     Provides an interface to interact with the data source (such as a database).
     Decouples the data access code from the rest of the application
     */
-    public class DriversDAO
+    public class DriversDAO(IConfiguration configuration, string connectionString = null)
     {
-        private readonly string _connectionString;
-        public DriversDAO(IConfiguration configuration)
-        {
-            _connectionString = configuration["ConnectionStrings:StartSmartDB"]
-                                 ?? throw new InvalidOperationException("Connection string not found.");
-        }
+        private readonly string _connectionString = connectionString ?? configuration["ConnectionStrings:StartSmartDB"]
+                       ?? throw new InvalidOperationException("Connection string not found.");
 
         public DataTable? GetAllDrivers()
         {
