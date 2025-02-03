@@ -1,3 +1,6 @@
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using StartSmartDeliveryForm.DataLayer.DAOs;
 using StartSmartDeliveryForm.PresentationLayer;
 using StartSmartDeliveryForm.PresentationLayer.DriverManagement;
 using StartSmartDeliveryForm.SharedLayer;
@@ -11,7 +14,13 @@ namespace StartSmartDeliveryForm
         {
             ApplicationConfiguration.Initialize();
             FormConsole.Instance.Show();
-            Application.Run(new DriverManagementForm());
+
+            IServiceProvider serviceRegistry = ServiceRegistry.RegisterServices();
+
+            // IoC in action
+            DriverManagementForm driverManagementForm = serviceRegistry.GetRequiredService<DriverManagementForm>();
+
+            Application.Run(driverManagementForm);
         }
     }
 }

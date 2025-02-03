@@ -11,6 +11,7 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
 {
     internal class PaginationManager
     {
+        private readonly DriversDAO _driversDAO;
         private readonly int _recordsPerPage = GlobalConstants.s_recordLimit;
         private readonly string _tableName;
 
@@ -19,10 +20,11 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
         public int TotalPages { get; private set; } = 1;
         public int RecordCount { get; private set; } = 0;
 
-        public PaginationManager(string tableName)
+        public PaginationManager(string tableName, DriversDAO driversDAO)
         {
+            _driversDAO = driversDAO;
             _tableName = tableName;
-            RecordCount = GetTotalRecordCount();
+            RecordCount = GetTotalRecordCount();  // This will use _driversDAO
             TotalPages = (int)Math.Ceiling((double)RecordCount / _recordsPerPage);
         }
 
@@ -36,7 +38,7 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
         {
             if (_tableName == "Drivers")
             {
-                return DriversDAO.GetRecordCount();
+                return _driversDAO.GetRecordCount();
             }
             else
             {

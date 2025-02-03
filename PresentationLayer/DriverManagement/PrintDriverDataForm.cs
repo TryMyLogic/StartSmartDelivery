@@ -9,43 +9,45 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using StartSmartDeliveryForm.DataLayer.DAOs;
+using StartSmartDeliveryForm.DataLayer.DTOs;
 using StartSmartDeliveryForm.SharedLayer;
 
 namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 {
     public partial class PrintDriverDataForm : Form
     {
+        private readonly DriversDAO _driversDAO;
         private int _currentPage = 1;
         private readonly int _totalPages;
         private readonly DataGridView? _dataGridView;
 
         // TODO - Print all databases pages, ensuring each page contains as many records (within reason)
-        public PrintDriverDataForm()
+        public PrintDriverDataForm(DriversDAO driversDAO)
         {
             InitializeComponent();
             printPreviewControl.Document = printDocument;
+            _driversDAO = driversDAO;
 
             // _totalPages = (int)Math.Ceiling((double)_recordsCount / GlobalConstants.s_recordLimit);
         }
 
         // Used for printing all the database pages, according to the appsettings row count
-        public PrintDriverDataForm(int totalPages)
+        public PrintDriverDataForm(int totalPages,DriversDAO driversDAO)
         {
             InitializeComponent();
             printPreviewControl.Document = printDocument;
+            _driversDAO = driversDAO;
 
             _totalPages = totalPages;
 
         }
 
         // Used for printing a specific page
-        public PrintDriverDataForm(DataGridView dgvMain)
+        public PrintDriverDataForm(DataGridView dgvMain, DriversDAO driversDAO)
+            : this(driversDAO) // Call the main constructor to inject the DAO
         {
-            InitializeComponent();
-            printPreviewControl.Document = printDocument;
-
             _dataGridView = dgvMain;
-            _totalPages = 1;
+            _totalPages = 1;  // Or calculate based on the data
         }
 
         private void PrintDriverDataForm_Load(object sender, EventArgs e)
@@ -81,7 +83,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             }
             else
             {
-                dataTable = DriversDAO.GetDriversAtPage(_currentPage);
+                dataTable = _driversDAO.GetDriversAtPage(_currentPage);
                 if (dataTable == null)
                 {
                     FormConsole.Instance.Log("GetDriversAtPage returned null datatable");

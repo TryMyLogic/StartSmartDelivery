@@ -15,8 +15,8 @@ namespace StartSmartDeliveryForm.DataLayer.DTOs
     Promotes a clear separation between the data structure and business logic, enhancing maintainability and clarity.
     */
 
-    internal record DriversDTO(
-      int DriverID, 
+    public record DriversDTO(
+      int DriverID,
       string Name,
       string Surname,
       string EmployeeNo,

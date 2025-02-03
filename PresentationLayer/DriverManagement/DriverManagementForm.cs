@@ -19,21 +19,22 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 {
     public partial class DriverManagementForm : ManagementTemplateForm
     {
-
+        private readonly DriversDAO _driversDAO;
         private DataTable _driverData;
         private readonly PaginationManager _paginationManager;
-        public DriverManagementForm()
+        public DriverManagementForm(DriversDAO driversDAO)
         {
             InitializeComponent();
+            _driversDAO = driversDAO;
             _driverData = new DataTable(); //Empty table by default
 
-            _paginationManager = new PaginationManager("Drivers");
+            _paginationManager = new PaginationManager("Drivers", _driversDAO);
             _paginationManager.PageChanged += OnPageChanged;
         }
 
         public void OnPageChanged(int currentPage)
         {
-            _driverData = DriversDAO.GetDriversAtPage(currentPage) ?? new DataTable();
+            _driverData = _driversDAO.GetDriversAtPage(currentPage) ?? new DataTable();
             dgvMain.DataSource = _driverData;
             txtStartPage.Text = $"{_paginationManager.CurrentPage}";
             lblEndPage.Text = $"/{_paginationManager.TotalPages}";
@@ -130,7 +131,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             if (result == DialogResult.Yes && int.TryParse(DriverID?.ToString(), out int driverID))
             {
                 _driverData.Rows.RemoveAt(rowIndex);
-                DriversDAO.DeleteDriver(driverID);
+                _driversDAO.DeleteDriver(driverID);
 
                 _paginationManager.UpdateRecordCount(_paginationManager.RecordCount - 1);
                 _paginationManager.EnsureValidPage();
@@ -149,13 +150,13 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
                 {
                     if (form.Mode == FormMode.Add)
                     {
-                        int newDriverId = DriversDAO.InsertDriver(driverDTO);
+                        int newDriverId = _driversDAO.InsertDriver(driverDTO);
 
                         if (newDriverId != -1) // Check for success
                         {
                             DataRow newRow = _driverData.NewRow();
                             PopulateDataRow(newRow, driverDTO);
-                            newRow[DriverColumns.DriverID] = newDriverId; 
+                            newRow[DriverColumns.DriverID] = newDriverId;
 
                             _driverData.Rows.Add(newRow);
                             _paginationManager.UpdateRecordCount(_paginationManager.RecordCount + 1);
@@ -172,7 +173,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
                         }
                         PopulateDataRow(rowToUpdate, driverDTO);
 
-                        DriversDAO.UpdateDriver(driverDTO);
+                        _driversDAO.UpdateDriver(driverDTO);
                         form.Close();
                     }
                 }
@@ -242,7 +243,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
         protected override void reloadToolStripMenuItem_Click(object sender, EventArgs e)
         {
             //Refetch data and rebind
-            _driverData = DriversDAO.GetAllDrivers() ?? new DataTable();
+            _driverData = _driversDAO.GetAllDrivers() ?? new DataTable();
             dgvMain.DataSource = null;
             dgvMain.DataSource = _driverData;
             SetDataGridViewColumns();
@@ -314,7 +315,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 
         protected override void btnPrint_Click(object sender, EventArgs e)
         {
-            PrintDriverDataForm preview = new(dgvMain); // Prints only 1 page. 
+            PrintDriverDataForm preview = new(dgvMain, _driversDAO); // Prints only 1 page. 
 
             //Unlike Show, it blocks execution on main form till complete
             preview.ShowDialog();

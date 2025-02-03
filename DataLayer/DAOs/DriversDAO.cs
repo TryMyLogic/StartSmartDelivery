@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
 using StartSmartDeliveryForm.DataLayer.DTOs;
 using StartSmartDeliveryForm.SharedLayer;
 
@@ -16,14 +17,20 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
     Provides an interface to interact with the data source (such as a database).
     Decouples the data access code from the rest of the application
     */
-    internal static class DriversDAO
+    public class DriversDAO
     {
+        private readonly string _connectionString;
+        public DriversDAO(IConfiguration configuration)
+        {
+            _connectionString = configuration["ConnectionStrings:StartSmartDB"]
+                                 ?? throw new InvalidOperationException("Connection string not found.");
+        }
 
-        public static DataTable? GetAllDrivers()
+        public DataTable? GetAllDrivers()
         {
             DataTable Dt = new();
 
-            using (SqlConnection Connection = new(GlobalConstants.s_connectionString))
+            using (SqlConnection Connection = new(_connectionString))
             {
                 try
                 {
@@ -59,9 +66,9 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             return Dt;
         }
 
-        public static int GetEmployeeNoCount(string EmployeeNo)
+        public int GetEmployeeNoCount(string EmployeeNo)
         {
-            using (SqlConnection Connection = new(GlobalConstants.s_connectionString))
+            using (SqlConnection Connection = new(_connectionString))
             {
                 try
                 {
@@ -88,9 +95,9 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             }
         }
 
-        public static void DeleteDriver(int DriverID)
+        public void DeleteDriver(int DriverID)
         {
-            using (SqlConnection Connection = new(GlobalConstants.s_connectionString))
+            using (SqlConnection Connection = new(_connectionString))
             {
                 try
                 {
@@ -120,9 +127,9 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             }
         }
 
-        public static int InsertDriver(DriversDTO driver)
+        public int InsertDriver(DriversDTO driver)
         {
-            using (SqlConnection Connection = new(GlobalConstants.s_connectionString))
+            using (SqlConnection Connection = new(_connectionString))
             {
                 try
                 {
@@ -155,9 +162,9 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             }
         }
 
-        public static void UpdateDriver(DriversDTO driver)
+        public void UpdateDriver(DriversDTO driver)
         {
-            using (SqlConnection Connection = new(GlobalConstants.s_connectionString))
+            using (SqlConnection Connection = new(_connectionString))
             {
                 try
                 {
@@ -184,13 +191,13 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             }
         }
 
-        public static DataTable? GetDriversAtPage(int Page)
+        public DataTable? GetDriversAtPage(int Page)
         {
 
             int Offset = (Page - 1) * GlobalConstants.s_recordLimit;
             DataTable Dt = new();
 
-            using (SqlConnection Connection = new(GlobalConstants.s_connectionString))
+            using (SqlConnection Connection = new(_connectionString))
             {
                 try
                 {
@@ -224,13 +231,13 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             return Dt;
         }
 
-        internal static int GetRecordCount()
+        internal int GetRecordCount()
         {
             int recordsCount = 0;
 
             string query = "SELECT COUNT(DriverID) FROM Drivers";
 
-            using (SqlConnection connection = new(GlobalConstants.s_connectionString)) // Ensure s_connectionString is defined
+            using (SqlConnection connection = new(_connectionString)) // Ensure s_connectionString is defined
             {
                 try
                 {
