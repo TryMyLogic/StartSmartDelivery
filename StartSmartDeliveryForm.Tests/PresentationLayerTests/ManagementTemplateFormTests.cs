@@ -11,16 +11,11 @@ using StartSmartDeliveryForm.SharedLayer;
 using StartSmartDeliveryForm.SharedLayer.Enums;
 using Xunit.Abstractions;
 
-namespace StartSmartDeliveryForm.Tests
+namespace StartSmartDeliveryForm.Tests.PresentationLayerTests
 {
-    public class ManagementTemplateTests
+    public class ManagementTemplateFormTests(ITestOutputHelper output)
     {
-        private readonly ITestOutputHelper _output;
-
-        public ManagementTemplateTests(ITestOutputHelper output)
-        {
-            _output = output;
-        }
+        private readonly ITestOutputHelper _output = output;
 
         [Theory]
         // Valid cases for filtering

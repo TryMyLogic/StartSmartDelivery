@@ -23,19 +23,20 @@ namespace StartSmartDeliveryForm.SharedLayer
         Dependency Injection (DI) is a technique where dependencies are provided to a class rather
         than the class creating them itself. This improves flexibility, testability, and maintainability.
         */
-        public static IServiceProvider RegisterServices()
+        public static IServiceProvider RegisterServices(string conStringName = "StartSmartDB")
         {
             IConfiguration configuration = new ConfigurationBuilder()
                 .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .Build();
 
-            string selectedConnectionString = configuration.GetConnectionString("StartSmartDB");
+            string? selectedConnectionString = configuration.GetConnectionString(conStringName);
 
             // Dependency injection container
             ServiceProvider serviceProvider = new ServiceCollection()
                 .AddSingleton<IConfiguration>(configuration)  // Inject configuration globally
-                .AddScoped<DriversDAO>(provider => new DriversDAO(configuration, selectedConnectionString))
+                .AddSingleton<string>(selectedConnectionString!) // Makes con string available for tests
+                .AddScoped<DriversDAO>(provider => new DriversDAO(configuration, selectedConnectionString!))
                 .AddScoped<PaginationManager>()
                 .AddScoped<DriverManagementForm>()
                 .AddScoped<PrintDriverDataForm>()
