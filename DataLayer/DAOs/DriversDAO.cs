@@ -48,7 +48,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
                                 throw new InvalidOperationException("The DataTable must contain the 'DriverID' column.");
                             }
 
-                           
+
                         }
                     }
                 }
@@ -91,7 +91,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             }
         }
 
-        public void DeleteDriver(int DriverID)
+        public void DeleteDriver(int DriverID, SqlTransaction transaction = null)
         {
             using (SqlConnection Connection = new(_connectionString))
             {
@@ -99,12 +99,17 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
                 {
                     string Query = "DELETE FROM Drivers WHERE DriverID = @DriverID";
 
-                    using (SqlCommand command = new(Query, Connection))
+                    using (SqlCommand Command = new(Query, Connection))
                     {
-                        command.Parameters.Add(new SqlParameter("@DriverID", SqlDbType.Int) { Value = DriverID });
+                        Command.Parameters.Add(new SqlParameter("@DriverID", SqlDbType.Int) { Value = DriverID });
+
+                        if (transaction != null)
+                        {
+                            Command.Transaction = transaction;
+                        }
 
                         Connection.Open();
-                        int RowsAffected = command.ExecuteNonQuery();
+                        int RowsAffected = Command.ExecuteNonQuery();
 
                         if (RowsAffected > 0)
                         {
@@ -123,16 +128,16 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             }
         }
 
-        public int InsertDriver(DriversDTO driver)
+        public int InsertDriver(DriversDTO driver, SqlTransaction transaction = null)
         {
             using (SqlConnection Connection = new(_connectionString))
             {
                 try
                 {
                     string Query = @"
-                INSERT INTO Drivers (Name, Surname, EmployeeNo, LicenseType, Availability) 
-                VALUES (@Name, @Surname, @EmployeeNo, @LicenseType, @Availability);
-                SELECT CAST(SCOPE_IDENTITY() AS int);"; // Get the new DriverID
+          INSERT INTO Drivers (Name, Surname, EmployeeNo, LicenseType, Availability) 
+          VALUES (@Name, @Surname, @EmployeeNo, @LicenseType, @Availability);
+          SELECT CAST(SCOPE_IDENTITY() AS int);"; // Get the new DriverID
 
                     using (SqlCommand Command = new(Query, Connection))
                     {
@@ -142,6 +147,11 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
                         Command.Parameters.Add(new SqlParameter("@EmployeeNo", SqlDbType.NVarChar, 50) { Value = driver.EmployeeNo });
                         Command.Parameters.Add(new SqlParameter("@LicenseType", SqlDbType.Int) { Value = (int)driver.LicenseType });
                         Command.Parameters.Add(new SqlParameter("@Availability", SqlDbType.Bit) { Value = driver.Availability });
+
+                        if (transaction != null)
+                        {
+                            Command.Transaction = transaction;
+                        }
 
                         Connection.Open();
                         int newDriverId = (int)Command.ExecuteScalar();
@@ -158,7 +168,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             }
         }
 
-        public void UpdateDriver(DriversDTO driver)
+        public void UpdateDriver(DriversDTO driver, SqlTransaction transaction = null)
         {
             using (SqlConnection Connection = new(_connectionString))
             {
@@ -174,6 +184,11 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
                         Command.Parameters.Add(new SqlParameter("@EmployeeNo", SqlDbType.NVarChar, 50) { Value = driver.EmployeeNo });
                         Command.Parameters.Add(new SqlParameter("@LicenseType", SqlDbType.Int) { Value = (int)driver.LicenseType });
                         Command.Parameters.Add(new SqlParameter("@Availability", SqlDbType.Bit) { Value = driver.Availability });
+
+                        if (transaction != null)
+                        {
+                            Command.Transaction = transaction;
+                        }
 
                         Connection.Open();
                         int RowsAffected = Command.ExecuteNonQuery();
@@ -251,6 +266,31 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             }
 
             return recordsCount;
+        }
+
+        public DataTable GetDriverByID(int driverID)
+        {
+            DataTable driverDataTable = new();
+            string query = "SELECT DriverID, Name, Surname, EmployeeNo, LicenseType, Availability FROM Drivers WHERE DriverID = @DriverID";
+
+            using (SqlConnection connection = new(_connectionString))
+            {
+                try
+                {
+                    using (SqlDataAdapter adapter = new(query, connection))
+                    {
+                        adapter.SelectCommand.Parameters.AddWithValue("@DriverID", driverID);
+                        connection.Open();
+                        adapter.Fill(driverDataTable);
+                    }
+                }
+                catch (SqlException ex)
+                {
+                    FormConsole.Instance.Log("Error retrieving driver by ID: " + ex.Message);
+                }
+            }
+
+            return driverDataTable;
         }
     }
 }
