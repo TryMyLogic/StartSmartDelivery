@@ -14,6 +14,8 @@ using Xunit.Abstractions;
 
 namespace StartSmartDeliveryForm.Tests
 {
+
+    [Collection("Sequential")]
     public class DriversDAOTests : IClassFixture<DatabaseFixture>
     {
         private readonly ITestOutputHelper _output;
@@ -72,6 +74,12 @@ namespace StartSmartDeliveryForm.Tests
             Assert.Empty(result.Rows);
         }
 
+        /* Lessons Learnt:
+        1. ADO.NET transactions require all methods to use the same connection and transaction.
+        2. Auto-increment seeds remain incremented after rollback; reseeding is necessary.
+        3. Methods must be able to read uncommitted data during rollback transactions.
+        4. Tests should run sequentially to avoid issues like unexpected seed numbers.      
+        */
         [Theory]
         [InlineData("Test", "Insert", "EMP010", LicenseType.Code14, false)]
         public void InsertDriver_ShouldInsertDataToDB(string Name, string Surname, string EmployeeNo, LicenseType LicenseType, bool Availability)
@@ -80,8 +88,9 @@ namespace StartSmartDeliveryForm.Tests
             {
                 connection.Open();
 
-                using (SqlTransaction transaction = connection.BeginTransaction())
+                using (SqlTransaction transaction = connection.BeginTransaction(IsolationLevel.ReadUncommitted))
                 {
+
                     try
                     {
                         // Arrange
@@ -95,31 +104,52 @@ namespace StartSmartDeliveryForm.Tests
                         );
 
                         // Act
-                        _driversDAO.InsertDriver(mockDriver);
+                        int DriverID = _driversDAO.InsertDriver(mockDriver, connection, transaction);
+                        _output.WriteLine($"Inserted: {DriverID}");
 
                         // Assert
-                        DataTable insertedDriver = _driversDAO.GetDriverByID(6); // Assumming test database always has 5 records
-                        DataRow driver = insertedDriver.Rows[0];
+                        DataTable insertedDriver = _driversDAO.GetDriverByID(6, connection, transaction); // Assumming test database always has 5 records
+                        if (insertedDriver != null && insertedDriver.Rows.Count > 0)
+                        {
+                            DataRow driver = insertedDriver.Rows[0];
 
-                        Assert.Equal(mockDriver.DriverID, driver["DriverID"]);
-                        Assert.Equal(mockDriver.Name, driver["Name"]);
-                        Assert.Equal(mockDriver.Surname, driver["Surname"]);
-                        Assert.Equal(mockDriver.EmployeeNo, driver["EmployeeNo"]);
-                        Assert.Equal((int)mockDriver.LicenseType, driver["LicenseType"]);
-                        Assert.Equal(mockDriver.Availability, driver["Availability"]);
+                            Assert.Equal(mockDriver.DriverID, driver["DriverID"]);
+                            Assert.Equal(mockDriver.Name, driver["Name"]);
+                            Assert.Equal(mockDriver.Surname, driver["Surname"]);
+                            Assert.Equal(mockDriver.EmployeeNo, driver["EmployeeNo"]);
+                            Assert.Equal((int)mockDriver.LicenseType, driver["LicenseType"]);
+                            Assert.Equal(mockDriver.Availability, driver["Availability"]);
 
-                        _output.WriteLine($"Driver Info: ID = {driver["DriverID"]}, Name = {driver["Name"]}, Surname = {driver["Surname"]}, " +
-                                          $"EmployeeNo = {driver["EmployeeNo"]}, LicenseType = {driver["LicenseType"]}, Availability = {driver["Availability"]}");
+                            _output.WriteLine($"Driver Info: ID = {driver["DriverID"]}, Name = {driver["Name"]}, Surname = {driver["Surname"]}, " +
+                                              $"EmployeeNo = {driver["EmployeeNo"]}, LicenseType = {driver["LicenseType"]}, Availability = {driver["Availability"]}");
+                        }
+                        else
+                        {
+                            _output.WriteLine("No data found for the driver with ID 6.");
+
+                            if (insertedDriver == null)
+                            {
+                                _output.WriteLine("The insertedDriver DataTable is null.");
+                            }
+                            else if (insertedDriver.Rows.Count == 0)
+                            {
+                                _output.WriteLine("The insertedDriver DataTable has no rows.");
+                            }
+                            Assert.Fail();
+                        }
 
                         transaction.Rollback(); // Ensures database data remains constant
+                        DriversDAO.ResetIdentitySeed(5, connection, transaction);
                     }
                     catch (Exception ex)
                     {
                         transaction.Rollback();
+                        DriversDAO.ResetIdentitySeed(5, connection, transaction);
                         throw new Exception("Test failed, rolling back transaction.", ex);
                     }
                 }
             }
         }
+
     }
 }

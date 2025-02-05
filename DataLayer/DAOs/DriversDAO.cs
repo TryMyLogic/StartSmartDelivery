@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Transactions;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using StartSmartDeliveryForm.DataLayer.DTOs;
@@ -17,7 +18,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
     Provides an interface to interact with the data source (such as a database).
     Decouples the data access code from the rest of the application
     */
-    public class DriversDAO(IConfiguration configuration, string connectionString = null)
+    public class DriversDAO(IConfiguration configuration, string? connectionString = null)
     {
         private readonly string _connectionString = connectionString ?? configuration["ConnectionStrings:StartSmartDB"]
                        ?? throw new InvalidOperationException("Connection string not found.");
@@ -91,114 +92,124 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             }
         }
 
-        public void DeleteDriver(int DriverID, SqlTransaction transaction = null)
+        public int InsertDriver(DriversDTO driver, SqlConnection? Connection = null, SqlTransaction? Transaction = null)
         {
-            using (SqlConnection Connection = new(_connectionString))
+            bool ShouldCloseCon = false;
+            if (Connection == null)
             {
-                try
-                {
-                    string Query = "DELETE FROM Drivers WHERE DriverID = @DriverID";
-
-                    using (SqlCommand Command = new(Query, Connection))
-                    {
-                        Command.Parameters.Add(new SqlParameter("@DriverID", SqlDbType.Int) { Value = DriverID });
-
-                        if (transaction != null)
-                        {
-                            Command.Transaction = transaction;
-                        }
-
-                        Connection.Open();
-                        int RowsAffected = Command.ExecuteNonQuery();
-
-                        if (RowsAffected > 0)
-                        {
-                            FormConsole.Instance.Log($"{RowsAffected} row(s) deleted.");
-                        }
-                        else
-                        {
-                            FormConsole.Instance.Log("No rows were deleted. Employee may not exist.");
-                        }
-                    }
-                }
-                catch (SqlException ex)
-                {
-                    FormConsole.Instance.Log("An error occurred while accessing the database: " + ex.Message);
-                }
+                Connection = new SqlConnection(connectionString);
+                Connection.Open();
+                ShouldCloseCon = true;
             }
-        }
 
-        public int InsertDriver(DriversDTO driver, SqlTransaction transaction = null)
-        {
-            using (SqlConnection Connection = new(_connectionString))
+            try
             {
-                try
-                {
-                    string Query = @"
+                string Query = @"
           INSERT INTO Drivers (Name, Surname, EmployeeNo, LicenseType, Availability) 
           VALUES (@Name, @Surname, @EmployeeNo, @LicenseType, @Availability);
           SELECT CAST(SCOPE_IDENTITY() AS int);"; // Get the new DriverID
 
-                    using (SqlCommand Command = new(Query, Connection))
-                    {
-                        // Add parameters
-                        Command.Parameters.Add(new SqlParameter("@Name", SqlDbType.NVarChar, 100) { Value = driver.Name });
-                        Command.Parameters.Add(new SqlParameter("@Surname", SqlDbType.NVarChar, 100) { Value = driver.Surname });
-                        Command.Parameters.Add(new SqlParameter("@EmployeeNo", SqlDbType.NVarChar, 50) { Value = driver.EmployeeNo });
-                        Command.Parameters.Add(new SqlParameter("@LicenseType", SqlDbType.Int) { Value = (int)driver.LicenseType });
-                        Command.Parameters.Add(new SqlParameter("@Availability", SqlDbType.Bit) { Value = driver.Availability });
-
-                        if (transaction != null)
-                        {
-                            Command.Transaction = transaction;
-                        }
-
-                        Connection.Open();
-                        int newDriverId = (int)Command.ExecuteScalar();
-
-                        FormConsole.Instance.Log("Driver added successfully with ID: " + newDriverId);
-                        return newDriverId;
-                    }
-                }
-                catch (SqlException ex)
+                using (SqlCommand Command = Transaction != null ? new SqlCommand(Query, Connection, Transaction) : new SqlCommand(Query, Connection))
                 {
-                    FormConsole.Instance.Log("An error occurred while adding the driver: " + ex.Message);
-                    return -1; //Indicates an error occurred
+                    // Add parameters
+                    Command.Parameters.Add(new SqlParameter("@Name", SqlDbType.NVarChar, 100) { Value = driver.Name });
+                    Command.Parameters.Add(new SqlParameter("@Surname", SqlDbType.NVarChar, 100) { Value = driver.Surname });
+                    Command.Parameters.Add(new SqlParameter("@EmployeeNo", SqlDbType.NVarChar, 50) { Value = driver.EmployeeNo });
+                    Command.Parameters.Add(new SqlParameter("@LicenseType", SqlDbType.Int) { Value = (int)driver.LicenseType });
+                    Command.Parameters.Add(new SqlParameter("@Availability", SqlDbType.Bit) { Value = driver.Availability });
+
+                    int newDriverId = (int)Command.ExecuteScalar();
+
+                    FormConsole.Instance.Log("Driver added successfully with ID: " + newDriverId);
+                    return newDriverId;
                 }
+            }
+            catch (SqlException ex)
+            {
+                FormConsole.Instance.Log("An error occurred while adding the driver: " + ex.Message);
+                return -1; //Indicates an error occurred
+            }
+            finally
+            {
+                if (ShouldCloseCon) Connection.Close();
+            }
+
+        }
+
+        public void UpdateDriver(DriversDTO driver, SqlConnection? Connection = null, SqlTransaction? Transaction = null)
+        {
+            bool ShouldCloseCon = false;
+            if (Connection == null)
+            {
+                Connection = new SqlConnection(connectionString);
+                Connection.Open();
+                ShouldCloseCon = true;
+            }
+
+            try
+            {
+                string Query = "UPDATE Drivers SET Name = @Name, Surname = @Surname, EmployeeNo = @EmployeeNo, LicenseType = @LicenseType, Availability = @Availability WHERE DriverID = @DriverID;";
+                using (SqlCommand Command = Transaction != null ? new SqlCommand(Query, Connection, Transaction) : new SqlCommand(Query, Connection))
+                {
+                    // Add parameters to the command
+                    Command.Parameters.Add(new SqlParameter("@DriverID", SqlDbType.Int) { Value = driver.DriverID });
+                    Command.Parameters.Add(new SqlParameter("@Name", SqlDbType.NVarChar, 100) { Value = driver.Name });
+                    Command.Parameters.Add(new SqlParameter("@Surname", SqlDbType.NVarChar, 100) { Value = driver.Surname });
+                    Command.Parameters.Add(new SqlParameter("@EmployeeNo", SqlDbType.NVarChar, 50) { Value = driver.EmployeeNo });
+                    Command.Parameters.Add(new SqlParameter("@LicenseType", SqlDbType.Int) { Value = (int)driver.LicenseType });
+                    Command.Parameters.Add(new SqlParameter("@Availability", SqlDbType.Bit) { Value = driver.Availability });
+
+                    int RowsAffected = Command.ExecuteNonQuery();
+                    FormConsole.Instance.Log($"{RowsAffected} row(s) updated.");
+                }
+            }
+            catch (SqlException ex)
+            {
+                FormConsole.Instance.Log("An error occurred while accessing the database: " + ex.Message);
+            }
+            finally
+            {
+                if (ShouldCloseCon) Connection.Close();
             }
         }
 
-        public void UpdateDriver(DriversDTO driver, SqlTransaction transaction = null)
+        public void DeleteDriver(int DriverID, SqlTransaction? Transaction = null, SqlConnection? Connection = null)
         {
-            using (SqlConnection Connection = new(_connectionString))
+            bool ShouldCloseCon = false;
+            if (Connection == null)
             {
-                try
+                Connection = new SqlConnection(connectionString);
+                Connection.Open();
+                ShouldCloseCon = true;
+            }
+
+            try
+            {
+                string Query = "DELETE FROM Drivers WHERE DriverID = @DriverID";
+
+                using (SqlCommand Command = Transaction != null ? new SqlCommand(Query, Connection, Transaction) : new SqlCommand(Query, Connection))
                 {
-                    string Query = "UPDATE Drivers SET Name = @Name, Surname = @Surname, EmployeeNo = @EmployeeNo, LicenseType = @LicenseType, Availability = @Availability WHERE DriverID = @DriverID;";
-                    using (SqlCommand Command = new(Query, Connection))
+                    Command.Parameters.Add(new SqlParameter("@DriverID", SqlDbType.Int) { Value = DriverID });
+
+                    int RowsAffected = Command.ExecuteNonQuery();
+
+                    if (RowsAffected > 0)
                     {
-                        // Add parameters to the command
-                        Command.Parameters.Add(new SqlParameter("@DriverID", SqlDbType.Int) { Value = driver.DriverID });
-                        Command.Parameters.Add(new SqlParameter("@Name", SqlDbType.NVarChar, 100) { Value = driver.Name });
-                        Command.Parameters.Add(new SqlParameter("@Surname", SqlDbType.NVarChar, 100) { Value = driver.Surname });
-                        Command.Parameters.Add(new SqlParameter("@EmployeeNo", SqlDbType.NVarChar, 50) { Value = driver.EmployeeNo });
-                        Command.Parameters.Add(new SqlParameter("@LicenseType", SqlDbType.Int) { Value = (int)driver.LicenseType });
-                        Command.Parameters.Add(new SqlParameter("@Availability", SqlDbType.Bit) { Value = driver.Availability });
-
-                        if (transaction != null)
-                        {
-                            Command.Transaction = transaction;
-                        }
-
-                        Connection.Open();
-                        int RowsAffected = Command.ExecuteNonQuery();
-                        FormConsole.Instance.Log($"{RowsAffected} row(s) updated.");
+                        FormConsole.Instance.Log($"{RowsAffected} row(s) deleted.");
+                    }
+                    else
+                    {
+                        FormConsole.Instance.Log("No rows were deleted. Employee may not exist.");
                     }
                 }
-                catch (SqlException ex)
-                {
-                    FormConsole.Instance.Log("An error occurred while accessing the database: " + ex.Message);
-                }
+            }
+            catch (SqlException ex)
+            {
+                FormConsole.Instance.Log("An error occurred while accessing the database: " + ex.Message);
+            }
+            finally
+            {
+                if (ShouldCloseCon) Connection.Close();
             }
         }
 
@@ -268,29 +279,54 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             return recordsCount;
         }
 
-        public DataTable GetDriverByID(int driverID)
+        public DataTable GetDriverByID(int driverID, SqlConnection? Connection = null, SqlTransaction? Transaction = null)
         {
             DataTable driverDataTable = new();
             string query = "SELECT DriverID, Name, Surname, EmployeeNo, LicenseType, Availability FROM Drivers WHERE DriverID = @DriverID";
 
-            using (SqlConnection connection = new(_connectionString))
+            bool ShouldCloseCon = false;
+            if (Connection == null)
             {
-                try
+                Connection = new SqlConnection(connectionString);
+                Connection.Open();
+                ShouldCloseCon = true;
+            }
+
+            try
+            {
+                using (SqlCommand Command = Transaction != null ? new SqlCommand(query, Connection, Transaction) : new SqlCommand(query, Connection))
                 {
-                    using (SqlDataAdapter adapter = new(query, connection))
+                    Command.Parameters.AddWithValue("@DriverID", driverID);
+
+                    using (SqlDataAdapter adapter = new(Command)) // Pass command with/without transaction
                     {
-                        adapter.SelectCommand.Parameters.AddWithValue("@DriverID", driverID);
-                        connection.Open();
                         adapter.Fill(driverDataTable);
                     }
                 }
-                catch (SqlException ex)
-                {
-                    FormConsole.Instance.Log("Error retrieving driver by ID: " + ex.Message);
-                }
+            }
+            catch (SqlException ex)
+            {
+                FormConsole.Instance.Log("Error retrieving driver by ID: " + ex.Message);
+            }
+            finally
+            {
+                if (ShouldCloseCon) Connection.Close();
             }
 
             return driverDataTable;
         }
+
+        // Should never be used outside of testing
+        public static void ResetIdentitySeed(int SeedAt, SqlConnection connection, SqlTransaction transaction)
+        {
+            string Query = $"DBCC CHECKIDENT ('Drivers', RESEED, {SeedAt});";
+
+            using (SqlCommand Command = new(Query, connection, transaction))
+            {
+                Command.ExecuteNonQuery();
+            }
+        }
+
+
     }
 }
