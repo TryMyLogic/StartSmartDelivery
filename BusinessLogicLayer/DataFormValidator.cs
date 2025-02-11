@@ -1,21 +1,25 @@
 ﻿using System;
 using System.Windows.Forms;
+using StartSmartDeliveryForm.SharedLayer;
+using StartSmartDeliveryForm.SharedLayer.Interfaces;
 
 namespace StartSmartDeliveryForm.BusinessLogicLayer
 {
-    public static class DataFormValidator
+    public class DataFormValidator(IMessageBox messageBox)
     {
-        public static bool IsValidString(string input, string fieldName)
+        private readonly IMessageBox _messageBox = messageBox;
+
+        public bool IsValidString(string input, string fieldName)
         {
             if (string.IsNullOrWhiteSpace(input))
             {
-                MessageBox.Show($"{fieldName} cannot be empty.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                _messageBox.Show($"{fieldName} cannot be empty.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
             return true;
         }
 
-        public static bool IsValidEnumValue<TEnum>(string input, string fieldName) where TEnum : struct
+        public bool IsValidEnumValue<TEnum>(string input, string fieldName) where TEnum : struct
         {
             if (!Enum.TryParse(input, out TEnum _))
             {
@@ -25,7 +29,7 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
             return true;
         }
 
-        public static bool IsValidBoolValue(string input, string fieldName)
+        public bool IsValidBoolValue(string input, string fieldName)
         {
             if (!bool.TryParse(input, out bool _))
             {

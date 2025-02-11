@@ -21,7 +21,6 @@
 
   <ItemGroup>
     <Folder Include="PresentationLayer\Images\" />
-    <Folder Include="SharedLayer\Interfaces\" />
   </ItemGroup>
 
   <ItemGroup>

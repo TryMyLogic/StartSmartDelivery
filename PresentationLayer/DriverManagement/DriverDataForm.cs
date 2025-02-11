@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using System.Windows.Forms;
 using StartSmartDeliveryForm.BusinessLogicLayer;
 using StartSmartDeliveryForm.DataLayer.DAOs;
@@ -20,11 +21,13 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
     {
         public int DriverID { get; set; }
         private readonly DriversDAO _driversDAO;
+        private readonly DataFormValidator _dataFormValidator;
 
-        public DriverDataForm(DriversDAO driversDAO)
+        public DriverDataForm(DriversDAO driversDAO, DataFormValidator? Validator = null) 
         {
             InitializeComponent();
             _driversDAO = driversDAO;
+            _dataFormValidator = Validator ?? new DataFormValidator(new MessageBoxWrapper());
         }
 
         private void DriverDataForm_Load(object sender, EventArgs e)
@@ -35,11 +38,11 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
         protected override bool ValidForm()
         {
 
-            if (!DataFormValidator.IsValidString(txtName.Text, "Name")) return false;
+            if (!_dataFormValidator.IsValidString(txtName.Text, "Name")) return false;
 
-            if (!DataFormValidator.IsValidString(txtSurname.Text, "Surname")) return false;
+            if (!_dataFormValidator.IsValidString(txtSurname.Text, "Surname")) return false;
 
-            if (!DataFormValidator.IsValidString(txtEmployeeNo.Text, "EmployeeNo"))
+            if (!_dataFormValidator.IsValidString(txtEmployeeNo.Text, "EmployeeNo"))
             {
                 Driver driver = new(_driversDAO);
 
@@ -51,8 +54,8 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
                 }
             }
 
-            if (!DataFormValidator.IsValidEnumValue<LicenseType>(cboLicenseType.Text, "License Type")) return false;
-            if (!DataFormValidator.IsValidBoolValue(cboAvailability.Text, "Availability")) return false;
+            if (!_dataFormValidator.IsValidEnumValue<LicenseType>(cboLicenseType.Text, "License Type")) return false;
+            if (!_dataFormValidator.IsValidBoolValue(cboAvailability.Text, "Availability")) return false;
 
             return true;
         }
