@@ -315,18 +315,5 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
 
             return driverDataTable;
         }
-
-        // Should never be used outside of testing
-        public static void ResetIdentitySeed(int SeedAt, SqlConnection connection, SqlTransaction transaction)
-        {
-            string Query = $"DBCC CHECKIDENT ('Drivers', RESEED, {SeedAt});";
-
-            using (SqlCommand Command = new(Query, connection, transaction))
-            {
-                Command.ExecuteNonQuery();
-            }
-        }
-
-
     }
 }
