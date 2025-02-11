@@ -1,5 +1,7 @@
+using System.Runtime.InteropServices;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 using StartSmartDeliveryForm.DataLayer.DAOs;
 using StartSmartDeliveryForm.PresentationLayer;
 using StartSmartDeliveryForm.PresentationLayer.DriverManagement;
@@ -13,7 +15,6 @@ namespace StartSmartDeliveryForm
         static void Main()
         {
             ApplicationConfiguration.Initialize();
-            FormConsole.Instance.Show();
 
             IServiceProvider serviceRegistry = ServiceRegistry.RegisterServices();
 

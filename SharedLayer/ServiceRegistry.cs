@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 using StartSmartDeliveryForm.BusinessLogicLayer;
 using StartSmartDeliveryForm.DataLayer.DAOs;
 using StartSmartDeliveryForm.PresentationLayer.DriverManagement;
@@ -32,9 +33,15 @@ namespace StartSmartDeliveryForm.SharedLayer
 
             string? selectedConnectionString = configuration.GetConnectionString(conStringName);
 
+            // Serilog setup
+            Log.Logger = new LoggerConfiguration()
+            .ReadFrom.Configuration(configuration)  
+            .CreateLogger();
+
             // Dependency injection container
             ServiceProvider serviceProvider = new ServiceCollection()
                 .AddSingleton<IConfiguration>(configuration)  // Inject configuration globally
+                .AddSingleton<ILogger>(provider => Log.Logger) // Serilog logger available globally
                 .AddSingleton<string>(selectedConnectionString!) // Makes con string available for tests
                 .AddScoped<DriversDAO>(provider => new DriversDAO(configuration, selectedConnectionString!))
                 .AddScoped<PaginationManager>()

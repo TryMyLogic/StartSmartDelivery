@@ -12,7 +12,7 @@ using StartSmartDeliveryForm.PresentationLayer.DriverManagement;
 using StartSmartDeliveryForm.SharedLayer.Enums;
 using Xunit.Abstractions;
 
-namespace StartSmartDeliveryForm.Tests
+namespace StartSmartDeliveryForm.Tests.DataLayerTests
 {
 
     [Collection("Sequential")]
