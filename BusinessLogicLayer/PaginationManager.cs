@@ -9,7 +9,7 @@ using StartSmartDeliveryForm.SharedLayer;
 
 namespace StartSmartDeliveryForm.BusinessLogicLayer
 {
-    internal class PaginationManager
+    public class PaginationManager
     {
         private readonly DriversDAO _driversDAO;
         private readonly int _recordsPerPage = GlobalConstants.s_recordLimit;
@@ -28,8 +28,8 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
             TotalPages = (int)Math.Ceiling((double)RecordCount / _recordsPerPage);
         }
 
-        public event Action<int> PageChanged;
-        private void EmitPageChanged()
+        public event Action<int>? PageChanged;
+        public void EmitPageChanged()
         {
             PageChanged?.Invoke(CurrentPage);
         }
