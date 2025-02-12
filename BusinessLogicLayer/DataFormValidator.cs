@@ -19,21 +19,21 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
             return true;
         }
 
-        public bool IsValidEnumValue<TEnum>(string input, string fieldName) where TEnum : struct
+        public bool IsValidEnumValue<TEnum>(string input) where TEnum : struct
         {
             if (!Enum.TryParse(input, out TEnum _))
             {
-                MessageBox.Show($"{fieldName} is not a valid enum value.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                _messageBox.Show($"' {input} ' is not a valid enum value.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
             return true;
         }
 
-        public bool IsValidBoolValue(string input, string fieldName)
+        public bool IsValidBoolValue(string input)
         {
             if (!bool.TryParse(input, out bool _))
             {
-                MessageBox.Show($"{fieldName} must be true or false.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                _messageBox.Show($"' {input} ' is not true or false.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
             return true;

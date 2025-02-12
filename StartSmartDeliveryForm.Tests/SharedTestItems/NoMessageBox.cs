@@ -4,8 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using StartSmartDeliveryForm.SharedLayer.Interfaces;
+using System.Windows.Forms;
 
-namespace StartSmartDeliveryForm.SharedLayer
+namespace StartSmartDeliveryForm.Tests.SharedTestItems
 {
     public class NoMessageBox : IMessageBox
     {

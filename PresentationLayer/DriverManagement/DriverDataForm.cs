@@ -54,8 +54,8 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
                 }
             }
 
-            if (!_dataFormValidator.IsValidEnumValue<LicenseType>(cboLicenseType.Text, "License Type")) return false;
-            if (!_dataFormValidator.IsValidBoolValue(cboAvailability.Text, "Availability")) return false;
+            if (!_dataFormValidator.IsValidEnumValue<LicenseType>(cboLicenseType.Text)) return false;
+            if (!_dataFormValidator.IsValidBoolValue(cboAvailability.Text)) return false;
 
             return true;
         }
