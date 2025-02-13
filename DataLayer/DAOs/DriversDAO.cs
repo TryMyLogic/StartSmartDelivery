@@ -250,25 +250,25 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             }
         }
 
-        internal int GetRecordCount()
+        internal async Task<int> GetRecordCountAsync()
         {
+            string Query = "SELECT COUNT(DriverID) FROM Drivers";
             int recordsCount = 0;
 
-            string query = "SELECT COUNT(DriverID) FROM Drivers";
-
-            using (SqlConnection connection = new(_connectionString)) // Ensure s_connectionString is defined
+            using (SqlConnection Connection = new(_connectionString)) 
             {
                 try
                 {
-                    using (SqlCommand command = new(query, connection))
+                    await Connection.OpenAsync();
+                    using (SqlCommand Command = new(Query, Connection))
                     {
-                        connection.Open();
-                        recordsCount = (int)command.ExecuteScalar(); // Execute the query and get the total count of records
+                        object? result = await Command.ExecuteScalarAsync();
+                        recordsCount = result != DBNull.Value ? Convert.ToInt32(result) : 0;
                     }
                 }
                 catch (SqlException ex)
                 {
-                    FormConsole.Instance.Log("Error counting records: " + ex.Message);
+                    _logger.LogError("An error occurred while accessing the database: {ErrorMessage}", ex.Message);
                     return recordsCount; // Return 0 pages if an error occurs
                 }
             }

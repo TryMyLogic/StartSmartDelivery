@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Microsoft.Extensions.Logging;
 using StartSmartDeliveryForm.BusinessLogicLayer;
 using StartSmartDeliveryForm.DataLayer;
 using StartSmartDeliveryForm.DataLayer.DAOs;
@@ -22,14 +23,31 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
         private readonly DriversDAO _driversDAO;
         private DataTable _driverData;
         private readonly PaginationManager _paginationManager;
-        public DriverManagementForm(DriversDAO driversDAO)
+        private readonly ILogger<DriversDAO> _logger;
+        public DriverManagementForm(DriversDAO driversDAO, ILogger<DriversDAO> logger)
         {
             InitializeComponent();
             _driversDAO = driversDAO;
             _driverData = new DataTable(); //Empty table by default
+            _logger = logger;
 
-            _paginationManager = new PaginationManager("Drivers", _driversDAO);
+            _paginationManager = new PaginationManager("Drivers", driversDAO, logger);
             _paginationManager.PageChanged += OnPageChanged;
+
+            InitializeAsync();
+        }
+
+        private async void InitializeAsync()
+        {
+            try
+            {
+                await _paginationManager.InitializeAsync(); 
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Fatal error during initialization. Pagination will not function - Error: {Error}", ex);
+                MessageBox.Show("Fatal error during initialization. Pagination will not function", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         public async Task OnPageChanged(int currentPage)
