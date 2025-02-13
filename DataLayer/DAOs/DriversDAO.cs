@@ -276,38 +276,38 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             return recordsCount;
         }
 
-        public DataTable GetDriverByID(int driverID, SqlConnection? Connection = null, SqlTransaction? Transaction = null)
+        public async Task<DataTable> GetDriverByIDAsync(int driverID, SqlConnection? Connection = null, SqlTransaction? Transaction = null)
         {
+            string Query = "SELECT DriverID, Name, Surname, EmployeeNo, LicenseType, Availability FROM Drivers WHERE DriverID = @DriverID";
             DataTable driverDataTable = new();
-            string query = "SELECT DriverID, Name, Surname, EmployeeNo, LicenseType, Availability FROM Drivers WHERE DriverID = @DriverID";
-
+           
             bool ShouldCloseCon = false;
             if (Connection == null)
             {
                 Connection = new SqlConnection(connectionString);
-                Connection.Open();
                 ShouldCloseCon = true;
             }
 
             try
             {
-                using (SqlCommand Command = Transaction != null ? new SqlCommand(query, Connection, Transaction) : new SqlCommand(query, Connection))
+                await Connection.OpenAsync();
+                using (SqlCommand Command = Transaction != null ? new SqlCommand(Query, Connection, Transaction) : new SqlCommand(Query, Connection))
                 {
                     Command.Parameters.AddWithValue("@DriverID", driverID);
 
-                    using (SqlDataAdapter adapter = new(Command)) // Pass command with/without transaction
+                    using (SqlDataReader reader = await Command.ExecuteReaderAsync())
                     {
-                        adapter.Fill(driverDataTable);
+                        driverDataTable.Load(reader);
                     }
                 }
             }
             catch (SqlException ex)
             {
-                FormConsole.Instance.Log("Error retrieving driver by ID: " + ex.Message);
+                _logger.LogError("An error occurred while accessing the database: {ErrorMessage}", ex.Message);
             }
             finally
             {
-                if (ShouldCloseCon) Connection.Close();
+                if (ShouldCloseCon) await Connection.CloseAsync();
             }
 
             return driverDataTable;
