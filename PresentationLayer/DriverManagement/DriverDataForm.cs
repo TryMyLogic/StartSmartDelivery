@@ -35,7 +35,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             cboAvailability.SelectedIndex = 0;  //Is true by default
         }
 
-        protected override bool ValidForm()
+        protected override async Task<bool> ValidFormAsync()
         {
 
             if (!_dataFormValidator.IsValidString(txtName.Text, "Name")) return false;
@@ -47,7 +47,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
                 Driver driver = new(_driversDAO);
 
                 // Only check uniqueness if the field isn't empty && Mode is not edit
-                if (Mode == FormMode.Add && !driver.IsEmployeeNoUnique(txtEmployeeNo.Text))
+                if (Mode == FormMode.Add && !(await driver.IsEmployeeNoUnique(txtEmployeeNo.Text)))
                 {
                     MessageBox.Show("Employee No is not unique.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return false;

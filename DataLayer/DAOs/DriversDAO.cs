@@ -223,22 +223,20 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             }
         }
 
-        public int GetEmployeeNoCount(string EmployeeNo)
+        public async Task<int> GetEmployeeNoCountAsync(string EmployeeNo)
         {
+            string Query = "SELECT TOP 1 * FROM Drivers WHERE EmployeeNo = @EmployeeNo";
             using (SqlConnection Connection = new(_connectionString))
             {
                 try
                 {
-                    string Query = "SELECT TOP 1 * FROM Drivers WHERE EmployeeNo = @EmployeeNo";
-
+                    await Connection.OpenAsync();
                     using (var Command = new SqlCommand(Query, Connection))
                     {
                         Command.CommandType = CommandType.Text; // Since it's a direct SQL query
                         Command.Parameters.Add(new SqlParameter("@EmployeeNo", SqlDbType.NVarChar, 50) { Value = EmployeeNo });
 
-                        Connection.Open();
-
-                        object FoundRow = Command.ExecuteScalar();
+                        object? FoundRow = await Command.ExecuteScalarAsync();
                         int Result = (FoundRow != null) ? (int)FoundRow : 0;
 
                         return Result; // 1 if the EmployeeNo exists, 0 if not
@@ -246,7 +244,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
                 }
                 catch (SqlException ex)
                 {
-                    FormConsole.Instance.Log("An error occurred while accessing the database: " + ex.Message);
+                    _logger.LogError("An error occurred while accessing the database: {ErrorMessage}", ex.Message);
                     return 1; // Assume it's not unique on error
                 }
             }

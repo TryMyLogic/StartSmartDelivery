@@ -17,9 +17,9 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
         public LicenseType LicenseType { get; set; }
         public bool Availability { get; set; }
 
-        public bool IsEmployeeNoUnique(string employeeNo)
+        public async Task<bool> IsEmployeeNoUnique(string EmployeeNo)
         {
-            int count = driversDAO.GetEmployeeNoCount(employeeNo);
+            int count = await driversDAO.GetEmployeeNoCountAsync(EmployeeNo);
             bool isUnique = count == 0;
             FormConsole.Instance.Log($"Employee Unique: {isUnique}");
             return isUnique;

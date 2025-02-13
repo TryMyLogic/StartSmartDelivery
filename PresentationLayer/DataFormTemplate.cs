@@ -35,13 +35,22 @@ namespace StartSmartDeliveryForm.PresentationLayer
 
         protected void btnSubmit_Click(object sender, EventArgs e)
         {
-            if (ValidForm())
+            _ = btnSubmit_ClickAsync(sender, e);
+        }
+
+        protected async Task btnSubmit_ClickAsync(object sender, EventArgs e)
+        {
+            if (await ValidFormAsync())
             {
                 SubmitClicked?.Invoke(this, EventArgs.Empty);
             }
         }
 
-        protected virtual bool ValidForm() { return true; }
+        protected virtual async Task<bool> ValidFormAsync()
+        {
+            await Task.Delay(500);
+            return false;
+        }
         internal virtual void InitializeEditing(object data) { }
         internal virtual void ClearData() { }
         internal virtual object GetData() { return new { }; }
