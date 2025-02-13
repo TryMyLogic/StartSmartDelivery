@@ -179,7 +179,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
                         }
                         PopulateDataRow(rowToUpdate, driverDTO);
 
-                        _driversDAO.UpdateDriver(driverDTO);
+                       await _driversDAO.UpdateDriverAsync(driverDTO);
                         form.Close();
                     }
                 }

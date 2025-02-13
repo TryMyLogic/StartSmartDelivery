@@ -124,7 +124,6 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
                 {
                     await Connection.OpenAsync();
 
-                    // Add parameters
                     Command.Parameters.Add(new SqlParameter("@Name", SqlDbType.NVarChar, 100) { Value = Driver.Name });
                     Command.Parameters.Add(new SqlParameter("@Surname", SqlDbType.NVarChar, 100) { Value = Driver.Surname });
                     Command.Parameters.Add(new SqlParameter("@EmployeeNo", SqlDbType.NVarChar, 50) { Value = Driver.EmployeeNo });
@@ -148,22 +147,22 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             }
         }
 
-        public void UpdateDriver(DriversDTO driver, SqlConnection? Connection = null, SqlTransaction? Transaction = null)
+        public async Task UpdateDriverAsync(DriversDTO driver, SqlConnection? Connection = null, SqlTransaction? Transaction = null)
         {
+            string Query = "UPDATE Drivers SET Name = @Name, Surname = @Surname, EmployeeNo = @EmployeeNo, LicenseType = @LicenseType, Availability = @Availability WHERE DriverID = @DriverID;";
+
             bool ShouldCloseCon = false;
             if (Connection == null)
             {
                 Connection = new SqlConnection(connectionString);
-                Connection.Open();
                 ShouldCloseCon = true;
             }
 
             try
             {
-                string Query = "UPDATE Drivers SET Name = @Name, Surname = @Surname, EmployeeNo = @EmployeeNo, LicenseType = @LicenseType, Availability = @Availability WHERE DriverID = @DriverID;";
+                await Connection.OpenAsync();
                 using (SqlCommand Command = Transaction != null ? new SqlCommand(Query, Connection, Transaction) : new SqlCommand(Query, Connection))
                 {
-                    // Add parameters to the command
                     Command.Parameters.Add(new SqlParameter("@DriverID", SqlDbType.Int) { Value = driver.DriverID });
                     Command.Parameters.Add(new SqlParameter("@Name", SqlDbType.NVarChar, 100) { Value = driver.Name });
                     Command.Parameters.Add(new SqlParameter("@Surname", SqlDbType.NVarChar, 100) { Value = driver.Surname });
@@ -171,17 +170,17 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
                     Command.Parameters.Add(new SqlParameter("@LicenseType", SqlDbType.Int) { Value = (int)driver.LicenseType });
                     Command.Parameters.Add(new SqlParameter("@Availability", SqlDbType.Bit) { Value = driver.Availability });
 
-                    int RowsAffected = Command.ExecuteNonQuery();
-                    FormConsole.Instance.Log($"{RowsAffected} row(s) updated.");
+                    int RowsAffected = await Command.ExecuteNonQueryAsync();
+                    _logger.LogInformation("Driver updated successfully with ID: {DriverID}", driver.DriverID);
                 }
             }
             catch (SqlException ex)
             {
-                FormConsole.Instance.Log("An error occurred while accessing the database: " + ex.Message);
+                _logger.LogError("An error occurred while accessing the database: {ErrorMessage}", ex.Message);
             }
             finally
             {
-                if (ShouldCloseCon) Connection.Close();
+                if (ShouldCloseCon) await Connection.CloseAsync();
             }
         }
 
