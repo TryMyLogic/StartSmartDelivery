@@ -16,7 +16,7 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
         private readonly string _tableName;
 
         // Uses auto property:
-        public int CurrentPage { get; private set; } = 1; 
+        public int CurrentPage { get; private set; } = 1;
         public int TotalPages { get; private set; } = 1;
         public int RecordCount { get; private set; } = 0;
 
@@ -28,10 +28,10 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
             TotalPages = (int)Math.Ceiling((double)RecordCount / _recordsPerPage);
         }
 
-        public event Action<int>? PageChanged;
-        public void EmitPageChanged()
+        public event Func<int, Task>? PageChanged;
+        public async Task EmitPageChanged()
         {
-            PageChanged?.Invoke(CurrentPage);
+            await PageChanged?.Invoke(CurrentPage)!;
         }
 
         private int GetTotalRecordCount()
@@ -46,40 +46,40 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
             }
         }
 
-        public void GoToFirstPage()
+        public async Task GoToFirstPage()
         {
             CurrentPage = 1;
-            EmitPageChanged();
+            await EmitPageChanged();
         }
 
-        public void GoToPreviousPage()
+        public async Task GoToPreviousPage()
         {
             if (CurrentPage > 1)
             {
                 CurrentPage--;
-                EmitPageChanged();
+                await EmitPageChanged();
             }
         }
 
-        public void GoToNextPage()
+        public async Task GoToNextPage()
         {
             if (CurrentPage < TotalPages)
             {
                 CurrentPage++;
-                EmitPageChanged();
+                await EmitPageChanged();
             }
         }
 
-        public void GoToLastPage()
+        public async Task GoToLastPage()
         {
             CurrentPage = TotalPages;
-            EmitPageChanged();
+            await EmitPageChanged();
         }
 
-        public void GoToPage(int page)
+        public async Task GoToPage(int page)
         {
             CurrentPage = Math.Clamp(page, 1, TotalPages);
-            EmitPageChanged();
+            await EmitPageChanged();
         }
 
         public void UpdateRecordCount(int recordCount)
@@ -88,15 +88,15 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
             TotalPages = (int)Math.Ceiling((double)RecordCount / _recordsPerPage);
         }
 
-        public void EnsureValidPage()
+        public async Task EnsureValidPage()
         {
             if (CurrentPage > TotalPages)
             {
-                GoToLastPage();
+                await GoToLastPage();
             }
             else
             {
-                GoToPage(CurrentPage);
+                await GoToPage(CurrentPage);
             }
         }
     }

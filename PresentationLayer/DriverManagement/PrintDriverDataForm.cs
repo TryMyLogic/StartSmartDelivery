@@ -61,6 +61,11 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 
         private void printDocument_PrintPage(object sender, PrintPageEventArgs e)
         {
+            _ = printDocument_PrintPageAsync(sender,e);
+        }
+
+        private async Task printDocument_PrintPageAsync(object sender, PrintPageEventArgs e)
+        {
             FormConsole.Instance.Log("Hello");
             if (e.Graphics == null)
             {
@@ -83,7 +88,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             }
             else
             {
-                dataTable = _driversDAO.GetDriversAtPage(_currentPage);
+                dataTable = await _driversDAO.GetDriversAtPageAsync(_currentPage);
                 if (dataTable == null)
                 {
                     FormConsole.Instance.Log("GetDriversAtPage returned null datatable");

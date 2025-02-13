@@ -32,9 +32,9 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             _paginationManager.PageChanged += OnPageChanged;
         }
 
-        public void OnPageChanged(int currentPage)
+        public async Task OnPageChanged(int currentPage)
         {
-            _driverData = _driversDAO.GetDriversAtPage(currentPage) ?? new DataTable();
+            _driverData = await _driversDAO.GetDriversAtPageAsync(currentPage) ?? new DataTable();
             dgvMain.DataSource = _driverData;
             txtStartPage.Text = $"{_paginationManager.CurrentPage}";
             lblEndPage.Text = $"/{_paginationManager.TotalPages}";
@@ -44,7 +44,12 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
         {
             AdjustDataGridViewHeight(dgvMain);
             SetSearchOptions(typeof(DriversDTO));
-            _paginationManager.GoToFirstPage();
+            _ = DriverManagementForm_LoadAsync(sender, e);
+        }
+
+        private async Task DriverManagementForm_LoadAsync(object sender, EventArgs e)
+        {
+            await _paginationManager.GoToFirstPage();
 
             if (_driverData == null || _driverData.Rows.Count == 0)
             {
@@ -121,7 +126,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             }
         }
 
-        protected override void btnDelete_Click(int rowIndex)
+        protected override async Task btnDelete_ClickAsync(int rowIndex)
         {
             DataGridViewRow selectedRow = dgvMain.Rows[rowIndex];
 
@@ -134,13 +139,14 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
                 _driversDAO.DeleteDriver(driverID);
 
                 _paginationManager.UpdateRecordCount(_paginationManager.RecordCount - 1);
-                _paginationManager.EnsureValidPage();
-
+                await _paginationManager.EnsureValidPage();
             }
         }
 
-        // DriverDataForm submit button event handler
-        private void DriverDataForm_SubmitClicked(object sender, EventArgs e)
+
+        // DriverDataForm submit button event handlers
+        private void DriverDataForm_SubmitClicked(object sender, EventArgs e) { _ = DriverDataForm_SubmitClickedAsync(sender, e); }
+        private async Task DriverDataForm_SubmitClickedAsync(object sender, EventArgs e)
         {
             if (sender is DriverDataForm form)
             {
@@ -160,7 +166,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 
                             _driverData.Rows.Add(newRow);
                             _paginationManager.UpdateRecordCount(_paginationManager.RecordCount + 1);
-                            _paginationManager.GoToLastPage(); // Allows user to see successful insert
+                            await _paginationManager.GoToLastPage(); // Allows user to see successful insert
                         }
                     }
                     else if (form.Mode == FormMode.Edit)
@@ -240,10 +246,10 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             MessageBox.Show("Succesfully Refreshed", "Refresh Status");
         }
 
-        protected override void reloadToolStripMenuItem_Click(object sender, EventArgs e)
+        protected override async Task reloadToolStripMenuItem_ClickAsync(object sender, EventArgs e)
         {
             //Refetch data and rebind
-            _driverData = _driversDAO.GetAllDrivers() ?? new DataTable();
+            _driverData = await _driversDAO.GetAllDriversAsync() ?? new DataTable();
             dgvMain.DataSource = null;
             dgvMain.DataSource = _driverData;
             SetDataGridViewColumns();
@@ -273,27 +279,27 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             }
         }
 
-        protected override void btnFirst_Click(object sender, EventArgs e)
+        protected override async Task btnFirst_ClickAsync(object sender, EventArgs e)
         {
-            _paginationManager.GoToFirstPage();
+            await _paginationManager.GoToFirstPage();
         }
 
-        protected override void btnPrevious_Click(object sender, EventArgs e)
+        protected override async Task btnPrevious_ClickAsync(object sender, EventArgs e)
         {
-            _paginationManager.GoToPreviousPage();
+            await _paginationManager.GoToPreviousPage();
         }
 
-        protected override void btnNext_Click(object sender, EventArgs e)
+        protected override async Task btnNext_ClickAsync(object sender, EventArgs e)
         {
-            _paginationManager.GoToNextPage();
+            await _paginationManager.GoToNextPage();
         }
 
-        protected override void btnLast_Click(object sender, EventArgs e)
+        protected override async Task btnLast_ClickAsync(object sender, EventArgs e)
         {
-            _paginationManager.GoToLastPage();
+            await _paginationManager.GoToLastPage();
         }
 
-        protected override void btnGotoPage_Click(object sender, EventArgs e)
+        protected override async Task btnGotoPage_ClickAsync(object sender, EventArgs e)
         {
             bool ParsedGoto = int.TryParse(txtStartPage.Text, out int GotoPage);
             if (ParsedGoto)
@@ -303,7 +309,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 
                 if (GotoPage >= 1 && GotoPage <= _paginationManager.TotalPages)
                 {
-                    _paginationManager.GoToPage(GotoPage);
+                   await _paginationManager.GoToPage(GotoPage);
                 }
                 else
                 {

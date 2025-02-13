@@ -25,21 +25,62 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
                                ?? throw new InvalidOperationException("Connection string not found.");
         private readonly ILogger<DriversDAO> _logger = logger;
 
-        public DataTable? GetAllDrivers()
+        public async Task<DataTable?> GetDriversAtPageAsync(int Page)
         {
+            string Query = @"
+                    SELECT * FROM Drivers
+                    ORDER BY DriverID
+                    OFFSET @Offset ROWS 
+                    FETCH NEXT @Pagelimit ROWS ONLY;";
+
+            int Offset = (Page - 1) * GlobalConstants.s_recordLimit;
             DataTable Dt = new();
 
             using (SqlConnection Connection = new(_connectionString))
             {
                 try
                 {
-                    string Query = @"SELECT * FROM Drivers;";
+                    await Connection.OpenAsync();
+                    using (SqlCommand Command = new(Query, Connection))
+                    {
+                        Command.Parameters.Add(new SqlParameter("@Offset", SqlDbType.Int) { Value = Offset });
+                        Command.Parameters.Add(new SqlParameter("@Pagelimit", SqlDbType.Int) { Value = GlobalConstants.s_recordLimit });
+
+                        using (SqlDataReader Reader = await Command.ExecuteReaderAsync())
+                        {
+                            Dt.Load(Reader);
+                        }
+
+                        DataColumn[] PrimaryKeyColumns = [Dt.Columns["DriverID"]!];
+                        Dt.PrimaryKey = PrimaryKeyColumns;
+                    }
+                }
+                catch (SqlException ex)
+                {
+                    _logger.LogError("An error occurred while accessing the database: {ErrorMessage}", ex.Message);
+                    return null;
+                }
+            }
+
+            return Dt;
+        }
+
+        public async Task<DataTable?> GetAllDriversAsync()
+        {
+            string Query = @"SELECT * FROM Drivers;";
+            DataTable Dt = new();
+
+            using (SqlConnection Connection = new(_connectionString))
+            {
+                try
+                {
+                    await Connection.OpenAsync();
 
                     using (SqlCommand Command = new(Query, Connection))
                     {
-                        using (SqlDataAdapter Adapter = new(Command))
+                        using (SqlDataReader Reader = await Command.ExecuteReaderAsync()) 
                         {
-                            Adapter.Fill(Dt);
+                            Dt.Load(Reader);
 
                             if (Dt.Columns.Contains("DriverID"))
                             {
@@ -50,48 +91,17 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
                             {
                                 throw new InvalidOperationException("The DataTable must contain the 'DriverID' column.");
                             }
-
-
                         }
                     }
                 }
                 catch (SqlException ex)
                 {
-                    FormConsole.Instance.Log("An error occurred while accessing the database: " + ex.Message);
+                    _logger.LogError("An error occurred while accessing the database: {ErrorMessage}", ex.Message);
                     return null;
                 }
             }
 
             return Dt;
-        }
-
-        public int GetEmployeeNoCount(string EmployeeNo)
-        {
-            using (SqlConnection Connection = new(_connectionString))
-            {
-                try
-                {
-                    string Query = "SELECT TOP 1 * FROM Drivers WHERE EmployeeNo = @EmployeeNo";
-
-                    using (var Command = new SqlCommand(Query, Connection))
-                    {
-                        Command.CommandType = CommandType.Text; // Since it's a direct SQL query
-                        Command.Parameters.Add(new SqlParameter("@EmployeeNo", SqlDbType.NVarChar, 50) { Value = EmployeeNo });
-
-                        Connection.Open();
-
-                        object FoundRow = Command.ExecuteScalar();
-                        int Result = (FoundRow != null) ? (int)FoundRow : 0;
-
-                        return Result; // 1 if the EmployeeNo exists, 0 if not
-                    }
-                }
-                catch (SqlException ex)
-                {
-                    FormConsole.Instance.Log("An error occurred while accessing the database: " + ex.Message);
-                    return 1; // Assume it's not unique on error
-                }
-            }
         }
 
         public int InsertDriver(DriversDTO driver, SqlConnection? Connection = null, SqlTransaction? Transaction = null)
@@ -215,44 +225,33 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             }
         }
 
-        public DataTable? GetDriversAtPage(int Page)
+        public int GetEmployeeNoCount(string EmployeeNo)
         {
-
-            int Offset = (Page - 1) * GlobalConstants.s_recordLimit;
-            DataTable Dt = new();
-
             using (SqlConnection Connection = new(_connectionString))
             {
                 try
                 {
-                    string Query = @"
-                    SELECT * FROM Drivers
-                    ORDER BY DriverID
-                    OFFSET @Offset ROWS 
-                    FETCH NEXT @Pagelimit ROWS ONLY;";
+                    string Query = "SELECT TOP 1 * FROM Drivers WHERE EmployeeNo = @EmployeeNo";
 
-                    using (SqlCommand Command = new(Query, Connection))
+                    using (var Command = new SqlCommand(Query, Connection))
                     {
-                        Command.Parameters.Add(new SqlParameter("@Offset", SqlDbType.Int) { Value = Offset });
-                        Command.Parameters.Add(new SqlParameter("@Pagelimit", SqlDbType.Int) { Value = GlobalConstants.s_recordLimit });
+                        Command.CommandType = CommandType.Text; // Since it's a direct SQL query
+                        Command.Parameters.Add(new SqlParameter("@EmployeeNo", SqlDbType.NVarChar, 50) { Value = EmployeeNo });
 
-                        using (SqlDataAdapter Adapter = new(Command))
-                        {
-                            Adapter.Fill(Dt);
+                        Connection.Open();
 
-                            DataColumn[] PrimaryKeyColumns = [Dt.Columns["DriverID"]!];
-                            Dt.PrimaryKey = PrimaryKeyColumns;
-                        }
+                        object FoundRow = Command.ExecuteScalar();
+                        int Result = (FoundRow != null) ? (int)FoundRow : 0;
+
+                        return Result; // 1 if the EmployeeNo exists, 0 if not
                     }
                 }
                 catch (SqlException ex)
                 {
                     FormConsole.Instance.Log("An error occurred while accessing the database: " + ex.Message);
-                    return null;
+                    return 1; // Assume it's not unique on error
                 }
             }
-
-            return Dt;
         }
 
         internal int GetRecordCount()
