@@ -11,10 +11,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Logs\**" />
     <Compile Remove="StartSmartDelivery.Tests\**" />
     <Compile Remove="StartSmartDeliveryForm.Tests\**" />
+    <EmbeddedResource Remove="Logs\**" />
     <EmbeddedResource Remove="StartSmartDelivery.Tests\**" />
     <EmbeddedResource Remove="StartSmartDeliveryForm.Tests\**" />
+    <None Remove="Logs\**" />
     <None Remove="StartSmartDelivery.Tests\**" />
     <None Remove="StartSmartDeliveryForm.Tests\**" />
   </ItemGroup>
@@ -31,7 +34,6 @@
     <None Remove=".gitattributes" />
     <None Remove=".gitignore" />
     <None Remove="appsettings.json" />
-    <None Remove="logs.txt" />
     <None Remove="README.md" />
   </ItemGroup>
 
@@ -57,12 +59,7 @@
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
     <PackageReference Include="Serilog.Sinks.Debug" Version="3.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="logs.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <PackageReference Include="Serilog.Sinks.MSSqlServer" Version="8.1.0" />
   </ItemGroup>
 
   <ItemGroup>
