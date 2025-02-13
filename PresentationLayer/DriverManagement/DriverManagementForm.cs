@@ -156,7 +156,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
                 {
                     if (form.Mode == FormMode.Add)
                     {
-                        int newDriverId = _driversDAO.InsertDriver(driverDTO);
+                        int newDriverId = await _driversDAO.InsertDriverAsync(driverDTO);
 
                         if (newDriverId != -1) // Check for success
                         {

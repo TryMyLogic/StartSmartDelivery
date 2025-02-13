@@ -78,7 +78,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
 
                     using (SqlCommand Command = new(Query, Connection))
                     {
-                        using (SqlDataReader Reader = await Command.ExecuteReaderAsync()) 
+                        using (SqlDataReader Reader = await Command.ExecuteReaderAsync())
                         {
                             Dt.Load(Reader);
 
@@ -104,48 +104,48 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             return Dt;
         }
 
-        public int InsertDriver(DriversDTO driver, SqlConnection? Connection = null, SqlTransaction? Transaction = null)
+        public async Task<int> InsertDriverAsync(DriversDTO Driver, SqlConnection? Connection = null, SqlTransaction? Transaction = null)
         {
+            string Query = @"
+            INSERT INTO Drivers (Name, Surname, EmployeeNo, LicenseType, Availability) 
+            VALUES (@Name, @Surname, @EmployeeNo, @LicenseType, @Availability);
+            SELECT CAST(SCOPE_IDENTITY() AS int);"; // Get the new DriverID
+
             bool ShouldCloseCon = false;
             if (Connection == null)
             {
                 Connection = new SqlConnection(connectionString);
-                Connection.Open();
                 ShouldCloseCon = true;
             }
 
             try
             {
-                string Query = @"
-          INSERT INTO Drivers (Name, Surname, EmployeeNo, LicenseType, Availability) 
-          VALUES (@Name, @Surname, @EmployeeNo, @LicenseType, @Availability);
-          SELECT CAST(SCOPE_IDENTITY() AS int);"; // Get the new DriverID
-
                 using (SqlCommand Command = Transaction != null ? new SqlCommand(Query, Connection, Transaction) : new SqlCommand(Query, Connection))
                 {
+                    await Connection.OpenAsync();
+
                     // Add parameters
-                    Command.Parameters.Add(new SqlParameter("@Name", SqlDbType.NVarChar, 100) { Value = driver.Name });
-                    Command.Parameters.Add(new SqlParameter("@Surname", SqlDbType.NVarChar, 100) { Value = driver.Surname });
-                    Command.Parameters.Add(new SqlParameter("@EmployeeNo", SqlDbType.NVarChar, 50) { Value = driver.EmployeeNo });
-                    Command.Parameters.Add(new SqlParameter("@LicenseType", SqlDbType.Int) { Value = (int)driver.LicenseType });
-                    Command.Parameters.Add(new SqlParameter("@Availability", SqlDbType.Bit) { Value = driver.Availability });
+                    Command.Parameters.Add(new SqlParameter("@Name", SqlDbType.NVarChar, 100) { Value = Driver.Name });
+                    Command.Parameters.Add(new SqlParameter("@Surname", SqlDbType.NVarChar, 100) { Value = Driver.Surname });
+                    Command.Parameters.Add(new SqlParameter("@EmployeeNo", SqlDbType.NVarChar, 50) { Value = Driver.EmployeeNo });
+                    Command.Parameters.Add(new SqlParameter("@LicenseType", SqlDbType.Int) { Value = (int)Driver.LicenseType });
+                    Command.Parameters.Add(new SqlParameter("@Availability", SqlDbType.Bit) { Value = Driver.Availability });
 
-                    int newDriverId = (int)Command.ExecuteScalar();
+                    int newDriverId = (int)(await Command.ExecuteScalarAsync())!;
 
-                    FormConsole.Instance.Log("Driver added successfully with ID: " + newDriverId);
+                    _logger.LogInformation("Driver added successfully with ID: {DriverID}", newDriverId);
                     return newDriverId;
                 }
             }
             catch (SqlException ex)
             {
-                FormConsole.Instance.Log("An error occurred while adding the driver: " + ex.Message);
+                _logger.LogError("An error occurred while accessing the database: {ErrorMessage}", ex.Message);
                 return -1; //Indicates an error occurred
             }
             finally
             {
                 if (ShouldCloseCon) Connection.Close();
             }
-
         }
 
         public void UpdateDriver(DriversDTO driver, SqlConnection? Connection = null, SqlTransaction? Transaction = null)
