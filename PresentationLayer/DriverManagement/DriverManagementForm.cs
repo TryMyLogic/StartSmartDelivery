@@ -136,7 +136,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             if (result == DialogResult.Yes && int.TryParse(DriverID?.ToString(), out int driverID))
             {
                 _driverData.Rows.RemoveAt(rowIndex);
-                _driversDAO.DeleteDriver(driverID);
+                await _driversDAO.DeleteDriverAsync(driverID);
 
                 _paginationManager.UpdateRecordCount(_paginationManager.RecordCount - 1);
                 await _paginationManager.EnsureValidPage();
@@ -179,7 +179,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
                         }
                         PopulateDataRow(rowToUpdate, driverDTO);
 
-                       await _driversDAO.UpdateDriverAsync(driverDTO);
+                        await _driversDAO.UpdateDriverAsync(driverDTO);
                         form.Close();
                     }
                 }
@@ -309,7 +309,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 
                 if (GotoPage >= 1 && GotoPage <= _paginationManager.TotalPages)
                 {
-                   await _paginationManager.GoToPage(GotoPage);
+                    await _paginationManager.GoToPage(GotoPage);
                 }
                 else
                 {

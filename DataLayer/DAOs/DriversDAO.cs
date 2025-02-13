@@ -184,43 +184,42 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             }
         }
 
-        public void DeleteDriver(int DriverID, SqlTransaction? Transaction = null, SqlConnection? Connection = null)
+        public async Task DeleteDriverAsync(int DriverID, SqlTransaction? Transaction = null, SqlConnection? Connection = null)
         {
+            string Query = "DELETE FROM Drivers WHERE DriverID = @DriverID";
             bool ShouldCloseCon = false;
             if (Connection == null)
             {
                 Connection = new SqlConnection(connectionString);
-                Connection.Open();
                 ShouldCloseCon = true;
             }
 
             try
             {
-                string Query = "DELETE FROM Drivers WHERE DriverID = @DriverID";
-
+                await Connection.OpenAsync();
                 using (SqlCommand Command = Transaction != null ? new SqlCommand(Query, Connection, Transaction) : new SqlCommand(Query, Connection))
                 {
                     Command.Parameters.Add(new SqlParameter("@DriverID", SqlDbType.Int) { Value = DriverID });
 
-                    int RowsAffected = Command.ExecuteNonQuery();
+                    int RowsAffected = await Command.ExecuteNonQueryAsync();
 
                     if (RowsAffected > 0)
                     {
-                        FormConsole.Instance.Log($"{RowsAffected} row(s) deleted.");
+                        _logger.LogInformation("{RowsAffected} row(s) were deleted with the DriverID: {DriverID}", RowsAffected, DriverID);
                     }
                     else
                     {
-                        FormConsole.Instance.Log("No rows were deleted. Employee may not exist.");
+                        _logger.LogWarning("No rows were deleted. Employee may not exist with DriverID: {DriverID}", DriverID);
                     }
                 }
             }
             catch (SqlException ex)
             {
-                FormConsole.Instance.Log("An error occurred while accessing the database: " + ex.Message);
+                _logger.LogError("An error occurred while accessing the database: {ErrorMessage}", ex.Message);
             }
             finally
             {
-                if (ShouldCloseCon) Connection.Close();
+                if (ShouldCloseCon) await Connection.CloseAsync();
             }
         }
 
