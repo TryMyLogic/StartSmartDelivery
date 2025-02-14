@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Serilog.Core;
 using StartSmartDeliveryForm.DataLayer.DAOs;
 using StartSmartDeliveryForm.SharedLayer;
@@ -16,23 +17,22 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
         private readonly DriversDAO _driversDAO;
         private readonly int _recordsPerPage = GlobalConstants.s_recordLimit;
         private readonly string _tableName;
-        private readonly ILogger<DriversDAO> _logger;
+        private readonly ILogger<PaginationManager> _logger;
 
         // Uses auto property:
         public int CurrentPage { get; private set; } = 1;
         public int TotalPages { get; private set; } = 1;
         public int RecordCount { get; private set; } = 0;
 
-        internal PaginationManager(string tableName, DriversDAO driversDAO, ILogger<DriversDAO> logger)
+        internal PaginationManager(string tableName, DriversDAO driversDAO, ILogger<PaginationManager>? logger = null)
         {
-            _driversDAO = driversDAO;
             _tableName = tableName;
-            _logger = logger;
-             TotalPages = (int)Math.Ceiling((double)RecordCount / _recordsPerPage);
+            _driversDAO = driversDAO;
+            _logger = logger ?? NullLogger<PaginationManager>.Instance;
         }
 
         // Async Factory Pattern
-        public static async Task<PaginationManager> CreateAsync(string tableName, DriversDAO driversDAO, ILogger<DriversDAO> logger)
+        public static async Task<PaginationManager> CreateAsync(string tableName, DriversDAO driversDAO, ILogger<PaginationManager>? logger = null)
         {
             PaginationManager paginationManager = new(tableName, driversDAO, logger);
             paginationManager.RecordCount = await paginationManager.GetTotalRecordCount(); // This will use _driversDAO
@@ -44,13 +44,13 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
         {
             try
             {
-                RecordCount = await GetTotalRecordCount(); 
+                RecordCount = await GetTotalRecordCount();
                 TotalPages = (int)Math.Ceiling((double)RecordCount / _recordsPerPage);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while initializing pagination.");
-                throw new InvalidOperationException("Initialization failed", ex); 
+                throw new InvalidOperationException("Initialization failed", ex);
             }
         }
 

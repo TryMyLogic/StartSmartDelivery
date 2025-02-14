@@ -8,6 +8,8 @@ using System.Transactions;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using StartSmartDeliveryForm.BusinessLogicLayer;
 using StartSmartDeliveryForm.DataLayer.DTOs;
 using StartSmartDeliveryForm.SharedLayer;
 
@@ -19,11 +21,11 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
     Provides an interface to interact with the data source (such as a database).
     Decouples the data access code from the rest of the application
     */
-    public class DriversDAO(IConfiguration configuration, ILogger<DriversDAO> logger, string? connectionString = null)
+    public class DriversDAO(IConfiguration configuration, ILogger<DriversDAO>? logger = null, string? connectionString = null)
     {
         private readonly string _connectionString = connectionString ?? configuration["ConnectionStrings:StartSmartDB"]
                                ?? throw new InvalidOperationException("Connection string not found.");
-        private readonly ILogger<DriversDAO> _logger = logger;
+        private readonly ILogger<DriversDAO> _logger = logger ?? NullLogger<DriversDAO>.Instance;
 
         public async Task<DataTable?> GetDriversAtPageAsync(int Page)
         {

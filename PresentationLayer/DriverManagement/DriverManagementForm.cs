@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using StartSmartDeliveryForm.BusinessLogicLayer;
 using StartSmartDeliveryForm.DataLayer;
 using StartSmartDeliveryForm.DataLayer.DAOs;
@@ -23,15 +24,15 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
         private readonly DriversDAO _driversDAO;
         private DataTable _driverData;
         private readonly PaginationManager _paginationManager;
-        private readonly ILogger<DriversDAO> _logger;
-        public DriverManagementForm(DriversDAO driversDAO, ILogger<DriversDAO> logger)
+        private readonly ILogger<DriverManagementForm> _logger;
+        public DriverManagementForm(DriversDAO driversDAO, ILogger<DriverManagementForm>? logger = null)
         {
             InitializeComponent();
             _driversDAO = driversDAO;
             _driverData = new DataTable(); //Empty table by default
-            _logger = logger;
+            _logger = logger ?? NullLogger<DriverManagementForm>.Instance;
 
-            _paginationManager = new PaginationManager("Drivers", driversDAO, logger);
+            _paginationManager = new PaginationManager("Drivers", driversDAO);
             _paginationManager.PageChanged += OnPageChanged;
         }
 

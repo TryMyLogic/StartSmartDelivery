@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using NSubstitute;
 using StartSmartDeliveryForm.BusinessLogicLayer;
 using StartSmartDeliveryForm.DataLayer.DAOs;
 using Xunit.Abstractions;
@@ -15,11 +17,12 @@ namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
         private readonly string _connectionString = fixture.ConnectionString;
 
         [Fact]
-        public void EmitPageChanged_CallsSubscribers_WhenEventIsSubscribedTo()
+        public async Task EmitPageChanged_CallsSubscribers_WhenEventIsSubscribedTo()
         {
             // Arrange
             int PageChangeCalled = 0;
-            PaginationManager paginationManager = PaginationManager paginationManager = await PaginationManager.CreateAsync("Drivers", _driversDAO, _logger);
+            ILogger<PaginationManager> _mockLogger = Substitute.For<ILogger<PaginationManager>>();
+            PaginationManager paginationManager = await PaginationManager.CreateAsync("Drivers", _driversDAO, _mockLogger);
 
             paginationManager.PageChanged += (currentPage) =>
             {
