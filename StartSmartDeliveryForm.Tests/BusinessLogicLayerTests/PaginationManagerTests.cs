@@ -19,7 +19,7 @@ namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
         {
             // Arrange
             int PageChangeCalled = 0;
-            PaginationManager paginationManager = new("Drivers", _driversDAO);
+            PaginationManager paginationManager = PaginationManager paginationManager = await PaginationManager.CreateAsync("Drivers", _driversDAO, _logger);
 
             paginationManager.PageChanged += (currentPage) =>
             {
