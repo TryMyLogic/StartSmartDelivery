@@ -33,9 +33,9 @@ namespace StartSmartDeliveryForm.PresentationLayer
         public delegate void SubmitEventHandler(object sender, EventArgs e);
         public event SubmitEventHandler? SubmitClicked;
 
-        protected void btnSubmit_Click(object sender, EventArgs e)
+        protected async void btnSubmit_Click(object sender, EventArgs e)
         {
-            _ = btnSubmit_ClickAsync(sender, e);
+            await btnSubmit_ClickAsync(sender, e);
         }
 
         protected async Task btnSubmit_ClickAsync(object sender, EventArgs e)

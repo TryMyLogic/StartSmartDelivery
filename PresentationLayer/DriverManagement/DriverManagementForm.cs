@@ -33,15 +33,13 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 
             _paginationManager = new PaginationManager("Drivers", driversDAO, logger);
             _paginationManager.PageChanged += OnPageChanged;
-
-            InitializeAsync();
         }
 
-        private async void InitializeAsync()
+        private async Task InitializeAsync()
         {
             try
             {
-                await _paginationManager.InitializeAsync(); 
+                await _paginationManager.InitializeAsync();
             }
             catch (Exception ex)
             {
@@ -58,15 +56,16 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             lblEndPage.Text = $"/{_paginationManager.TotalPages}";
         }
 
-        private void DriverManagementForm_Load(object sender, EventArgs e)
+        private async void DriverManagementForm_Load(object sender, EventArgs e)
         {
             AdjustDataGridViewHeight(dgvMain);
             SetSearchOptions(typeof(DriversDTO));
-            _ = DriverManagementForm_LoadAsync(sender, e);
+            await DriverManagementForm_LoadAsync(sender, e);
         }
 
         private async Task DriverManagementForm_LoadAsync(object sender, EventArgs e)
         {
+            await InitializeAsync();
             await _paginationManager.GoToFirstPage();
 
             if (_driverData == null || _driverData.Rows.Count == 0)
@@ -161,9 +160,8 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             }
         }
 
-
         // DriverDataForm submit button event handlers
-        private void DriverDataForm_SubmitClicked(object sender, EventArgs e) { _ = DriverDataForm_SubmitClickedAsync(sender, e); }
+        private async void DriverDataForm_SubmitClicked(object sender, EventArgs e) { await DriverDataForm_SubmitClickedAsync(sender, e); }
         private async Task DriverDataForm_SubmitClickedAsync(object sender, EventArgs e)
         {
             if (sender is DriverDataForm form)

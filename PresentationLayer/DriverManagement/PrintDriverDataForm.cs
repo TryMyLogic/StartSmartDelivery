@@ -59,9 +59,9 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             }
         }
 
-        private void printDocument_PrintPage(object sender, PrintPageEventArgs e)
+        private async void printDocument_PrintPage(object sender, PrintPageEventArgs e)
         {
-            _ = printDocument_PrintPageAsync(sender,e);
+            await printDocument_PrintPageAsync(sender, e);
         }
 
         private async Task printDocument_PrintPageAsync(object sender, PrintPageEventArgs e)
