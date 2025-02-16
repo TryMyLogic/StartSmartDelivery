@@ -9,7 +9,6 @@ using System.Xml.Linq;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Moq;
 using StartSmartDeliveryForm.DataLayer.DAOs;
 using StartSmartDeliveryForm.DataLayer.DTOs;
 using StartSmartDeliveryForm.PresentationLayer.DriverManagement;

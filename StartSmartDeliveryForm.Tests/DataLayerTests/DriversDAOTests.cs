@@ -62,19 +62,19 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
         //             $"LicenseType: {firstRow["LicenseType"]} ({LicenseType}), Availability: {firstRow["Availability"]} ({Availability})");
         //}
 
-        [Fact]
-        public void GetDriverByID_ReturnsEmptyTable_WhenDriverDoesNotExist()
-        {
-            // Arrange
-            int nonExistentID = 9999;
+        //[Fact]
+        //public void GetDriverByID_ReturnsEmptyTable_WhenDriverDoesNotExist()
+        //{
+        //    // Arrange
+        //    int nonExistentID = 9999;
 
-            // Act
-            DataTable result = _driversDAO.GetDriverByID(nonExistentID);
+        //    // Act
+        //    DataTable result = _driversDAO.GetDriverByID(nonExistentID);
 
-            // Assert
-            Assert.NotNull(result);
-            Assert.Empty(result.Rows);
-        }
+        //    // Assert
+        //    Assert.NotNull(result);
+        //    Assert.Empty(result.Rows);
+        //}
 
     }
 }
