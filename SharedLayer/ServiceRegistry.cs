@@ -12,6 +12,10 @@ using StartSmartDeliveryForm.PresentationLayer.DriverManagement;
 using Serilog.Sinks.MSSqlServer;
 using System.Data;
 using Serilog.Events;
+using Polly;
+using Polly.Retry;
+using Microsoft.Extensions.Logging;
+using Microsoft.Data.SqlClient;
 
 
 namespace StartSmartDeliveryForm.SharedLayer
@@ -81,12 +85,55 @@ namespace StartSmartDeliveryForm.SharedLayer
 
             .CreateLogger();
 
+            // Example of handling specific result. Will be used to specify transient error codes. Non-transient will be handled seperately
+            // .HandleResult(response => response.StatusCode == System.Net.HttpStatusCode.InternalServerError)
+            // See https://learn.microsoft.com/en-us/sql/connect/ado-net/step-4-connect-resiliently-sql-ado-net?view=sql-server-ver16
 
             // Dependency injection container
             ServiceProvider serviceProvider = new ServiceCollection()
                 .AddSingleton<IConfiguration>(configuration)  // Inject configuration globally
                 .AddSingleton<string>(selectedConnectionString!) // Makes con string available for tests
                 .AddLogging(builder => builder.AddSerilog(dispose: true))
+                .AddSingleton<RetryEventService>()
+                .AddResiliencePipeline("sql-retry-pipeline", (builder, context) =>
+                {
+                    RetryEventService retryEventService = context.ServiceProvider.GetRequiredService<RetryEventService>();
+                    Microsoft.Extensions.Logging.ILogger RetryLogger = context.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("SQL-Retry");
+                    int MaxRetryAttemptsAllowed = 3;
+
+                    builder.AddTimeout(TimeSpan.FromSeconds(60));
+
+                    builder.AddRetry(new RetryStrategyOptions
+                    {
+                        MaxRetryAttempts = MaxRetryAttemptsAllowed,
+                        Delay = TimeSpan.FromSeconds(5),
+                        ShouldHandle = new Func<RetryPredicateArguments<object>, ValueTask<bool>>(args =>
+                        {
+                            return new ValueTask<bool>(args.Outcome.Exception is SqlException);
+                        }),
+                        OnRetry = args =>
+                        {
+                            if (args.Outcome.Exception is not null)
+                            {
+                                RetryLogger.LogError("Retrying connection to database. Attempt {AttemptNumber} of {MaxRetryAttempts}. Retrying in {DelaySeconds} seconds. Exception: {ExceptionMessage}.",
+                                args.AttemptNumber + 1, // Is 0 indexed. Adding 1 for display purposes
+                                MaxRetryAttemptsAllowed,
+                                args.RetryDelay,
+                                args.Outcome.Exception.Message
+                                );
+
+                                retryEventService.OnRetryOccurred(
+                                args.AttemptNumber + 1,
+                                MaxRetryAttemptsAllowed,
+                                args.RetryDelay,
+                                args.Outcome.Exception.Message
+                                );
+                            }
+                            return default;
+                        }
+                    });
+                })
+
                 .AddScoped<DriversDAO>()
                 .AddScoped<PaginationManager>()
                 .AddScoped<DriverManagementForm>()

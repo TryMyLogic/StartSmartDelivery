@@ -25,15 +25,21 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
         private DataTable _driverData;
         private readonly PaginationManager _paginationManager;
         private readonly ILogger<DriverManagementForm> _logger;
-        public DriverManagementForm(DriversDAO driversDAO, ILogger<DriverManagementForm>? logger = null)
+        private CancellationTokenSource? _cts;
+        private readonly RetryEventService _retryEventService;
+        public DriverManagementForm(DriversDAO driversDAO, ILogger<DriverManagementForm>? logger = null, RetryEventService? retryEventService = null)
         {
             InitializeComponent();
             _driversDAO = driversDAO;
             _driverData = new DataTable(); //Empty table by default
             _logger = logger ?? NullLogger<DriverManagementForm>.Instance;
 
+            _retryEventService = retryEventService ?? new RetryEventService(); // New RetryEvent should never display anything
+            _retryEventService.RetryOccurred += OnRetryOccurred;
+
             _paginationManager = new PaginationManager("Drivers", driversDAO);
             _paginationManager.PageChanged += OnPageChanged;
+
         }
 
         private async Task InitializeAsync()
@@ -49,12 +55,28 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             }
         }
 
+        private void OnRetryOccurred(int attemptNumber, int maxRetries, TimeSpan retryDelay, string exceptionMessage)
+        {
+            //TODO: Will replace this with a custom form for live updates since multiple MessageBoxes stack, which is a bad user experience
+            MessageBox.Show($"Retry attempt {attemptNumber}/{maxRetries}. Retrying in {retryDelay.Seconds} seconds. Exception: {exceptionMessage}");
+        }
+
         public async Task OnPageChanged(int currentPage)
         {
-            _driverData = await _driversDAO.GetDriversAtPageAsync(currentPage) ?? new DataTable();
-            dgvMain.DataSource = _driverData;
-            txtStartPage.Text = $"{_paginationManager.CurrentPage}";
-            lblEndPage.Text = $"/{_paginationManager.TotalPages}";
+            _cts = new CancellationTokenSource();
+
+            try
+            {
+                _driverData = await _driversDAO.GetDriversAtPageAsync(currentPage, _cts.Token) ?? new DataTable();
+                dgvMain.DataSource = _driverData;
+                txtStartPage.Text = $"{_paginationManager.CurrentPage}";
+                lblEndPage.Text = $"/{_paginationManager.TotalPages}";
+            }
+            catch (OperationCanceledException)
+            {
+                MessageBox.Show("The operation was canceled.");
+            }
+
         }
 
         private async void DriverManagementForm_Load(object sender, EventArgs e)
@@ -67,6 +89,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
         private async Task DriverManagementForm_LoadAsync(object sender, EventArgs e)
         {
             await InitializeAsync();
+            _logger.LogDebug("Helooo LoadAsync");
             await _paginationManager.GoToFirstPage();
 
             if (_driverData == null || _driverData.Rows.Count == 0)

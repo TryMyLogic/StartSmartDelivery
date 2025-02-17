@@ -20,6 +20,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
         private int _currentPage = 1;
         private readonly int _totalPages;
         private readonly DataGridView? _dataGridView;
+        private CancellationTokenSource? _cts;
 
         // TODO - Print all databases pages, ensuring each page contains as many records (within reason)
         public PrintDriverDataForm(DriversDAO driversDAO)
@@ -32,7 +33,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
         }
 
         // Used for printing all the database pages, according to the appsettings row count
-        public PrintDriverDataForm(int totalPages,DriversDAO driversDAO)
+        public PrintDriverDataForm(int totalPages, DriversDAO driversDAO)
         {
             InitializeComponent();
             printPreviewControl.Document = printDocument;
@@ -88,7 +89,9 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             }
             else
             {
-                dataTable = await _driversDAO.GetDriversAtPageAsync(_currentPage);
+                _cts = new CancellationTokenSource();
+
+                dataTable = await _driversDAO.GetDriversAtPageAsync(_currentPage, _cts.Token);
                 if (dataTable == null)
                 {
                     FormConsole.Instance.Log("GetDriversAtPage returned null datatable");

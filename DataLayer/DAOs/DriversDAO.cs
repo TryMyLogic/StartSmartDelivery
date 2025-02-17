@@ -9,6 +9,8 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Polly;
+using Polly.Registry;
 using StartSmartDeliveryForm.BusinessLogicLayer;
 using StartSmartDeliveryForm.DataLayer.DTOs;
 using StartSmartDeliveryForm.SharedLayer;
@@ -21,51 +23,63 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
     Provides an interface to interact with the data source (such as a database).
     Decouples the data access code from the rest of the application
     */
-    public class DriversDAO(IConfiguration configuration, ILogger<DriversDAO>? logger = null, string? connectionString = null)
+    public class DriversDAO(ResiliencePipelineProvider<string> pipelineProvider, IConfiguration configuration,ILogger<DriversDAO>? logger = null, string? connectionString = null)
     {
         private readonly string _connectionString = connectionString ?? configuration["ConnectionStrings:StartSmartDB"]
                                ?? throw new InvalidOperationException("Connection string not found.");
         private readonly ILogger<DriversDAO> _logger = logger ?? NullLogger<DriversDAO>.Instance;
+        private readonly ResiliencePipeline _pipeline = pipelineProvider.GetPipeline("sql-retry-pipeline");
 
-        public async Task<DataTable?> GetDriversAtPageAsync(int Page)
+        public async Task<DataTable?> GetDriversAtPageAsync(int Page, CancellationToken CancellationToken)
         {
             string Query = @"
-                    SELECT * FROM Drivers
-                    ORDER BY DriverID
-                    OFFSET @Offset ROWS 
-                    FETCH NEXT @Pagelimit ROWS ONLY;";
+            SELECT * FROM Drivers
+            ORDER BY DriverID
+            OFFSET @Offset ROWS 
+            FETCH NEXT @Pagelimit ROWS ONLY;";
 
             int Offset = (Page - 1) * GlobalConstants.s_recordLimit;
             DataTable Dt = new();
 
-            using (SqlConnection Connection = new(_connectionString))
+            try
             {
-                try
+                await _pipeline.ExecuteAsync(async (_cancellationToken) =>
                 {
-                    await Connection.OpenAsync();
-                    using (SqlCommand Command = new(Query, Connection))
+                    using (SqlConnection Connection = new(_connectionString))
                     {
-                        Command.Parameters.Add(new SqlParameter("@Offset", SqlDbType.Int) { Value = Offset });
-                        Command.Parameters.Add(new SqlParameter("@Pagelimit", SqlDbType.Int) { Value = GlobalConstants.s_recordLimit });
-
-                        using (SqlDataReader Reader = await Command.ExecuteReaderAsync())
+                        await Connection.OpenAsync(_cancellationToken);  
+                        using (SqlCommand Command = new(Query, Connection))
                         {
-                            Dt.Load(Reader);
-                        }
+                            Command.Parameters.Add(new SqlParameter("@Offset", SqlDbType.Int) { Value = Offset });
+                            Command.Parameters.Add(new SqlParameter("@Pagelimit", SqlDbType.Int) { Value = GlobalConstants.s_recordLimit });
 
-                        DataColumn[] PrimaryKeyColumns = [Dt.Columns["DriverID"]!];
-                        Dt.PrimaryKey = PrimaryKeyColumns;
+                            using (SqlDataReader Reader = await Command.ExecuteReaderAsync(_cancellationToken))  
+                            {
+                                Dt.Load(Reader);
+                            }
+
+                            DataColumn[] PrimaryKeyColumns = new[] { Dt.Columns["DriverID"]! };
+                            Dt.PrimaryKey = PrimaryKeyColumns;
+                        }
                     }
-                }
-                catch (SqlException ex)
-                {
-                    _logger.LogError("An error occurred while accessing the database: {ErrorMessage}", ex.Message);
-                    return null;
-                }
+
+                    return Dt;
+                }, CancellationToken);  
+            }
+            catch (SqlException ex)
+            {
+                _logger.LogError("An error occurred while accessing the database: {ErrorMessage}", ex.Message);
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("An unexpected error occurred: {ErrorMessage}", ex.Message);
+                return null;
             }
 
             return Dt;
         }
+
 
         public async Task<DataTable?> GetAllDriversAsync()
         {
@@ -257,7 +271,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             string Query = "SELECT COUNT(DriverID) FROM Drivers";
             int recordsCount = 0;
 
-            using (SqlConnection Connection = new(_connectionString)) 
+            using (SqlConnection Connection = new(_connectionString))
             {
                 try
                 {
@@ -282,7 +296,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
         {
             string Query = "SELECT DriverID, Name, Surname, EmployeeNo, LicenseType, Availability FROM Drivers WHERE DriverID = @DriverID";
             DataTable driverDataTable = new();
-           
+
             bool ShouldCloseCon = false;
             if (Connection == null)
             {
