@@ -129,6 +129,7 @@ namespace StartSmartDeliveryForm.SharedLayer
                                 args.Outcome.Exception.Message
                                 );
                             }
+
                             return default;
                         }
                     });

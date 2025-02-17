@@ -45,7 +45,7 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
             try
             {
                 RecordCount = await GetTotalRecordCount();
-                TotalPages = (int)Math.Ceiling((double)RecordCount / _recordsPerPage);
+                TotalPages = Math.Max(1, (int)Math.Ceiling((double)RecordCount / _recordsPerPage));
             }
             catch (Exception ex)
             {

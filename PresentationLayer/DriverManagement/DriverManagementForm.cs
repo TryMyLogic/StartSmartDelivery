@@ -36,6 +36,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 
             _retryEventService = retryEventService ?? new RetryEventService(); // New RetryEvent should never display anything
             _retryEventService.RetryOccurred += OnRetryOccurred;
+            _retryEventService.RetrySucceeded += OnRetrySuccessOccurred;
 
             _paginationManager = new PaginationManager("Drivers", driversDAO);
             _paginationManager.PageChanged += OnPageChanged;
@@ -55,6 +56,22 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             }
         }
 
+        private async void OnRetrySuccessOccurred()
+        {
+            _cts = new CancellationTokenSource();
+
+            try
+            {
+                await _paginationManager.InitializeAsync();
+                _logger.LogDebug("Records Count: {RecordCount}, Total Pages: {TotalPages}",_paginationManager.RecordCount,_paginationManager.TotalPages);
+
+                _driverData = await _driversDAO.GetDriversAtPageAsync(1, _cts.Token) ?? new DataTable();
+            }
+            catch (OperationCanceledException)
+            {
+                MessageBox.Show("The operation was canceled.");
+            }
+        }
         private void OnRetryOccurred(int attemptNumber, int maxRetries, TimeSpan retryDelay, string exceptionMessage)
         {
             //TODO: Will replace this with a custom form for live updates since multiple MessageBoxes stack, which is a bad user experience
@@ -89,7 +106,6 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
         private async Task DriverManagementForm_LoadAsync(object sender, EventArgs e)
         {
             await InitializeAsync();
-            _logger.LogDebug("Helooo LoadAsync");
             await _paginationManager.GoToFirstPage();
 
             if (_driverData == null || _driverData.Rows.Count == 0)

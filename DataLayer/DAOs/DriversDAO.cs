@@ -23,13 +23,14 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
     Provides an interface to interact with the data source (such as a database).
     Decouples the data access code from the rest of the application
     */
-    public class DriversDAO(ResiliencePipelineProvider<string> pipelineProvider, IConfiguration configuration,ILogger<DriversDAO>? logger = null, string? connectionString = null)
+    public class DriversDAO(ResiliencePipelineProvider<string> pipelineProvider, IConfiguration configuration, ILogger<DriversDAO>? logger = null, string? connectionString = null, RetryEventService? retryEventService = null)
     {
+
         private readonly string _connectionString = connectionString ?? configuration["ConnectionStrings:StartSmartDB"]
                                ?? throw new InvalidOperationException("Connection string not found.");
         private readonly ILogger<DriversDAO> _logger = logger ?? NullLogger<DriversDAO>.Instance;
         private readonly ResiliencePipeline _pipeline = pipelineProvider.GetPipeline("sql-retry-pipeline");
-
+        private readonly RetryEventService _retryEventService = retryEventService ?? new RetryEventService(); // New retry service ensures no "success" events are emitted.
         public async Task<DataTable?> GetDriversAtPageAsync(int Page, CancellationToken CancellationToken)
         {
             string Query = @"
@@ -47,13 +48,13 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
                 {
                     using (SqlConnection Connection = new(_connectionString))
                     {
-                        await Connection.OpenAsync(_cancellationToken);  
+                        await Connection.OpenAsync(_cancellationToken);
                         using (SqlCommand Command = new(Query, Connection))
                         {
                             Command.Parameters.Add(new SqlParameter("@Offset", SqlDbType.Int) { Value = Offset });
                             Command.Parameters.Add(new SqlParameter("@Pagelimit", SqlDbType.Int) { Value = GlobalConstants.s_recordLimit });
 
-                            using (SqlDataReader Reader = await Command.ExecuteReaderAsync(_cancellationToken))  
+                            using (SqlDataReader Reader = await Command.ExecuteReaderAsync(_cancellationToken))
                             {
                                 Dt.Load(Reader);
                             }
@@ -62,9 +63,10 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
                             Dt.PrimaryKey = PrimaryKeyColumns;
                         }
                     }
+                    _retryEventService.OnRetrySuccessOccurred(); // Does internally check if a retry has occurred. Else its skipped
 
                     return Dt;
-                }, CancellationToken);  
+                }, CancellationToken);
             }
             catch (SqlException ex)
             {
