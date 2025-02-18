@@ -5,6 +5,7 @@ using System.Data;
 using System.DirectoryServices.ActiveDirectory;
 using System.Drawing;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -170,62 +171,81 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 
         protected override async Task btnDelete_ClickAsync(int rowIndex)
         {
-            DataGridViewRow selectedRow = dgvMain.Rows[rowIndex];
+            _cts = new CancellationTokenSource();
 
-            object? DriverID = selectedRow.Cells[DriverColumns.DriverID].Value;
-
-            DialogResult result = MessageBox.Show("Are you sure?", "Delete Row", MessageBoxButtons.YesNo);
-            if (result == DialogResult.Yes && int.TryParse(DriverID?.ToString(), out int driverID))
+            try
             {
-                _driverData.Rows.RemoveAt(rowIndex);
-                await _driversDAO.DeleteDriverAsync(driverID);
+                DataGridViewRow selectedRow = dgvMain.Rows[rowIndex];
 
-                _paginationManager.UpdateRecordCount(_paginationManager.RecordCount - 1);
-                await _paginationManager.EnsureValidPage();
+                object? DriverID = selectedRow.Cells[DriverColumns.DriverID].Value;
+
+                DialogResult result = MessageBox.Show("Are you sure?", "Delete Row", MessageBoxButtons.YesNo);
+                if (result == DialogResult.Yes && int.TryParse(DriverID?.ToString(), out int driverID))
+                {
+                    _driverData.Rows.RemoveAt(rowIndex);
+                    await _driversDAO.DeleteDriverAsync(driverID,_cts.Token);
+
+                    _paginationManager.UpdateRecordCount(_paginationManager.RecordCount - 1);
+                    await _paginationManager.EnsureValidPage();
+                }
             }
+            catch (OperationCanceledException)
+            {
+                MessageBox.Show("The operation was canceled.");
+            }
+           
         }
 
         // DriverDataForm submit button event handlers
         private async void DriverDataForm_SubmitClicked(object sender, EventArgs e) { await DriverDataForm_SubmitClickedAsync(sender, e); }
         private async Task DriverDataForm_SubmitClickedAsync(object sender, EventArgs e)
         {
-            if (sender is DriverDataForm form)
+            _cts = new CancellationTokenSource();
+
+            try
             {
-                DriversDTO driverDTO = form.GetData();
-
-                if (driverDTO != null)
+                if (sender is DriverDataForm form)
                 {
-                    if (form.Mode == FormMode.Add)
+                    DriversDTO driverDTO = form.GetData();
+
+                    if (driverDTO != null)
                     {
-                        int newDriverId = await _driversDAO.InsertDriverAsync(driverDTO);
-
-                        if (newDriverId != -1) // Check for success
+                        if (form.Mode == FormMode.Add)
                         {
-                            DataRow newRow = _driverData.NewRow();
-                            PopulateDataRow(newRow, driverDTO);
-                            newRow[DriverColumns.DriverID] = newDriverId;
+                            int newDriverId = await _driversDAO.InsertDriverAsync(driverDTO, _cts.Token);
+                            _logger.LogInformation("NewDriverID: {newDriverID}", newDriverId);
+                            if (newDriverId != -1) // Check for success
+                            {
+                                DataRow newRow = _driverData.NewRow();
+                                PopulateDataRow(newRow, driverDTO);
+                                newRow[DriverColumns.DriverID] = newDriverId;
 
-                            _driverData.Rows.Add(newRow);
-                            _paginationManager.UpdateRecordCount(_paginationManager.RecordCount + 1);
-                            await _paginationManager.GoToLastPage(); // Allows user to see successful insert
+                                _driverData.Rows.Add(newRow);
+                                _paginationManager.UpdateRecordCount(_paginationManager.RecordCount + 1);
+                                await _paginationManager.GoToLastPage(); // Allows user to see successful insert
+                            }
+                        }
+                        else if (form.Mode == FormMode.Edit)
+                        {
+                            DataRow? rowToUpdate = _driverData.Rows.Find(driverDTO.DriverID); // Assuming EmployeeNo is the primary key
+                            if (rowToUpdate == null)
+                            {
+                                FormConsole.Instance.Log("Row not found for update.");
+                                return;
+                            }
+                            PopulateDataRow(rowToUpdate, driverDTO);
+
+                            await _driversDAO.UpdateDriverAsync(driverDTO, _cts.Token);
+                            form.Close();
                         }
                     }
-                    else if (form.Mode == FormMode.Edit)
-                    {
-                        DataRow? rowToUpdate = _driverData.Rows.Find(driverDTO.DriverID); // Assuming EmployeeNo is the primary key
-                        if (rowToUpdate == null)
-                        {
-                            FormConsole.Instance.Log("Row not found for update.");
-                            return;
-                        }
-                        PopulateDataRow(rowToUpdate, driverDTO);
 
-                        await _driversDAO.UpdateDriverAsync(driverDTO);
-                        form.Close();
-                    }
+                    form.ClearData(); //Clear form for next batch of data
                 }
-
-                form.ClearData(); //Clear form for next batch of data
+            }
+            catch (OperationCanceledException)
+            {
+                MessageBox.Show("The operation was canceled.");
             }
         }
 
@@ -290,12 +310,21 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
         protected override async Task reloadToolStripMenuItem_ClickAsync(object sender, EventArgs e)
         {
             //Refetch data and rebind
-            _driverData = await _driversDAO.GetAllDriversAsync() ?? new DataTable();
-            dgvMain.DataSource = null;
-            dgvMain.DataSource = _driverData;
-            SetDataGridViewColumns();
+            _cts = new CancellationTokenSource();
 
-            MessageBox.Show("Succesfully Reloaded", "Reload Status");
+            try
+            {
+                _driverData = await _driversDAO.GetAllDriversAsync(_cts.Token) ?? new DataTable();
+                dgvMain.DataSource = null;
+                dgvMain.DataSource = _driverData;
+                SetDataGridViewColumns();
+
+                MessageBox.Show("Succesfully Reloaded", "Reload Status");
+            }
+            catch (OperationCanceledException)
+            {
+                MessageBox.Show("The operation was canceled.");
+            }
         }
 
         protected override void rollbackToolStripMenuItem_Click(object sender, EventArgs e)

@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 using StartSmartDeliveryForm.DataLayer.DAOs;
 using StartSmartDeliveryForm.SharedLayer.Enums;
 using StartSmartDeliveryForm.SharedLayer;
+using Microsoft.Extensions.Logging;
+using StartSmartDeliveryForm.PresentationLayer.DriverManagement;
+using Serilog;
 
 namespace StartSmartDeliveryForm.BusinessLogicLayer
 {
@@ -17,12 +20,25 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
         public LicenseType LicenseType { get; set; }
         public bool Availability { get; set; }
 
+        public CancellationTokenSource Cts { get; private set; }
+
         public async Task<bool> IsEmployeeNoUnique(string EmployeeNo)
         {
-            int count = await driversDAO.GetEmployeeNoCountAsync(EmployeeNo);
-            bool isUnique = count == 0;
-            FormConsole.Instance.Log($"Employee Unique: {isUnique}");
-            return isUnique;
+            Cts = new CancellationTokenSource();
+
+            try
+            {
+                int count = await driversDAO.GetEmployeeNoCountAsync(EmployeeNo, Cts.Token);
+                bool isUnique = count == 0;
+                FormConsole.Instance.Log($"Employee Unique: {isUnique}");
+                return isUnique;
+            }
+            catch (OperationCanceledException)
+            {
+                Log.Information("IsEmployeeNoUnique was cancelled");
+                return false;
+            }
+
         }
     }
 

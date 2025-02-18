@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
 using Microsoft.Data.SqlClient;
@@ -44,9 +45,10 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
 
             try
             {
+                // The inner token in the lambda will/should be different if you're using strategies like timeout and hedging
                 await _pipeline.ExecuteAsync(async (_cancellationToken) =>
                 {
-                    using (SqlConnection Connection = new(_connectionString))
+                    await using (SqlConnection Connection = new(_connectionString))
                     {
                         await Connection.OpenAsync(_cancellationToken);
                         using (SqlCommand Command = new(Query, Connection))
@@ -59,7 +61,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
                                 Dt.Load(Reader);
                             }
 
-                            DataColumn[] PrimaryKeyColumns = new[] { Dt.Columns["DriverID"]! };
+                            DataColumn[] PrimaryKeyColumns = [Dt.Columns["DriverID"]!];
                             Dt.PrimaryKey = PrimaryKeyColumns;
                         }
                     }
@@ -80,51 +82,60 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             return Dt;
         }
 
-        public async Task<DataTable?> GetAllDriversAsync()
+        public async Task<DataTable?> GetAllDriversAsync(CancellationToken CancellationToken)
         {
             string Query = @"SELECT * FROM Drivers;";
             DataTable Dt = new();
 
-            using (SqlConnection Connection = new(_connectionString))
+            try
             {
-                try
+                await _pipeline.ExecuteAsync(async (_cancellationToken) =>
                 {
-                    await Connection.OpenAsync();
-
-                    using (SqlCommand Command = new(Query, Connection))
+                    await using (SqlConnection Connection = new(_connectionString))
                     {
-                        using (SqlDataReader Reader = await Command.ExecuteReaderAsync())
+                        await Connection.OpenAsync(_cancellationToken);
+                        using (SqlCommand Command = new(Query, Connection))
                         {
-                            Dt.Load(Reader);
+                            using (SqlDataReader Reader = await Command.ExecuteReaderAsync(_cancellationToken))
+                            {
+                                Dt.Load(Reader);
 
-                            if (Dt.Columns.Contains("DriverID"))
-                            {
-                                DataColumn[] PrimaryKeyColumns = [Dt.Columns["DriverID"]!];
-                                Dt.PrimaryKey = PrimaryKeyColumns;
-                            }
-                            else
-                            {
-                                throw new InvalidOperationException("The DataTable must contain the 'DriverID' column.");
+                                if (Dt.Columns.Contains("DriverID"))
+                                {
+                                    DataColumn[] PrimaryKeyColumns = [Dt.Columns["DriverID"]!];
+                                    Dt.PrimaryKey = PrimaryKeyColumns;
+                                }
+                                else
+                                {
+                                    throw new InvalidOperationException("The DataTable must contain the 'DriverID' column.");
+                                }
                             }
                         }
                     }
-                }
-                catch (SqlException ex)
-                {
-                    _logger.LogError("An error occurred while accessing the database: {ErrorMessage}", ex.Message);
-                    return null;
-                }
+                    _retryEventService.OnRetrySuccessOccurred(); // Does internally check if a retry has occurred. Else its skipped
+                }, CancellationToken);
+            }
+            catch (SqlException ex)
+            {
+                _logger.LogError("An error occurred while accessing the database: {ErrorMessage}", ex.Message);
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("An unexpected error occurred: {ErrorMessage}", ex.Message);
+                return null;
             }
 
             return Dt;
         }
 
-        public async Task<int> InsertDriverAsync(DriversDTO Driver, SqlConnection? Connection = null, SqlTransaction? Transaction = null)
+        public async Task<int> InsertDriverAsync(DriversDTO Driver, CancellationToken CancellationToken, SqlConnection? Connection = null, SqlTransaction? Transaction = null)
         {
             string Query = @"
             INSERT INTO Drivers (Name, Surname, EmployeeNo, LicenseType, Availability) 
             VALUES (@Name, @Surname, @EmployeeNo, @LicenseType, @Availability);
             SELECT CAST(SCOPE_IDENTITY() AS int);"; // Get the new DriverID
+            int newDriverId = -1;
 
             bool ShouldCloseCon = false;
             if (Connection == null)
@@ -135,34 +146,42 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
 
             try
             {
-                using (SqlCommand Command = Transaction != null ? new SqlCommand(Query, Connection, Transaction) : new SqlCommand(Query, Connection))
+                await _pipeline.ExecuteAsync(async (_cancellationToken) =>
                 {
-                    await Connection.OpenAsync();
+                    await Connection.OpenAsync(_cancellationToken);
+                    using (SqlCommand Command = Transaction != null ? new SqlCommand(Query, Connection, Transaction) : new SqlCommand(Query, Connection))
+                    {
+                        Command.Parameters.Add(new SqlParameter("@Name", SqlDbType.NVarChar, 100) { Value = Driver.Name });
+                        Command.Parameters.Add(new SqlParameter("@Surname", SqlDbType.NVarChar, 100) { Value = Driver.Surname });
+                        Command.Parameters.Add(new SqlParameter("@EmployeeNo", SqlDbType.NVarChar, 50) { Value = Driver.EmployeeNo });
+                        Command.Parameters.Add(new SqlParameter("@LicenseType", SqlDbType.Int) { Value = (int)Driver.LicenseType });
+                        Command.Parameters.Add(new SqlParameter("@Availability", SqlDbType.Bit) { Value = Driver.Availability });
 
-                    Command.Parameters.Add(new SqlParameter("@Name", SqlDbType.NVarChar, 100) { Value = Driver.Name });
-                    Command.Parameters.Add(new SqlParameter("@Surname", SqlDbType.NVarChar, 100) { Value = Driver.Surname });
-                    Command.Parameters.Add(new SqlParameter("@EmployeeNo", SqlDbType.NVarChar, 50) { Value = Driver.EmployeeNo });
-                    Command.Parameters.Add(new SqlParameter("@LicenseType", SqlDbType.Int) { Value = (int)Driver.LicenseType });
-                    Command.Parameters.Add(new SqlParameter("@Availability", SqlDbType.Bit) { Value = Driver.Availability });
+                        newDriverId = (int)(await Command.ExecuteScalarAsync(_cancellationToken))!;
 
-                    int newDriverId = (int)(await Command.ExecuteScalarAsync())!;
-
-                    _logger.LogInformation("Driver added successfully with ID: {DriverID}", newDriverId);
-                    return newDriverId;
-                }
+                        _logger.LogInformation("Driver added successfully with ID: {DriverID}", newDriverId);
+                        _retryEventService.OnRetrySuccessOccurred(); // Does internally check if a retry has occurred. Else its skipped
+                    }
+                }, CancellationToken);
             }
             catch (SqlException ex)
             {
                 _logger.LogError("An error occurred while accessing the database: {ErrorMessage}", ex.Message);
-                return -1; //Indicates an error occurred
+                return -1; // Indicates an error occurred
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("An unexpected error occurred: {ErrorMessage}", ex.Message);
+                return -1;
             }
             finally
             {
-                if (ShouldCloseCon) Connection.Close();
+                if (ShouldCloseCon) await Connection.CloseAsync();
             }
+            return newDriverId;
         }
 
-        public async Task UpdateDriverAsync(DriversDTO driver, SqlConnection? Connection = null, SqlTransaction? Transaction = null)
+        public async Task UpdateDriverAsync(DriversDTO driver, CancellationToken CancellationToken, SqlConnection? Connection = null, SqlTransaction? Transaction = null)
         {
             string Query = "UPDATE Drivers SET Name = @Name, Surname = @Surname, EmployeeNo = @EmployeeNo, LicenseType = @LicenseType, Availability = @Availability WHERE DriverID = @DriverID;";
 
@@ -175,23 +194,30 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
 
             try
             {
-                await Connection.OpenAsync();
-                using (SqlCommand Command = Transaction != null ? new SqlCommand(Query, Connection, Transaction) : new SqlCommand(Query, Connection))
+                await _pipeline.ExecuteAsync(async (_cancellationToken) =>
                 {
-                    Command.Parameters.Add(new SqlParameter("@DriverID", SqlDbType.Int) { Value = driver.DriverID });
-                    Command.Parameters.Add(new SqlParameter("@Name", SqlDbType.NVarChar, 100) { Value = driver.Name });
-                    Command.Parameters.Add(new SqlParameter("@Surname", SqlDbType.NVarChar, 100) { Value = driver.Surname });
-                    Command.Parameters.Add(new SqlParameter("@EmployeeNo", SqlDbType.NVarChar, 50) { Value = driver.EmployeeNo });
-                    Command.Parameters.Add(new SqlParameter("@LicenseType", SqlDbType.Int) { Value = (int)driver.LicenseType });
-                    Command.Parameters.Add(new SqlParameter("@Availability", SqlDbType.Bit) { Value = driver.Availability });
+                    await Connection.OpenAsync(_cancellationToken);
+                    using (SqlCommand Command = Transaction != null ? new SqlCommand(Query, Connection, Transaction) : new SqlCommand(Query, Connection))
+                    {
+                        Command.Parameters.Add(new SqlParameter("@DriverID", SqlDbType.Int) { Value = driver.DriverID });
+                        Command.Parameters.Add(new SqlParameter("@Name", SqlDbType.NVarChar, 100) { Value = driver.Name });
+                        Command.Parameters.Add(new SqlParameter("@Surname", SqlDbType.NVarChar, 100) { Value = driver.Surname });
+                        Command.Parameters.Add(new SqlParameter("@EmployeeNo", SqlDbType.NVarChar, 50) { Value = driver.EmployeeNo });
+                        Command.Parameters.Add(new SqlParameter("@LicenseType", SqlDbType.Int) { Value = (int)driver.LicenseType });
+                        Command.Parameters.Add(new SqlParameter("@Availability", SqlDbType.Bit) { Value = driver.Availability });
 
-                    int RowsAffected = await Command.ExecuteNonQueryAsync();
-                    _logger.LogInformation("Driver updated successfully with ID: {DriverID}", driver.DriverID);
-                }
+                        int RowsAffected = await Command.ExecuteNonQueryAsync(_cancellationToken);
+                        _logger.LogInformation("Driver updated successfully with ID: {DriverID}", driver.DriverID);
+                    }
+                }, CancellationToken);
             }
             catch (SqlException ex)
             {
                 _logger.LogError("An error occurred while accessing the database: {ErrorMessage}", ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("An unexpected error occurred: {ErrorMessage}", ex.Message);
             }
             finally
             {
@@ -199,7 +225,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             }
         }
 
-        public async Task DeleteDriverAsync(int DriverID, SqlTransaction? Transaction = null, SqlConnection? Connection = null)
+        public async Task DeleteDriverAsync(int DriverID, CancellationToken CancellationToken, SqlTransaction? Transaction = null, SqlConnection? Connection = null)
         {
             string Query = "DELETE FROM Drivers WHERE DriverID = @DriverID";
             bool ShouldCloseCon = false;
@@ -211,26 +237,33 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
 
             try
             {
-                await Connection.OpenAsync();
-                using (SqlCommand Command = Transaction != null ? new SqlCommand(Query, Connection, Transaction) : new SqlCommand(Query, Connection))
+                await _pipeline.ExecuteAsync(async (_cancellationToken) =>
                 {
-                    Command.Parameters.Add(new SqlParameter("@DriverID", SqlDbType.Int) { Value = DriverID });
-
-                    int RowsAffected = await Command.ExecuteNonQueryAsync();
-
-                    if (RowsAffected > 0)
+                    await Connection.OpenAsync(_cancellationToken);
+                    using (SqlCommand Command = Transaction != null ? new SqlCommand(Query, Connection, Transaction) : new SqlCommand(Query, Connection))
                     {
-                        _logger.LogInformation("{RowsAffected} row(s) were deleted with the DriverID: {DriverID}", RowsAffected, DriverID);
+                        Command.Parameters.Add(new SqlParameter("@DriverID", SqlDbType.Int) { Value = DriverID });
+
+                        int RowsAffected = await Command.ExecuteNonQueryAsync(_cancellationToken);
+
+                        if (RowsAffected > 0)
+                        {
+                            _logger.LogInformation("{RowsAffected} row(s) were deleted with the DriverID: {DriverID}", RowsAffected, DriverID);
+                        }
+                        else
+                        {
+                            _logger.LogWarning("No rows were deleted. Employee may not exist with DriverID: {DriverID}", DriverID);
+                        }
                     }
-                    else
-                    {
-                        _logger.LogWarning("No rows were deleted. Employee may not exist with DriverID: {DriverID}", DriverID);
-                    }
-                }
+                }, CancellationToken);
             }
             catch (SqlException ex)
             {
                 _logger.LogError("An error occurred while accessing the database: {ErrorMessage}", ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("An unexpected error occurred: {ErrorMessage}", ex.Message);
             }
             finally
             {
@@ -238,30 +271,40 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             }
         }
 
-        public async Task<int> GetEmployeeNoCountAsync(string EmployeeNo)
+        public async Task<int> GetEmployeeNoCountAsync(string EmployeeNo, CancellationToken CancellationToken)
         {
             string Query = "SELECT TOP 1 * FROM Drivers WHERE EmployeeNo = @EmployeeNo";
+            int Result = 1;
             using (SqlConnection Connection = new(_connectionString))
             {
                 try
                 {
-                    await Connection.OpenAsync();
-                    using (var Command = new SqlCommand(Query, Connection))
+                    await _pipeline.ExecuteAsync(async (_cancellationToken) =>
                     {
-                        Command.CommandType = CommandType.Text; // Since it's a direct SQL query
-                        Command.Parameters.Add(new SqlParameter("@EmployeeNo", SqlDbType.NVarChar, 50) { Value = EmployeeNo });
+                        await Connection.OpenAsync(_cancellationToken);
+                        using (var Command = new SqlCommand(Query, Connection))
+                        {
+                            Command.CommandType = CommandType.Text; // Since it's a direct SQL query
+                            Command.Parameters.Add(new SqlParameter("@EmployeeNo", SqlDbType.NVarChar, 50) { Value = EmployeeNo });
 
-                        object? FoundRow = await Command.ExecuteScalarAsync();
-                        int Result = (FoundRow != null) ? (int)FoundRow : 0;
+                            object? FoundRow = await Command.ExecuteScalarAsync(_cancellationToken);
+                            Result = (FoundRow != null) ? (int)FoundRow : 0;
 
-                        return Result; // 1 if the EmployeeNo exists, 0 if not
-                    }
+                            return Result; // 1 if the EmployeeNo exists, 0 if not
+                        }
+                    }, CancellationToken);
                 }
                 catch (SqlException ex)
                 {
                     _logger.LogError("An error occurred while accessing the database: {ErrorMessage}", ex.Message);
                     return 1; // Assume it's not unique on error
                 }
+                catch (Exception ex)
+                {
+                    _logger.LogError("An unexpected error occurred: {ErrorMessage}", ex.Message);
+                    return 1;
+                }
+                return Result;
             }
         }
 
@@ -276,10 +319,10 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
                 {
                     using (SqlConnection Connection = new(_connectionString))
                     {
-                        await Connection.OpenAsync(CancellationToken);
+                        await Connection.OpenAsync(_cancellationToken);
                         using (SqlCommand Command = new(Query, Connection))
                         {
-                            object? result = await Command.ExecuteScalarAsync(CancellationToken);
+                            object? result = await Command.ExecuteScalarAsync(_cancellationToken);
                             recordsCount = result != DBNull.Value ? Convert.ToInt32(result) : 0;
                         }
                     }
@@ -291,11 +334,16 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
                 _logger.LogError("An error occurred while accessing the database: {ErrorMessage}", ex.Message);
                 return recordsCount; // Return 0 pages if an error occurs
             }
+            catch (Exception ex)
+            {
+                _logger.LogError("An unexpected error occurred: {ErrorMessage}", ex.Message);
+                return recordsCount;
+            }
 
             return recordsCount;
         }
 
-        public async Task<DataTable> GetDriverByIDAsync(int driverID, SqlConnection? Connection = null, SqlTransaction? Transaction = null)
+        public async Task<DataTable> GetDriverByIDAsync(int DriverID, CancellationToken CancellationToken, SqlConnection? Connection = null, SqlTransaction? Transaction = null)
         {
             string Query = "SELECT DriverID, Name, Surname, EmployeeNo, LicenseType, Availability FROM Drivers WHERE DriverID = @DriverID";
             DataTable driverDataTable = new();
@@ -309,20 +357,27 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
 
             try
             {
-                await Connection.OpenAsync();
-                using (SqlCommand Command = Transaction != null ? new SqlCommand(Query, Connection, Transaction) : new SqlCommand(Query, Connection))
+                await _pipeline.ExecuteAsync(async (_cancellationToken) =>
                 {
-                    Command.Parameters.AddWithValue("@DriverID", driverID);
-
-                    using (SqlDataReader reader = await Command.ExecuteReaderAsync())
+                    await Connection.OpenAsync(_cancellationToken);
+                    using (SqlCommand Command = Transaction != null ? new SqlCommand(Query, Connection, Transaction) : new SqlCommand(Query, Connection))
                     {
-                        driverDataTable.Load(reader);
+                        Command.Parameters.AddWithValue("@DriverID", DriverID);
+
+                        using (SqlDataReader reader = await Command.ExecuteReaderAsync(_cancellationToken))
+                        {
+                            driverDataTable.Load(reader);
+                        }
                     }
-                }
+                }, CancellationToken);
             }
             catch (SqlException ex)
             {
                 _logger.LogError("An error occurred while accessing the database: {ErrorMessage}", ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("An unexpected error occurred: {ErrorMessage}", ex.Message);
             }
             finally
             {
