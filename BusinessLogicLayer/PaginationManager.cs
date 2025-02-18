@@ -36,11 +36,11 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
         public static async Task<PaginationManager> CreateAsync(string tableName, DriversDAO driversDAO, ILogger<PaginationManager>? logger = null)
         {
             PaginationManager paginationManager = new(tableName, driversDAO, logger);
-            paginationManager.RecordCount = await paginationManager.GetTotalRecordCount(); // This will use _driversDAO
+            await paginationManager.InitializeAsync();
             return paginationManager;
         }
 
-        // To be used in constructors which cannot be made async. E.g DriverManagementForm
+        // Is seperate so that it can be used in constructors which cannot be made async if necessary
         public async Task InitializeAsync()
         {
             try
@@ -58,7 +58,9 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
         public event Func<int, Task>? PageChanged;
         public async Task EmitPageChanged()
         {
-            await PageChanged?.Invoke(CurrentPage)!;
+            _logger.LogInformation("Changing Pages to {CurrentPage}", CurrentPage);
+            // `?` checks for subscribers, `??` ensures Task completion, preventing "Object reference not set" errors.
+            await (PageChanged?.Invoke(CurrentPage) ?? Task.CompletedTask);
         }
 
         private async Task<int> GetTotalRecordCount()

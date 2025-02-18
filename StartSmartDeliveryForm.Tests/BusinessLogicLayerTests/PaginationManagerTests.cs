@@ -4,17 +4,44 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Client;
+using Microsoft.VisualStudio.TestPlatform.Utilities;
 using NSubstitute;
+using Serilog;
 using StartSmartDeliveryForm.BusinessLogicLayer;
 using StartSmartDeliveryForm.DataLayer.DAOs;
+using StartSmartDeliveryForm.Tests.SharedTestItems;
 using Xunit.Abstractions;
+using Serilog.Sinks.XUnit;
 
 namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
 {
-    public class PaginationManagerTests(DatabaseFixture fixture, ITestOutputHelper output) : IClassFixture<DatabaseFixture>
+    public class PaginationManagerTests : IClassFixture<DatabaseFixture>
     {
-        private readonly DriversDAO _driversDAO = fixture.DriversDAO;
-        private readonly string _connectionString = fixture.ConnectionString;
+        private readonly DriversDAO _driversDAO;
+        private readonly string _connectionString;
+        private readonly ITestOutputHelper _output;
+
+        public PaginationManagerTests(DatabaseFixture fixture, ITestOutputHelper output)
+        {
+            _driversDAO = fixture.DriversDAO;
+            _connectionString = fixture.ConnectionString;
+            _output = output;
+        }
+
+        [Fact]
+        public async Task GetTotalRecordCount_GetsRecordCountCorrectly()
+        {
+            // Arrange
+            ILogger<PaginationManager> _mockLogger = Substitute.For<ILogger<PaginationManager>>();
+            PaginationManager paginationManager = await PaginationManager.CreateAsync("Drivers", _driversDAO, _mockLogger);
+
+            // Act
+            _output.WriteLine("Record Count: " + paginationManager.RecordCount);
+
+            // Assert
+            Assert.Equal(100, paginationManager.RecordCount);
+        }
 
         [Fact]
         public async Task EmitPageChanged_CallsSubscribers_WhenEventIsSubscribedTo()
@@ -24,95 +51,105 @@ namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
             ILogger<PaginationManager> _mockLogger = Substitute.For<ILogger<PaginationManager>>();
             PaginationManager paginationManager = await PaginationManager.CreateAsync("Drivers", _driversDAO, _mockLogger);
 
-            paginationManager.PageChanged += (currentPage) =>
+            paginationManager.PageChanged += async (currentPage) =>
             {
                 PageChangeCalled++;
+                await Task.CompletedTask;
             };
 
             // Act
-            paginationManager.EmitPageChanged();
+            await paginationManager.EmitPageChanged();
 
             // Assert
             Assert.Equal(1, PageChangeCalled);
         }
 
         [Fact]
-        public void GoToFirstPage_SetsCurrentPageToFirst()
+        public async Task GoToFirstPage_SetsCurrentPageToFirst()
         {
             // Arrange
-            PaginationManager paginationManager = new("Drivers", _driversDAO);
-            paginationManager.GoToLastPage(); // Needs to be a page other than 1 which is default
+            ILogger<PaginationManager> _mockLogger = Substitute.For<ILogger<PaginationManager>>();
+
+            PaginationManager paginationManager = await PaginationManager.CreateAsync("Drivers", _driversDAO, _mockLogger);
+
+            await paginationManager.GoToLastPage(); // Needs to be a page other than 1 which is default
 
             // Act
-            paginationManager.GoToFirstPage();
+            await paginationManager.GoToFirstPage();
 
             // Assert
             Assert.Equal(1, paginationManager.CurrentPage);
         }
 
         [Fact]
-        public void GoToLastPage_SetsCurrentPageToLast()
+        public async Task GoToLastPage_SetsCurrentPageToLast()
         {
             // Arrange
-            PaginationManager paginationManager = new("Drivers", _driversDAO);
+            ILogger<PaginationManager> _mockLogger = Substitute.For<ILogger<PaginationManager>>();
+            PaginationManager paginationManager = await PaginationManager.CreateAsync("Drivers", _driversDAO, _mockLogger);
+            _output.WriteLine("Total Pages: " + paginationManager.TotalPages);
 
             // Act
-            paginationManager.GoToLastPage();
+            await paginationManager.GoToLastPage();
 
             // Assert
             Assert.Equal(paginationManager.TotalPages, paginationManager.CurrentPage);
         }
 
         [Fact]
-        public void GoToNextPage_SetsCurrentPageToNext()
+        public async Task GoToNextPage_SetsCurrentPageToNext()
         {
             // Arrange
-            PaginationManager paginationManager = new("Drivers", _driversDAO);
-            output.WriteLine("Total Pages: " + paginationManager.TotalPages);
+            ILogger<PaginationManager> _mockLogger = Substitute.For<ILogger<PaginationManager>>();
+            PaginationManager paginationManager = await PaginationManager.CreateAsync("Drivers", _driversDAO, _mockLogger);
+            _output.WriteLine("Total Pages: " + paginationManager.TotalPages);
 
             // Act
-            paginationManager.GoToNextPage();
+            await paginationManager.GoToNextPage();
 
             // Assert
             Assert.Equal(2, paginationManager.CurrentPage);
         }
 
         [Fact]
-        public void GoToPreviousPage_SetsCurrentPageToPrevious()
+        public async Task GoToPreviousPage_SetsCurrentPageToPrevious()
         {
             // Arrange
-            PaginationManager paginationManager = new("Drivers", _driversDAO);
-            paginationManager.GoToLastPage();
+            ILogger<PaginationManager> _mockLogger = Substitute.For<ILogger<PaginationManager>>();
+            PaginationManager paginationManager = await PaginationManager.CreateAsync("Drivers", _driversDAO, _mockLogger);
+            await paginationManager.GoToLastPage();
             // Act
-            paginationManager.GoToPreviousPage();
+            await paginationManager.GoToPreviousPage();
             // Assert
-            Assert.Equal(paginationManager.TotalPages-1, paginationManager.CurrentPage);
+            Assert.Equal(paginationManager.TotalPages - 1, paginationManager.CurrentPage);
         }
 
         [Theory]
         [InlineData(1)]
         [InlineData(2)]
-        public void GoToPage_SetsPageToSpecified_WhenValid(int page)
+        public async Task GoToPage_SetsPageToSpecified_WhenValid(int page)
         {
             // Arrange
-            PaginationManager paginationManager = new("Drivers", _driversDAO);
+            ILogger<PaginationManager> _mockLogger = Substitute.For<ILogger<PaginationManager>>();
+            PaginationManager paginationManager = await PaginationManager.CreateAsync("Drivers", _driversDAO, _mockLogger);
 
             // Act
-            paginationManager.GoToPage(page);
+            await paginationManager.GoToPage(page);
 
             // Assert
             Assert.Equal(page, paginationManager.CurrentPage);
         }
 
         [Fact]
-        public void GoToPage_SetsPageToOne_WhenInvalid()
+        public async Task GoToPage_SetsPageToOne_WhenInvalid()
         {
             // Arrange
             int page = -1;
-            PaginationManager paginationManager = new("Drivers", _driversDAO);
+            ILogger<PaginationManager> _mockLogger = Substitute.For<ILogger<PaginationManager>>();
+            PaginationManager paginationManager = await PaginationManager.CreateAsync("Drivers", _driversDAO, _mockLogger);
 
             // Act
-            paginationManager.GoToPage(page);
+            await paginationManager.GoToPage(page);
 
             // Assert
             Assert.Equal(1, paginationManager.CurrentPage);
@@ -129,32 +166,33 @@ namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
             paginationManager.UpdateRecordCount(paginationManager.RecordCount - 1);
 
             // Assert
-            Assert.Equal(OriginalRecordCount-1,paginationManager.RecordCount);
+            Assert.Equal(OriginalRecordCount - 1, paginationManager.RecordCount);
         }
 
         [Theory]
-        [InlineData(0,1)]
+        [InlineData(0, 1)]
         [InlineData(2, 2)]
-        [InlineData(1,5)] 
-        [InlineData(100,6)]
-        public void EnsureValidPage_ValidatesPagesCorrectly(int currentPage, int totalPages)
+        [InlineData(1, 5)]
+        [InlineData(100, 6)]
+        public async Task EnsureValidPage_ValidatesPagesCorrectly(int currentPage, int totalPages)
         {
             // Arrange
-            PaginationManager paginationManager = new("Drivers", _driversDAO);
+            ILogger<PaginationManager> _mockLogger = Substitute.For<ILogger<PaginationManager>>();
+            PaginationManager paginationManager = await PaginationManager.CreateAsync("Drivers", _driversDAO, _mockLogger);
 
             // Use reflection to modify private setters
             typeof(PaginationManager)
                 .GetProperty("TotalPages", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)?
                 .SetValue(paginationManager, totalPages);
-            output.WriteLine($"Total Pages: {paginationManager.TotalPages}");
+            _output.WriteLine("Total Pages: " + paginationManager.TotalPages);
 
             typeof(PaginationManager)
                 .GetProperty("CurrentPage", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)?
                 .SetValue(paginationManager, currentPage);
-            output.WriteLine($"Current Page: {paginationManager.CurrentPage}");
+            _output.WriteLine("Current Page: " + paginationManager.CurrentPage);
 
             // Act
-            paginationManager.EnsureValidPage();
+            await paginationManager.EnsureValidPage();
 
             // Assert
             if (currentPage > totalPages)
@@ -173,10 +211,7 @@ namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
             {
                 Assert.Equal(currentPage, paginationManager.CurrentPage);
             }
-          
+
         }
-
-
-
     }
 }
