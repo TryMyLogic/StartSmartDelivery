@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
 using StartSmartDeliveryForm.DataLayer.DAOs;
 using StartSmartDeliveryForm.PresentationLayer.DriverManagement;
@@ -15,17 +16,36 @@ namespace StartSmartDeliveryForm.Tests
         public DriversDAO DriversDAO { get; private set; }
         public string ConnectionString { get; private set; }
         public DriverManagementForm DriverManagementForm { get; private set; }
+        public bool CanConnectToDatabase { get; private set; }
+
         public DatabaseFixture()
         {
             IServiceProvider serviceRegistry = ServiceRegistry.RegisterServices("TestDB");
             ConnectionString = serviceRegistry.GetRequiredService<string>();
             DriversDAO = serviceRegistry.GetRequiredService<DriversDAO>();
             DriverManagementForm = serviceRegistry.GetRequiredService<DriverManagementForm>();
+            CanConnectToDatabase = TestConnectionToDB(ConnectionString);
+        }
+
+        private static bool TestConnectionToDB(string ConString)
+        {
+            try
+            {
+                using (SqlConnection Connection = new(ConString))
+                {
+                    Connection.Open();
+                    return true;
+                }
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public void Dispose()
         {
-           
+
         }
     }
 }
