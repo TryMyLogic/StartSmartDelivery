@@ -13,20 +13,32 @@ using StartSmartDeliveryForm.DataLayer.DAOs;
 using StartSmartDeliveryForm.Tests.SharedTestItems;
 using Xunit.Abstractions;
 using Serilog.Sinks.XUnit;
+using System.Reflection;
 
 namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
 {
     public class PaginationManagerTests : IClassFixture<DatabaseFixture>
     {
         private readonly DriversDAO _driversDAO;
-        private readonly string _connectionString;
         private readonly ITestOutputHelper _output;
+        private readonly ILogger<PaginationManager> _testLogger;
 
         public PaginationManagerTests(DatabaseFixture fixture, ITestOutputHelper output)
         {
             _driversDAO = fixture.DriversDAO;
-            _connectionString = fixture.ConnectionString;
             _output = output;
+
+            Serilog.Core.Logger serilogLogger = new LoggerConfiguration()
+            .MinimumLevel.Verbose()
+            .WriteTo.TestOutput(output)
+            .CreateLogger();
+
+            ILoggerFactory loggerFactory = LoggerFactory.Create(builder =>
+            {
+                builder.AddSerilog(serilogLogger);
+            });
+
+            _testLogger = loggerFactory.CreateLogger<PaginationManager>();
         }
 
         [Fact]
@@ -35,12 +47,22 @@ namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
             // Arrange
             ILogger<PaginationManager> _mockLogger = Substitute.For<ILogger<PaginationManager>>();
             PaginationManager paginationManager = await PaginationManager.CreateAsync("Drivers", _driversDAO, _mockLogger);
+            int RecordCount;
 
             // Act
-            _output.WriteLine("Record Count: " + paginationManager.RecordCount);
+            MethodInfo? methodInfo = typeof(PaginationManager).GetMethod("GetTotalRecordCount", BindingFlags.NonPublic | BindingFlags.Instance) ?? throw new InvalidOperationException("Method 'GetTotalRecordCount' was not found.");
+            object? result = methodInfo.Invoke(paginationManager, null);
+            if (result is Task<int> GetTotalRecordCount)
+            {
+                RecordCount = await GetTotalRecordCount;
+            }
+            else
+            {
+                throw new InvalidOperationException("Unexpected return type.");
+            }
 
             // Assert
-            Assert.Equal(100, paginationManager.RecordCount);
+            Assert.Equal(100, RecordCount); 
         }
 
         [Fact]
@@ -70,7 +92,7 @@ namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
             // Arrange
             ILogger<PaginationManager> _mockLogger = Substitute.For<ILogger<PaginationManager>>();
 
-            PaginationManager paginationManager = await PaginationManager.CreateAsync("Drivers", _driversDAO, _mockLogger);
+            PaginationManager paginationManager = await PaginationManager.CreateAsync("Drivers", _driversDAO, _testLogger);
 
             await paginationManager.GoToLastPage(); // Needs to be a page other than 1 which is default
 

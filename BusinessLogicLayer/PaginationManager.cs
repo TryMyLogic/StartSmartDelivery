@@ -58,7 +58,7 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
         public event Func<int, Task>? PageChanged;
         public async Task EmitPageChanged()
         {
-            _logger.LogInformation("Changing Pages to {CurrentPage}", CurrentPage);
+            _logger.LogInformation("Changing Page to {CurrentPage}", CurrentPage);
             // `?` checks for subscribers, `??` ensures Task completion, preventing "Object reference not set" errors.
             await (PageChanged?.Invoke(CurrentPage) ?? Task.CompletedTask);
         }
@@ -80,9 +80,8 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
             }
             catch (InvalidOperationException ex)
             {
-                // Handle the specific InvalidOperationException
                 _logger.LogError("Error: {ErrorMessage}", ex.Message);
-                return 0; // Or any default value you prefer
+                return 0; 
             }
             catch (OperationCanceledException)
             {
@@ -91,9 +90,8 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
             }
             catch (Exception ex)
             {
-                // Catch any other unexpected exceptions
                 _logger.LogError("Unexpected error: {ErrorMessage}", ex.Message);
-                return 0; // Or any default value you prefer
+                return 0; 
             }
         }
 
