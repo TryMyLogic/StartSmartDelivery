@@ -56,22 +56,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             }
         }
 
-        private async void OnRetrySuccessOccurred()
-        {
-            _cts = new CancellationTokenSource();
-
-            try
-            {
-                await _paginationManager.InitializeAsync();
-                _logger.LogDebug("Records Count: {RecordCount}, Total Pages: {TotalPages}",_paginationManager.RecordCount,_paginationManager.TotalPages);
-
-                _driverData = await _driversDAO.GetDriversAtPageAsync(1, _cts.Token) ?? new DataTable();
-            }
-            catch (OperationCanceledException)
-            {
-                MessageBox.Show("The operation was canceled.");
-            }
-        }
+        private void OnRetrySuccessOccurred() { MessageBox.Show("Success"); }
         private void OnRetryOccurred(int attemptNumber, int maxRetries, TimeSpan retryDelay, string exceptionMessage)
         {
             //TODO: Will replace this with a custom form for live updates since multiple MessageBoxes stack, which is a bad user experience

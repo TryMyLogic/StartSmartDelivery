@@ -64,8 +64,6 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
                         }
                     }
                     _retryEventService.OnRetrySuccessOccurred(); // Does internally check if a retry has occurred. Else its skipped
-
-                    return Dt;
                 }, CancellationToken);
             }
             catch (SqlException ex)
@@ -81,7 +79,6 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
 
             return Dt;
         }
-
 
         public async Task<DataTable?> GetAllDriversAsync()
         {
@@ -268,27 +265,31 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             }
         }
 
-        internal async Task<int> GetRecordCountAsync()
+        internal async Task<int> GetRecordCountAsync(CancellationToken CancellationToken)
         {
             string Query = "SELECT COUNT(DriverID) FROM Drivers";
             int recordsCount = 0;
 
-            using (SqlConnection Connection = new(_connectionString))
+            try
             {
-                try
+                await _pipeline.ExecuteAsync(async (_cancellationToken) =>
                 {
-                    await Connection.OpenAsync();
-                    using (SqlCommand Command = new(Query, Connection))
+                    using (SqlConnection Connection = new(_connectionString))
                     {
-                        object? result = await Command.ExecuteScalarAsync();
-                        recordsCount = result != DBNull.Value ? Convert.ToInt32(result) : 0;
+                        await Connection.OpenAsync(CancellationToken);
+                        using (SqlCommand Command = new(Query, Connection))
+                        {
+                            object? result = await Command.ExecuteScalarAsync(CancellationToken);
+                            recordsCount = result != DBNull.Value ? Convert.ToInt32(result) : 0;
+                        }
                     }
-                }
-                catch (SqlException ex)
-                {
-                    _logger.LogError("An error occurred while accessing the database: {ErrorMessage}", ex.Message);
-                    return recordsCount; // Return 0 pages if an error occurs
-                }
+                    _retryEventService.OnRetrySuccessOccurred(); // Does internally check if a retry has occurred. Else its skipped
+                }, CancellationToken);
+            }
+            catch (SqlException ex)
+            {
+                _logger.LogError("An error occurred while accessing the database: {ErrorMessage}", ex.Message);
+                return recordsCount; // Return 0 pages if an error occurs
             }
 
             return recordsCount;

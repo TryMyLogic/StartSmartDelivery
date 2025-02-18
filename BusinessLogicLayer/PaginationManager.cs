@@ -18,6 +18,7 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
         private readonly int _recordsPerPage = GlobalConstants.s_recordLimit;
         private readonly string _tableName;
         private readonly ILogger<PaginationManager> _logger;
+        private CancellationTokenSource? _cts;
 
         // Uses auto property:
         public int CurrentPage { get; private set; } = 1;
@@ -62,11 +63,13 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
 
         private async Task<int> GetTotalRecordCount()
         {
+            _cts = new CancellationTokenSource();
+
             try
             {
                 if (_tableName == "Drivers")
                 {
-                    return await _driversDAO.GetRecordCountAsync();
+                    return await _driversDAO.GetRecordCountAsync(_cts.Token);
                 }
                 else
                 {
@@ -78,6 +81,11 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
                 // Handle the specific InvalidOperationException
                 _logger.LogError("Error: {ErrorMessage}", ex.Message);
                 return 0; // Or any default value you prefer
+            }
+            catch (OperationCanceledException)
+            {
+                _logger.LogInformation("GetRecordCount was cancelled");
+                return 0;
             }
             catch (Exception ex)
             {
