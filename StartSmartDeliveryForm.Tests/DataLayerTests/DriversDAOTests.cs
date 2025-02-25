@@ -8,20 +8,21 @@ using StartSmartDeliveryForm.DataLayer.DAOs;
 using StartSmartDeliveryForm.SharedLayer;
 using Xunit.Abstractions;
 using Microsoft.Extensions.Configuration;
+using StartSmartDeliveryForm.DataLayer.DTOs;
+using StartSmartDeliveryForm.SharedLayer.Enums;
 
 namespace StartSmartDeliveryForm.Tests.DataLayerTests
 {
 
-    [Collection("Sequential")]
-    public class DriversDAOTests : IClassFixture<DatabaseFixture>
+    public class DriversDAOTestBase : IClassFixture<DatabaseFixture>
     {
-        private readonly DriversDAO _driversDAO;
-        private readonly string _connectionString;
-        private CancellationTokenSource? _cts;
-        private readonly bool _shouldSkipTests;
-        private readonly ILogger<DriversDAO> _testLogger;
+        protected readonly DriversDAO _driversDAO;
+        protected readonly string _connectionString;
+        protected CancellationTokenSource? _cts;
+        protected readonly bool _shouldSkipTests;
+        protected readonly ILogger<DriversDAO> _testLogger;
 
-        public DriversDAOTests(DatabaseFixture fixture, ITestOutputHelper output)
+        public DriversDAOTestBase(DatabaseFixture fixture, ITestOutputHelper output)
         {
             // Will not use fixture DriversDAO so as to have control over parameters
             _connectionString = fixture.ConnectionString;
@@ -50,7 +51,10 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
 
             _driversDAO = new DriversDAO(_mockPipelineProvider, _mockConfiguration, _testLogger, _connectionString, _mockRetryEventService);
         }
+    }
 
+    public class DriversDAOTests(DatabaseFixture fixture, ITestOutputHelper output) : DriversDAOTestBase(fixture, output)
+    {
         [SkippableTheory]
         [InlineData(-1, false)] // Cannot have negative page
 
@@ -117,7 +121,7 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
 
             // Arrange
             _cts = new CancellationTokenSource();
-            int SetPageTo = 6; 
+            int SetPageTo = 6;
 
             // Act
             _testLogger.LogInformation("Getting drivers at page {PageNumber}", SetPageTo);
@@ -214,9 +218,83 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
             Assert.NotNull(result);
             Assert.Empty(result.Rows);
         }
-
-        
-
-
     }
+
+    [Collection("Sequential")]
+    public class SequentialDriversDAOTests(DatabaseFixture fixture, ITestOutputHelper output) : DriversDAOTestBase(fixture, output)
+    {
+        [SkippableFact]
+        public async Task InsertDriverAsync_ReturnsCorrectDriverID_WhenDriverIsInserted()
+        {
+            Skip.If(_shouldSkipTests, "Test Database is not available. Skipping this test");
+
+            // Arrange
+            _cts = new CancellationTokenSource();
+            DriversDTO mockDriver = new(
+            DriverID: 999, // DriverID auto-increments server-side on insert. 999 is a placeholder 
+            Name: "Test",
+            Surname: "Insert",
+            EmployeeNo: "EMP106",
+            LicenseType: LicenseType.Code14,
+            Availability: false
+            );
+
+            // Act
+            int returnedDriverID = await _driversDAO.InsertDriverAsync(mockDriver, _cts.Token);
+
+            // Assert
+            Assert.Equal(106, returnedDriverID);
+
+            // Clean up
+            await _driversDAO.DeleteDriverAsync(returnedDriverID, _cts.Token);
+            await _driversDAO.ReseedTable("Drivers", 105);
+        }
+
+        // Running this test in parallel causes multiple driver inserts with IDs above 106, leading to improper cleanup
+        [SkippableTheory]
+        [InlineData("Olivia", "Clark", "EMP106", LicenseType.Code8, true)]
+        [InlineData("Liam", "White", "EMP107", LicenseType.Code8, false)]
+        [InlineData("Sophia", "Harris", "EMP108", LicenseType.Code10, true)]
+        [InlineData("Noah", "Martin", "EMP109", LicenseType.Code10, false)]
+        [InlineData("Ava", "Thompson", "EMP1010", LicenseType.Code14, true)]
+        [InlineData("Mason", "Baker", "EMP1011", LicenseType.Code14, false)]
+        public async Task InsertDriverAsync_EntersDetailsCorrectly_WhenInserted(string Name, string Surname, string EmployeeNo, LicenseType LicenseType, bool Availability)
+        {
+            Skip.If(_shouldSkipTests, "Test Database is not available. Skipping this test");
+
+            // Arrange
+            _cts = new CancellationTokenSource();
+
+            DriversDTO mockDriver = new(
+            DriverID: 999, // DriverID auto-increments server-side on insert. 999 is a placeholder 
+            Name: Name,
+            Surname: Surname,
+            EmployeeNo: EmployeeNo,
+            LicenseType: LicenseType,
+            Availability: Availability
+            );
+
+            // Act
+            int returnedDriverID = await _driversDAO.InsertDriverAsync(mockDriver, _cts.Token);
+
+            // Assert
+            Assert.True(returnedDriverID > 105, "DriverID should be greater than existing records.");
+
+            DataTable result = await _driversDAO.GetDriverByIDAsync(returnedDriverID, _cts.Token);
+            DataRow firstRow = result.Rows[0];
+            Assert.Equal(Name, firstRow["Name"]);
+            Assert.Equal(Surname, firstRow["Surname"]);
+            Assert.Equal(EmployeeNo, firstRow["EmployeeNo"]);
+            Assert.Equal((int)LicenseType, firstRow["LicenseType"]);
+            Assert.Equal(Availability, firstRow["Availability"]);
+
+            // Clean up
+            await _driversDAO.DeleteDriverAsync(returnedDriverID, _cts.Token);
+            await _driversDAO.ReseedTable("Drivers", 105);
+        }
+    }
+
+
+
+
 }

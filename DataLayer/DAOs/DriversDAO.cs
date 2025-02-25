@@ -386,5 +386,23 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
 
             return driverDataTable;
         }
+
+        // Used only for testing
+        #if DEBUG
+        public async Task ReseedTable(string TableName, int SeedValue)
+        {
+            string Query = $"DBCC CHECKIDENT ('{TableName}', RESEED, {SeedValue})";
+
+            using (SqlConnection Connection = new(_connectionString))
+            {
+                await Connection.OpenAsync();
+                using (var Command = new SqlCommand(Query, Connection))
+                {
+                    await Command.ExecuteNonQueryAsync();
+                }
+            }
+        }
+        #endif
+
     }
 }
