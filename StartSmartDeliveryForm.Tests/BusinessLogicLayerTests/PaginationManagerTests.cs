@@ -61,7 +61,7 @@ namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
             }
 
             // Assert
-            Assert.Equal(100, RecordCount); 
+            Assert.Equal(105, RecordCount); 
         }
 
         [SkippableFact]
