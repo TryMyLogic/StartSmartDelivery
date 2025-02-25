@@ -138,6 +138,32 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
                               lastRow["Name"], lastRow["Surname"], lastRow["DriverID"], lastRow["EmployeeNo"], lastRow["LicenseType"], lastRow["Availability"]);
         }
 
+        [SkippableFact]
+        public async Task GetAllDriversAsync_ReturnsExpectedDataTable()
+        {
+            Skip.If(_shouldSkipTests, "Test Database is not available. Skipping this test");
+
+            // Arrange
+            _cts = new CancellationTokenSource();
+
+            // Act
+            DataTable? result = await _driversDAO.GetAllDriversAsync(_cts.Token);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(105, result.Rows.Count);
+
+            DataRow firstRow = result.Rows[0];
+            Assert.Equal(1, firstRow["DriverID"]);
+            _testLogger.LogInformation("First Driver: {Name} {Surname}, ID: {DriverID}, EmployeeNo: {EmployeeNo}, LicenseType: {LicenseType}, Availability: {Availability}",
+                           firstRow["Name"], firstRow["Surname"], firstRow["DriverID"], firstRow["EmployeeNo"], firstRow["LicenseType"], firstRow["Availability"]);
+
+            DataRow lastRow = result.Rows[104];
+            Assert.Equal(105, lastRow["DriverID"]);
+            _testLogger.LogInformation("Last Driver: {Name} {Surname}, ID: {DriverID}, EmployeeNo: {EmployeeNo}, LicenseType: {LicenseType}, Availability: {Availability}",
+                              lastRow["Name"], lastRow["Surname"], lastRow["DriverID"], lastRow["EmployeeNo"], lastRow["LicenseType"], lastRow["Availability"]);
+        }
+
         [SkippableTheory]
         [InlineData(1, "Sarah", "Johnson", "EMP1230", 1, true)]
         [InlineData(2, "Emily", "Jones", "EMP7380", 1, false)]
