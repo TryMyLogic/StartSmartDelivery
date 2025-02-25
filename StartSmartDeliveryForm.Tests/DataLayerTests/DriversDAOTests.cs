@@ -138,49 +138,59 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
                               lastRow["Name"], lastRow["Surname"], lastRow["DriverID"], lastRow["EmployeeNo"], lastRow["LicenseType"], lastRow["Availability"]);
         }
 
-        // Re-making test database. This below test will always fail due to John Doe not existing 
+        [SkippableTheory]
+        [InlineData(1, "Sarah", "Johnson", "EMP1230", 1, true)]
+        [InlineData(2, "Emily", "Jones", "EMP7380", 1, false)]
+        [InlineData(3, "Jane", "Davis", "EMP1432", 2, true)]
+        [InlineData(4, "David", "Smith", "EMP7070", 2, false)]
+        [InlineData(5, "Laura", "Moore", "EMP5849", 3, true)]
+        [InlineData(6, "John", "Taylor", "EMP2187", 3, false)]
+        public async Task GetDriverByID_ReturnsCorrectDriver_WhenDriverExists(int DriverID, string Name, string Surname, string EmployeeNo, int LicenseType, bool Availability)
+        {
+            Skip.If(_shouldSkipTests, "Test Database is not available. Skipping this test");
 
-        //[Theory]
-        //[InlineData(1, "John", "Doe", "EMP001", 1, true)]
-        //[InlineData(2, "Jane", "Smith", "EMP002", 2, false)]
-        //public void GetDriverByID_ReturnsCorrectDriver_WhenDriverExists(int DriverID, string Name, string Surname, string EmployeeNo, int LicenseType, bool Availability)
-        //{
-        //    // Arrange
+            // Arrange
+            _cts = new CancellationTokenSource();
 
-        //    // Act
-        //    DataTable result = _driversDAO.GetDriverByID(DriverID);
+            // Act
+            DataTable result = await _driversDAO.GetDriverByIDAsync(DriverID, _cts.Token);
 
-        //    // Assert
-        //    DataRow firstRow = result.Rows[0];
+            // Assert
+            DataRow firstRow = result.Rows[0];
 
-        //    Assert.NotNull(result);
-        //    Assert.Single(result.Rows);
-        //    Assert.Equal(DriverID, firstRow["DriverID"]);
-        //    Assert.Equal(Name, firstRow["Name"]);
-        //    Assert.Equal(Surname, firstRow["Surname"]);
-        //    Assert.Equal(EmployeeNo, firstRow["EmployeeNo"]);
-        //    Assert.Equal(LicenseType, firstRow["LicenseType"]);
-        //    Assert.Equal(Availability, firstRow["Availability"]);
+            Assert.NotNull(result);
+            Assert.Single(result.Rows);
 
-        //    _output.WriteLine($"Driver: {firstRow["Name"]} ({Name}), {firstRow["Surname"]} ({Surname}), " +
-        //             $"ID: {firstRow["DriverID"]} ({DriverID}), EmployeeNo: {firstRow["EmployeeNo"]} ({EmployeeNo}), " +
-        //             $"LicenseType: {firstRow["LicenseType"]} ({LicenseType}), Availability: {firstRow["Availability"]} ({Availability})");
-        //}
+            Assert.Equal(DriverID, firstRow["DriverID"]);
+            Assert.Equal(Name, firstRow["Name"]);
+            Assert.Equal(Surname, firstRow["Surname"]);
+            Assert.Equal(EmployeeNo, firstRow["EmployeeNo"]);
+            Assert.Equal(LicenseType, firstRow["LicenseType"]);
+            Assert.Equal(Availability, firstRow["Availability"]);
 
-        //[Fact]
-        //public void GetDriverByID_ReturnsEmptyTable_WhenDriverDoesNotExist()
-        //{
-        //    // Arrange
-        //    int nonExistentID = 9999;
+            _testLogger.LogInformation("Driver: {Name} {Surname}, ID: {DriverID}, EmployeeNo: {EmployeeNo}, LicenseType: {LicenseType}, Availability: {Availability}",
+                         firstRow["Name"], firstRow["Surname"], firstRow["DriverID"], firstRow["EmployeeNo"], firstRow["LicenseType"], firstRow["Availability"]);
+        }
 
-        //    // Act
-        //    DataTable result = _driversDAO.GetDriverByID(nonExistentID);
+        [SkippableFact]
+        public async Task GetDriverByID_ReturnsEmptyTable_WhenDriverDoesNotExist()
+        {
+            Skip.If(_shouldSkipTests, "Test Database is not available. Skipping this test");
 
-        //    // Assert
-        //    Assert.NotNull(result);
-        //    Assert.Empty(result.Rows);
-        //}
+            // Arrange
+            _cts = new CancellationTokenSource();
+            int nonExistentID = 9999;
 
-  
+            // Act
+            DataTable result = await _driversDAO.GetDriverByIDAsync(nonExistentID, _cts.Token);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Empty(result.Rows);
+        }
+
+        
+
+
     }
 }
