@@ -261,7 +261,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
                         }
                         else
                         {
-                            _logger.LogWarning("No rows were deleted. Employee may not exist with DriverID: {DriverID}", DriverID);
+                            _logger.LogWarning("No driver was found with ID: {DriverID}, delete not performed", DriverID);
                         }
                     }
                 }, CancellationToken);

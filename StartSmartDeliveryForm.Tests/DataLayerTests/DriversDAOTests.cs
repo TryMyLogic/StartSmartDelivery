@@ -63,6 +63,7 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
             _driversDAO = new DriversDAO(_mockPipelineProvider, _mockConfiguration, _testLogger, _connectionString, _mockRetryEventService);
         }
 
+        // Used to create a new memory sink instance for each test
         public void InitializeMemorySinkLogger()
         {
             memorySink = new();
@@ -327,7 +328,7 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
             // Arrange
             _cts = new CancellationTokenSource();
             DriversDTO mockDriver = new(
-            DriverID: 999, // DriverID auto-increments server-side on insert. 999 is a placeholder 
+            DriverID: 999,
             Name: "Test",
             Surname: "Update",
             EmployeeNo: "EMP106",
@@ -336,20 +337,18 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
             );
 
             string message = $"No driver was found with ID: {mockDriver.DriverID}, update not performed";
-            InitializeMemorySinkLogger(); // Make sure this is before mockDAO always
+            InitializeMemorySinkLogger(); // Make sure this is always before mockDAO 
             DriversDAO mockDAO = new(_mockPipelineProvider, _mockConfiguration, _mockLogger, _connectionString, _mockRetryEventService);
-          
+
             // Act
             await mockDAO.UpdateDriverAsync(mockDriver, _cts.Token);
 
             // Assert
-            if(memorySink != null)
+            if (memorySink != null)
             {
-                if (memorySink.LogEvents.Any()) 
+                if (memorySink.LogEvents.Any())
                 {
                     List<LogEvent> memoryLog = memorySink.LogEvents.ToList();
-
-                    _testLogger.LogInformation("Log Level: {Level}, Message: {Message}", memoryLog[0].Level, memoryLog[0].RenderMessage());
                     Assert.Single(memoryLog);
                     Assert.Equal(LogEventLevel.Warning, memoryLog[0].Level);
                     Assert.Contains(message, memoryLog[0].RenderMessage());
@@ -398,7 +397,84 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
             Assert.Equal(Availability, firstRow["Availability"]);
             _testLogger.LogInformation("Driver: {Name} {Surname}, ID: {DriverID}, EmployeeNo: {EmployeeNo}, LicenseType: {LicenseType}, Availability: {Availability}",
                       firstRow["Name"], firstRow["Surname"], firstRow["DriverID"], firstRow["EmployeeNo"], firstRow["LicenseType"], firstRow["Availability"]);
+
+            // Cleanup
+            DriversDTO Driver105 = new(
+            DriverID: 105, // DriverID auto-increments server-side on insert. 999 is a placeholder 
+            Name: "Lucas",
+            Surname: "Miller",
+            EmployeeNo: "EMP1234",
+            LicenseType: LicenseType.Code8,
+            Availability: false
+            );
+            await _driversDAO.UpdateDriverAsync(Driver105, _cts.Token);
         }
+
+        [SkippableFact]
+        public async Task DeleteDriverAsync_LogsWarning_WhenDriverDoesNotExist()
+        {
+            Skip.If(_shouldSkipTests, "Test Database is not available. Skipping this test");
+
+            // Arrange
+            _cts = new CancellationTokenSource();
+            int DriverID = 999;
+
+            string message = $"No driver was found with ID: {DriverID}, delete not performed";
+            InitializeMemorySinkLogger(); // Make sure this is always before mockDAO 
+            DriversDAO mockDAO = new(_mockPipelineProvider, _mockConfiguration, _mockLogger, _connectionString, _mockRetryEventService);
+
+            // Act
+            await mockDAO.DeleteDriverAsync(DriverID, _cts.Token);
+
+            // Assert
+            if (memorySink != null)
+            {
+                if (memorySink.LogEvents.Any())
+                {
+                    List<LogEvent> memoryLog = memorySink.LogEvents.ToList();
+                    Assert.Single(memoryLog);
+                    Assert.Equal(LogEventLevel.Warning, memoryLog[0].Level);
+                    Assert.Contains(message, memoryLog[0].RenderMessage());
+                }
+                else
+                {
+                    Assert.Fail("No log events found.");
+                }
+            }
+        }
+
+        [SkippableFact]
+        public async Task DeleteDriverAsync_DeletesCorrectDriver()
+        {
+            Skip.If(_shouldSkipTests, "Test Database is not available. Skipping this test");
+
+            // Arrange
+            _cts = new CancellationTokenSource();
+            int DriverID = 105;
+
+            // Act
+            await _driversDAO.DeleteDriverAsync(DriverID, _cts.Token);
+
+            // Assert
+            DataTable result = await _driversDAO.GetDriverByIDAsync(DriverID, _cts.Token);
+            Assert.NotNull(result);
+            Assert.Empty(result.Rows);
+
+            // Cleanup
+            DriversDTO Driver105 = new(
+            DriverID: 105, // DriverID auto-increments server-side on insert. 999 is a placeholder 
+            Name: "Lucas",
+            Surname: "Miller",
+            EmployeeNo: "EMP1234",
+            LicenseType: LicenseType.Code8,
+            Availability: false
+            );
+            await _driversDAO.ReseedTable("Drivers", 104);
+            await _driversDAO.InsertDriverAsync(Driver105, _cts.Token);
+        }
+
+
+
     }
 
 
