@@ -10,6 +10,10 @@ using Xunit.Abstractions;
 using Microsoft.Extensions.Configuration;
 using StartSmartDeliveryForm.DataLayer.DTOs;
 using StartSmartDeliveryForm.SharedLayer.Enums;
+using Serilog.Core;
+using StartSmartDeliveryForm.BusinessLogicLayer;
+using Serilog.Sinks.InMemory;
+using Serilog.Events;
 
 namespace StartSmartDeliveryForm.Tests.DataLayerTests
 {
@@ -22,6 +26,12 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
         protected readonly bool _shouldSkipTests;
         protected readonly ILogger<DriversDAO> _testLogger;
 
+        protected ResiliencePipelineProvider<string> _mockPipelineProvider;
+        protected IConfiguration _mockConfiguration;
+        protected InMemorySink memorySink;
+        protected ILogger<DriversDAO> _mockLogger;
+        protected RetryEventService _mockRetryEventService;
+
         public DriversDAOTestBase(DatabaseFixture fixture, ITestOutputHelper output)
         {
             // Will not use fixture DriversDAO so as to have control over parameters
@@ -31,7 +41,7 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
                 _shouldSkipTests = true;
             }
 
-            Serilog.Core.Logger serilogLogger = new LoggerConfiguration()
+            Logger serilogLogger = new LoggerConfiguration()
             .MinimumLevel.Verbose()
             .WriteTo.TestOutput(output)
             .CreateLogger();
@@ -43,11 +53,21 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
 
             _testLogger = loggerFactory.CreateLogger<DriversDAO>();
 
-            ResiliencePipelineProvider<string> _mockPipelineProvider = Substitute.For<ResiliencePipelineProvider<string>>();
+             memorySink = new();
+            Logger serilogMemoryLogger = new LoggerConfiguration()
+                .WriteTo.Sink(memorySink)
+                .CreateLogger();
+
+            ILoggerFactory memoryLoggerFactory = LoggerFactory.Create(builder =>
+            {
+                builder.AddSerilog(serilogMemoryLogger);  // Integrates Serilog with ILoggerFactory
+            });
+
+            _mockPipelineProvider = Substitute.For<ResiliencePipelineProvider<string>>();
             _mockPipelineProvider.GetPipeline("sql-retry-pipeline").Returns(ResiliencePipeline.Empty);
-            IConfiguration _mockConfiguration = Substitute.For<IConfiguration>();
-            ILogger<DriversDAO> _mockLogger = Substitute.For<ILogger<DriversDAO>>();
-            RetryEventService _mockRetryEventService = Substitute.For<RetryEventService>();
+            _mockConfiguration = Substitute.For<IConfiguration>();
+            _mockLogger = loggerFactory.CreateLogger<DriversDAO>();
+            _mockRetryEventService = Substitute.For<RetryEventService>();
 
             _driversDAO = new DriversDAO(_mockPipelineProvider, _mockConfiguration, _testLogger, _connectionString, _mockRetryEventService);
         }
@@ -291,6 +311,45 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
             // Clean up
             await _driversDAO.DeleteDriverAsync(returnedDriverID, _cts.Token);
             await _driversDAO.ReseedTable("Drivers", 105);
+        }
+
+        [SkippableTheory]
+        [InlineData("Olivia", "Clark", "EMP106", LicenseType.Code8, true)]
+        [InlineData("Liam", "White", "EMP107", LicenseType.Code8, false)]
+        [InlineData("Sophia", "Harris", "EMP108", LicenseType.Code10, true)]
+        [InlineData("Noah", "Martin", "EMP109", LicenseType.Code10, false)]
+        [InlineData("Ava", "Thompson", "EMP1010", LicenseType.Code14, true)]
+        [InlineData("Mason", "Baker", "EMP1011", LicenseType.Code14, false)]
+        public async Task UpdateDriverAsync_UpdatesDetailsCorrectly_WhenDriverExists(string Name, string Surname, string EmployeeNo, LicenseType LicenseType, bool Availability)
+        {
+            Skip.If(_shouldSkipTests, "Test Database is not available. Skipping this test");
+
+            // Arrange
+            _cts = new CancellationTokenSource();
+            int DriverID = 105;
+
+            DriversDTO mockDriver = new(
+            DriverID: DriverID,
+            Name: Name,
+            Surname: Surname,
+            EmployeeNo: EmployeeNo,
+            LicenseType: LicenseType,
+            Availability: Availability
+            );
+
+            // Act
+            await _driversDAO.UpdateDriverAsync(mockDriver, _cts.Token);
+
+            // Assert
+            DataTable result = await _driversDAO.GetDriverByIDAsync(DriverID, _cts.Token);
+            DataRow firstRow = result.Rows[0];
+            Assert.Equal(Name, firstRow["Name"]);
+            Assert.Equal(Surname, firstRow["Surname"]);
+            Assert.Equal(EmployeeNo, firstRow["EmployeeNo"]);
+            Assert.Equal((int)LicenseType, firstRow["LicenseType"]);
+            Assert.Equal(Availability, firstRow["Availability"]);
+            _testLogger.LogInformation("Driver: {Name} {Surname}, ID: {DriverID}, EmployeeNo: {EmployeeNo}, LicenseType: {LicenseType}, Availability: {Availability}",
+                      firstRow["Name"], firstRow["Surname"], firstRow["DriverID"], firstRow["EmployeeNo"], firstRow["LicenseType"], firstRow["Availability"]);
         }
     }
 

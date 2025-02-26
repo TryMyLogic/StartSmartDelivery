@@ -207,7 +207,16 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
                         Command.Parameters.Add(new SqlParameter("@Availability", SqlDbType.Bit) { Value = driver.Availability });
 
                         int RowsAffected = await Command.ExecuteNonQueryAsync(_cancellationToken);
-                        _logger.LogInformation("Driver updated successfully with ID: {DriverID}", driver.DriverID);
+
+                        if(RowsAffected > 0)
+                        {
+                            _logger.LogInformation("Driver updated successfully with ID: {DriverID}", driver.DriverID);
+                        }
+                        else
+                        {
+                            _logger.LogWarning("No driver was found with ID: {DriverID}, update not performed", driver.DriverID);
+                        }
+
                     }
                 }, CancellationToken);
             }
