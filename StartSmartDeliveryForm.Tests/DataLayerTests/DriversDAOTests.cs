@@ -14,6 +14,8 @@ using Serilog.Core;
 using StartSmartDeliveryForm.BusinessLogicLayer;
 using Serilog.Sinks.InMemory;
 using Serilog.Events;
+using NSubstitute.ClearExtensions;
+using Castle.Core.Logging;
 
 namespace StartSmartDeliveryForm.Tests.DataLayerTests
 {
@@ -28,8 +30,8 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
 
         protected ResiliencePipelineProvider<string> _mockPipelineProvider;
         protected IConfiguration _mockConfiguration;
-        protected InMemorySink memorySink;
-        protected ILogger<DriversDAO> _mockLogger;
+        protected InMemorySink? memorySink;
+        protected ILogger<DriversDAO>? _mockLogger;
         protected RetryEventService _mockRetryEventService;
 
         public DriversDAOTestBase(DatabaseFixture fixture, ITestOutputHelper output)
@@ -46,30 +48,34 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
             .WriteTo.TestOutput(output)
             .CreateLogger();
 
-            ILoggerFactory loggerFactory = LoggerFactory.Create(builder =>
+            Microsoft.Extensions.Logging.ILoggerFactory loggerFactory = LoggerFactory.Create(builder =>
             {
                 builder.AddSerilog(serilogLogger);
             });
 
             _testLogger = loggerFactory.CreateLogger<DriversDAO>();
 
-             memorySink = new();
+            _mockPipelineProvider = Substitute.For<ResiliencePipelineProvider<string>>();
+            _mockPipelineProvider.GetPipeline("sql-retry-pipeline").Returns(ResiliencePipeline.Empty);
+            _mockConfiguration = Substitute.For<IConfiguration>();
+            _mockRetryEventService = Substitute.For<RetryEventService>();
+
+            _driversDAO = new DriversDAO(_mockPipelineProvider, _mockConfiguration, _testLogger, _connectionString, _mockRetryEventService);
+        }
+
+        public void InitializeMemorySinkLogger()
+        {
+            memorySink = new();
             Logger serilogMemoryLogger = new LoggerConfiguration()
                 .WriteTo.Sink(memorySink)
                 .CreateLogger();
 
-            ILoggerFactory memoryLoggerFactory = LoggerFactory.Create(builder =>
+            Microsoft.Extensions.Logging.ILoggerFactory memoryLoggerFactory = LoggerFactory.Create(builder =>
             {
                 builder.AddSerilog(serilogMemoryLogger);  // Integrates Serilog with ILoggerFactory
             });
 
-            _mockPipelineProvider = Substitute.For<ResiliencePipelineProvider<string>>();
-            _mockPipelineProvider.GetPipeline("sql-retry-pipeline").Returns(ResiliencePipeline.Empty);
-            _mockConfiguration = Substitute.For<IConfiguration>();
-            _mockLogger = loggerFactory.CreateLogger<DriversDAO>();
-            _mockRetryEventService = Substitute.For<RetryEventService>();
-
-            _driversDAO = new DriversDAO(_mockPipelineProvider, _mockConfiguration, _testLogger, _connectionString, _mockRetryEventService);
+            _mockLogger = memoryLoggerFactory.CreateLogger<DriversDAO>();
         }
     }
 
@@ -311,6 +317,48 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
             // Clean up
             await _driversDAO.DeleteDriverAsync(returnedDriverID, _cts.Token);
             await _driversDAO.ReseedTable("Drivers", 105);
+        }
+
+        [SkippableFact]
+        public async Task UpdateDriverAsync_LogsWarning_WhenDriverDoesNotExist()
+        {
+            Skip.If(_shouldSkipTests, "Test Database is not available. Skipping this test");
+
+            // Arrange
+            _cts = new CancellationTokenSource();
+            DriversDTO mockDriver = new(
+            DriverID: 999, // DriverID auto-increments server-side on insert. 999 is a placeholder 
+            Name: "Test",
+            Surname: "Update",
+            EmployeeNo: "EMP106",
+            LicenseType: LicenseType.Code14,
+            Availability: false
+            );
+
+            string message = $"No driver was found with ID: {mockDriver.DriverID}, update not performed";
+            InitializeMemorySinkLogger(); // Make sure this is before mockDAO always
+            DriversDAO mockDAO = new(_mockPipelineProvider, _mockConfiguration, _mockLogger, _connectionString, _mockRetryEventService);
+          
+            // Act
+            await mockDAO.UpdateDriverAsync(mockDriver, _cts.Token);
+
+            // Assert
+            if(memorySink != null)
+            {
+                if (memorySink.LogEvents.Any()) 
+                {
+                    List<LogEvent> memoryLog = memorySink.LogEvents.ToList();
+
+                    _testLogger.LogInformation("Log Level: {Level}, Message: {Message}", memoryLog[0].Level, memoryLog[0].RenderMessage());
+                    Assert.Single(memoryLog);
+                    Assert.Equal(LogEventLevel.Warning, memoryLog[0].Level);
+                    Assert.Contains(message, memoryLog[0].RenderMessage());
+                }
+                else
+                {
+                    Assert.Fail("No log events found.");
+                }
+            }
         }
 
         [SkippableTheory]
