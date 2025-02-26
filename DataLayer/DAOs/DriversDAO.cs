@@ -282,7 +282,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
 
         public async Task<int> GetEmployeeNoCountAsync(string EmployeeNo, CancellationToken CancellationToken)
         {
-            string Query = "SELECT TOP 1 * FROM Drivers WHERE EmployeeNo = @EmployeeNo";
+            string Query = "SELECT COUNT(*) FROM Drivers WHERE EmployeeNo = @EmployeeNo";
             int Result = 1;
             using (SqlConnection Connection = new(_connectionString))
             {
@@ -297,7 +297,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
                             Command.Parameters.Add(new SqlParameter("@EmployeeNo", SqlDbType.NVarChar, 50) { Value = EmployeeNo });
 
                             object? FoundRow = await Command.ExecuteScalarAsync(_cancellationToken);
-                            Result = (FoundRow != null) ? (int)FoundRow : 0;
+                            Result = (FoundRow != null) ? (int) FoundRow : 0;
 
                             return Result; // 1 if the EmployeeNo exists, 0 if not
                         }

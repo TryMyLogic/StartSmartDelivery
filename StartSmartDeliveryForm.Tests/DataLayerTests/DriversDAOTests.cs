@@ -196,6 +196,30 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
         }
 
         [SkippableTheory]
+        [InlineData("EMP1234", false)]
+        [InlineData("EMP99999", true)]
+        public async Task GetEmployeeNoCountAsync_EnsuresValueIsUnique(string EmployeeNo,bool isUnique)
+        {
+            Skip.If(_shouldSkipTests, "Test Database is not available. Skipping this test");
+
+            // Arrange
+            _cts = new CancellationTokenSource();
+
+            // Act
+           int result = await _driversDAO.GetEmployeeNoCountAsync(EmployeeNo, _cts.Token);
+
+            // Assert
+            if (isUnique)
+            {
+                Assert.Equal(0, result);
+            }
+            else
+            {
+                Assert.Equal(1, result);
+            }
+        }
+
+        [SkippableTheory]
         [InlineData(1, "Sarah", "Johnson", "EMP1230", 1, true)]
         [InlineData(2, "Emily", "Jones", "EMP7380", 1, false)]
         [InlineData(3, "Jane", "Davis", "EMP1432", 2, true)]
