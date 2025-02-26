@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using StartSmartDeliveryForm.SharedLayer;
+﻿using StartSmartDeliveryForm.SharedLayer;
 
 namespace StartSmartDeliveryForm.PresentationLayer
 {
@@ -33,7 +24,6 @@ namespace StartSmartDeliveryForm.PresentationLayer
         public delegate void SubmitEventHandler(object sender, EventArgs e);
         public event SubmitEventHandler? SubmitClicked;
 
- 
         protected async void btnSubmit_Click(object sender, EventArgs e)
         {
             await btnSubmit_ClickAsync(sender, e);

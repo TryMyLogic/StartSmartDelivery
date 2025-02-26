@@ -1,21 +1,19 @@
 ﻿using System.Data;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using Polly.Registry;
 using Polly;
+using Polly.Registry;
 using Serilog;
-using StartSmartDeliveryForm.DataLayer.DAOs;
-using StartSmartDeliveryForm.SharedLayer;
-using Xunit.Abstractions;
-using Microsoft.Extensions.Configuration;
-using StartSmartDeliveryForm.DataLayer.DTOs;
-using StartSmartDeliveryForm.SharedLayer.Enums;
 using Serilog.Core;
-using StartSmartDeliveryForm.BusinessLogicLayer;
-using Serilog.Sinks.InMemory;
 using Serilog.Events;
-using NSubstitute.ClearExtensions;
-using Castle.Core.Logging;
+using Serilog.Sinks.InMemory;
+using StartSmartDeliveryForm.DataLayer.DAOs;
+using StartSmartDeliveryForm.DataLayer.DTOs;
+using StartSmartDeliveryForm.SharedLayer;
+using StartSmartDeliveryForm.SharedLayer.Enums;
+using StartSmartDeliveryForm.Tests.SharedTestItems;
+using Xunit.Abstractions;
 
 namespace StartSmartDeliveryForm.Tests.DataLayerTests
 {
@@ -31,7 +29,7 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
         protected ResiliencePipelineProvider<string> _mockPipelineProvider;
         protected IConfiguration _mockConfiguration;
         protected InMemorySink? memorySink;
-        protected ILogger<DriversDAO>? _mockLogger;
+        protected ILogger<DriversDAO>? _memoryLogger;
         protected RetryEventService _mockRetryEventService;
 
         public DriversDAOTestBase(DatabaseFixture fixture, ITestOutputHelper output)
@@ -42,18 +40,7 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
             {
                 _shouldSkipTests = true;
             }
-
-            Logger serilogLogger = new LoggerConfiguration()
-            .MinimumLevel.Verbose()
-            .WriteTo.TestOutput(output)
-            .CreateLogger();
-
-            Microsoft.Extensions.Logging.ILoggerFactory loggerFactory = LoggerFactory.Create(builder =>
-            {
-                builder.AddSerilog(serilogLogger);
-            });
-
-            _testLogger = loggerFactory.CreateLogger<DriversDAO>();
+            _testLogger = SharedFunctions.CreateTestLogger<DriversDAO>(output);
 
             _mockPipelineProvider = Substitute.For<ResiliencePipelineProvider<string>>();
             _mockPipelineProvider.GetPipeline("sql-retry-pipeline").Returns(ResiliencePipeline.Empty);
@@ -63,20 +50,11 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
             _driversDAO = new DriversDAO(_mockPipelineProvider, _mockConfiguration, _testLogger, _connectionString, _mockRetryEventService);
         }
 
-        // Used to create a new memory sink instance for each test
         public void InitializeMemorySinkLogger()
         {
-            memorySink = new();
-            Logger serilogMemoryLogger = new LoggerConfiguration()
-                .WriteTo.Sink(memorySink)
-                .CreateLogger();
-
-            Microsoft.Extensions.Logging.ILoggerFactory memoryLoggerFactory = LoggerFactory.Create(builder =>
-            {
-                builder.AddSerilog(serilogMemoryLogger);  // Integrates Serilog with ILoggerFactory
-            });
-
-            _mockLogger = memoryLoggerFactory.CreateLogger<DriversDAO>();
+            (ILogger<DriversDAO> MemoryLogger, InMemorySink MemorySink) = SharedFunctions.CreateMemorySinkLogger<DriversDAO>();
+            _memoryLogger = MemoryLogger;
+            memorySink = MemorySink;
         }
     }
 
@@ -377,7 +355,7 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
 
             string message = $"No driver was found with ID: {mockDriver.DriverID}, update not performed";
             InitializeMemorySinkLogger(); // Make sure this is always before mockDAO 
-            DriversDAO mockDAO = new(_mockPipelineProvider, _mockConfiguration, _mockLogger, _connectionString, _mockRetryEventService);
+            DriversDAO mockDAO = new(_mockPipelineProvider, _mockConfiguration, _memoryLogger, _connectionString, _mockRetryEventService);
 
             // Act
             await mockDAO.UpdateDriverAsync(mockDriver, _cts.Token);
@@ -460,7 +438,7 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
 
             string message = $"No driver was found with ID: {DriverID}, delete not performed";
             InitializeMemorySinkLogger(); // Make sure this is always before mockDAO 
-            DriversDAO mockDAO = new(_mockPipelineProvider, _mockConfiguration, _mockLogger, _connectionString, _mockRetryEventService);
+            DriversDAO mockDAO = new(_mockPipelineProvider, _mockConfiguration, _memoryLogger, _connectionString, _mockRetryEventService);
 
             // Act
             await mockDAO.DeleteDriverAsync(DriverID, _cts.Token);

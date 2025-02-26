@@ -38,6 +38,7 @@ namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
             }
         }
 
+        // Another flakey test due to running at same time as Insert/Delete. Must add it to Sequential Collection
         [SkippableFact]
         public async Task GetTotalRecordCount_GetsRecordCountCorrectly()
         {
