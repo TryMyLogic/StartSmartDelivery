@@ -11,6 +11,11 @@ using StartSmartDeliveryForm.DataLayer.DAOs;
 using Xunit.Abstractions;
 using StartSmartDeliveryForm.PresentationLayer;
 using StartSmartDeliveryForm.Tests.SharedTestItems;
+using NSubstitute;
+using System.Reflection;
+using System.Windows.Forms;
+using StartSmartDeliveryForm.PresentationLayer.TemplateViews;
+
 
 namespace StartSmartDeliveryForm.Tests.PresentationLayerTests
 {
@@ -20,13 +25,8 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests
         public DataFormTemplateTests(ITestOutputHelper output) {
             _testLogger = SharedFunctions.CreateTestLogger<DataFormTemplate>(output);
 
-
-        }
-        [Fact]
-        public void btnSubmit_Click_EmitsSubmitClickedEvent()
-        {
-
         }
 
+        // Will do after i am done changing forms to MVP pattern
     }
 }

@@ -5,15 +5,15 @@ using StartSmartDeliveryForm.SharedLayer.Interfaces;
 
 namespace StartSmartDeliveryForm.BusinessLogicLayer
 {
-    public class DataFormValidator(IMessageBox messageBox)
+    public class DataFormValidator()
     {
-        private readonly IMessageBox _messageBox = messageBox;
+        public event Action<string, string, MessageBoxButtons, MessageBoxIcon>? RequestMessageBox;
 
         public bool IsValidString(string input, string fieldName)
         {
             if (string.IsNullOrWhiteSpace(input))
             {
-                _messageBox.Show($"{fieldName} cannot be empty.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                RequestMessageBox?.Invoke($"{fieldName} cannot be empty.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
             return true;
@@ -21,9 +21,9 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
 
         public bool IsValidEnumValue<TEnum>(string input) where TEnum : struct
         {
-            if (!Enum.TryParse(input, out TEnum _))
+            if (!Enum.TryParse(input, out TEnum value) || !Enum.IsDefined(typeof(TEnum), value))
             {
-                _messageBox.Show($"' {input} ' is not a valid enum value.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                RequestMessageBox?.Invoke($"' {input} ' is not a valid enum value.","Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
             return true;
@@ -33,10 +33,11 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
         {
             if (!bool.TryParse(input, out bool _))
             {
-                _messageBox.Show($"' {input} ' is not true or false.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                RequestMessageBox?.Invoke($"' {input} ' is not true or false.", input, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
             return true;
         }
+
     }
 }

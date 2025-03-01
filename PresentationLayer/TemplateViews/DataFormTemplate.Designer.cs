@@ -1,4 +1,4 @@
-﻿namespace StartSmartDeliveryForm.PresentationLayer
+﻿namespace StartSmartDeliveryForm.PresentationLayer.TemplateViews
 {
     partial class DataFormTemplate
     {

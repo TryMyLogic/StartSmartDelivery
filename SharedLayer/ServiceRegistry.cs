@@ -16,6 +16,10 @@ using Polly;
 using Polly.Retry;
 using Microsoft.Extensions.Logging;
 using Microsoft.Data.SqlClient;
+using StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters;
+using StartSmartDeliveryForm.PresentationLayer.TemplatePresenters;
+using StartSmartDeliveryForm.PresentationLayer.TemplateViews;
+using StartSmartDeliveryForm.PresentationLayer.TemplateModels;
 
 
 namespace StartSmartDeliveryForm.SharedLayer
@@ -57,6 +61,7 @@ namespace StartSmartDeliveryForm.SharedLayer
                   fileSizeLimitBytes: 104857600, // 100MB
                   outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level}] {Message}{NewLine}{Exception}").ReadFrom.Configuration(configuration)
             .WriteTo.Debug(restrictedToMinimumLevel: LogEventLevel.Debug)
+            .MinimumLevel.Override("Polly", LogEventLevel.Warning)
 
             // Filter for SQL logs (Not fully tested yet, will do later)
             //.WriteTo.Logger(lc => lc
@@ -133,12 +138,18 @@ namespace StartSmartDeliveryForm.SharedLayer
                             return default;
                         }
                     });
+
                 })
 
                 .AddScoped<DriversDAO>()
                 .AddScoped<PaginationManager>()
                 .AddScoped<DriverManagementForm>()
                 .AddScoped<PrintDriverDataForm>()
+                .AddTransient<DriverDataFormPresenter>()
+                .AddTransient<DataFormPresenterTemplate>()
+               .AddTransient<IDataForm, DriverDataForm>()
+                .AddTransient<DataFormValidator>()
+                .AddTransient<DataFormTemplate>()
                 .BuildServiceProvider();
 
             GlobalConstants.Configuration = configuration;

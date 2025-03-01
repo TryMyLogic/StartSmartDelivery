@@ -9,12 +9,16 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using StartSmartDeliveryForm.BusinessLogicLayer;
 using StartSmartDeliveryForm.DataLayer;
 using StartSmartDeliveryForm.DataLayer.DAOs;
 using StartSmartDeliveryForm.DataLayer.DTOs;
+using StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters;
+using StartSmartDeliveryForm.PresentationLayer.TemplateModels;
+using StartSmartDeliveryForm.PresentationLayer.TemplateViews;
 using StartSmartDeliveryForm.SharedLayer;
 using StartSmartDeliveryForm.SharedLayer.Enums;
 
@@ -119,8 +123,15 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 
         protected override void btnAdd_Click(object sender, EventArgs e)
         {
-            DriverDataForm driverDataForm = new(_driversDAO);
-            driverDataForm.SubmitClicked += DriverDataForm_SubmitClicked;
+            _logger.LogInformation("btnAdd Clicked");
+            ILogger<DriverDataForm> dataFormLogger = Program.ServiceProvider.GetRequiredService<ILogger<DriverDataForm>>();
+            DriverDataForm driverDataForm = new(dataFormLogger);
+
+            ILogger<DriverDataFormPresenter> presenterLogger = Program.ServiceProvider.GetRequiredService<ILogger<DriverDataFormPresenter>>();
+            DataFormValidator validator = Program.ServiceProvider.GetRequiredService<DataFormValidator>();
+            DriverDataFormPresenter presenter = new(driverDataForm, _driversDAO, validator, presenterLogger);
+            presenter.SubmissionCompleted += DriverDataForm_SubmitClicked;
+
             driverDataForm.Show();
         }
 
@@ -154,13 +165,13 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
                     availability
                 );
 
-                DriverDataForm driverDataForm = new(_driversDAO)
+                DriverDataForm driverDataForm = new()
                 {
                     Mode = FormMode.Edit
                 };
 
                 driverDataForm.InitializeEditing(driverData);
-                driverDataForm.SubmitClicked += DriverDataForm_SubmitClicked;
+                // driverDataForm.SubmitClicked += DriverDataForm_SubmitClicked;
                 driverDataForm.Show();
             }
             else
@@ -183,7 +194,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
                 if (result == DialogResult.Yes && int.TryParse(DriverID?.ToString(), out int driverID))
                 {
                     _driverData.Rows.RemoveAt(rowIndex);
-                    await _driversDAO.DeleteDriverAsync(driverID,_cts.Token);
+                    await _driversDAO.DeleteDriverAsync(driverID, _cts.Token);
 
                     _paginationManager.UpdateRecordCount(_paginationManager.RecordCount - 1);
                     await _paginationManager.EnsureValidPage();
@@ -193,7 +204,6 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             {
                 MessageBox.Show("The operation was canceled.");
             }
-           
         }
 
         // DriverDataForm submit button event handlers
@@ -204,8 +214,10 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 
             try
             {
-                if (sender is DriverDataForm form)
+                _logger.LogInformation("sender is: {Sender}", sender);
+                if (sender is DriverDataFormPresenter presenterForm)
                 {
+                    DriverDataForm form = (DriverDataForm) presenterForm.GetDataForm();
                     DriversDTO driverDTO = form.GetData();
 
                     if (driverDTO != null)
