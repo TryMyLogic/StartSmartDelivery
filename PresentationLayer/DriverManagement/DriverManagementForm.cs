@@ -12,6 +12,7 @@ using System.Windows.Forms;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Serilog.Core;
 using StartSmartDeliveryForm.BusinessLogicLayer;
 using StartSmartDeliveryForm.DataLayer;
 using StartSmartDeliveryForm.DataLayer.DAOs;
@@ -21,6 +22,7 @@ using StartSmartDeliveryForm.PresentationLayer.TemplateModels;
 using StartSmartDeliveryForm.PresentationLayer.TemplateViews;
 using StartSmartDeliveryForm.SharedLayer;
 using StartSmartDeliveryForm.SharedLayer.Enums;
+using static StartSmartDeliveryForm.SharedLayer.EventArgs.CustomEventArgs;
 
 namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 {
@@ -215,6 +217,12 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             try
             {
                 _logger.LogInformation("sender is: {Sender}", sender);
+
+                if(e is SubmissionCompletedEventArgs args)
+                {
+                    _logger.LogInformation("object is: {Object}", args.Data);
+                }
+
                 if (sender is DriverDataFormPresenter presenterForm)
                 {
                     DriverDataForm form = (DriverDataForm) presenterForm.GetDataForm();

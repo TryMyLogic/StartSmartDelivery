@@ -47,8 +47,6 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters
                 }
             }
 
-            string license = _driverDataForm.LicenseType.ToString();
-            _logger.LogInformation("License: {License}", license);
             if (!_dataFormValidator.IsValidEnumValue<LicenseType>(_driverDataForm.LicenseType.ToString())) return false;
 
             if (!_dataFormValidator.IsValidBoolValue(_driverDataForm.Availability.ToString())) return false;

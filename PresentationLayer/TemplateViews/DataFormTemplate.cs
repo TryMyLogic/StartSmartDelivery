@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using StartSmartDeliveryForm.PresentationLayer.TemplateModels;
 using StartSmartDeliveryForm.SharedLayer;
 using StartSmartDeliveryForm.SharedLayer.Interfaces;
+using static StartSmartDeliveryForm.SharedLayer.EventArgs.CustomEventArgs;
 using static StartSmartDeliveryForm.SharedLayer.EventDelegates.CustomEventDelegates;
 
 namespace StartSmartDeliveryForm.PresentationLayer.TemplateViews
@@ -32,9 +33,9 @@ namespace StartSmartDeliveryForm.PresentationLayer.TemplateViews
             btnSubmit.FlatAppearance.BorderSize = 0;
         }
 
-        private event SubmitEventDelegate<EventArgs>? _submitClicked;
+        private event SubmitEventDelegate<SubmissionCompletedEventArgs>? _submitClicked;
 
-        event SubmitEventDelegate<EventArgs>? IDataForm.SubmitClicked
+        event SubmitEventDelegate<SubmissionCompletedEventArgs>? IDataForm.SubmitClicked
         {
             add { _submitClicked += value; }
             remove { _submitClicked -= value; }
@@ -43,10 +44,10 @@ namespace StartSmartDeliveryForm.PresentationLayer.TemplateViews
         public void btnSubmit_Click(object sender, EventArgs e)
         {
             _logger.LogInformation("btnSubmit clicked");
-            _submitClicked?.Invoke(this, e);
+            _submitClicked?.Invoke(this, SubmissionCompletedEventArgs.Empty);
         }
 
-        void IDataForm.OnSubmissionComplete(object sender, EventArgs e) { }
+        void IDataForm.OnSubmissionComplete(object sender, SubmissionCompletedEventArgs e) { }
         void IDataForm.InitializeEditing(object data) { }
         void IDataForm.ClearData() { }
         object IDataForm.GetData() { return -1; }

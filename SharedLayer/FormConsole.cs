@@ -21,7 +21,7 @@ namespace StartSmartDeliveryForm.SharedLayer
             InitializeComponent();
         }
 
-        private void FormConsole_Load(object sender, EventArgs e)
+        private void FormConsole_Load(object sender, System.EventArgs e)
         {
 
         }

@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters;
 using StartSmartDeliveryForm.PresentationLayer.TemplateModels;
+using static StartSmartDeliveryForm.SharedLayer.EventArgs.CustomEventArgs;
 using static StartSmartDeliveryForm.SharedLayer.EventDelegates.CustomEventDelegates;
 
 namespace StartSmartDeliveryForm.PresentationLayer.TemplatePresenters
@@ -24,18 +25,17 @@ namespace StartSmartDeliveryForm.PresentationLayer.TemplatePresenters
             _logger = logger ?? NullLogger<DataFormPresenterTemplate>.Instance;
         }
 
-        public event SubmitEventDelegate<EventArgs>? SubmissionCompleted;
+        public event SubmitEventDelegate<SubmissionCompletedEventArgs>? SubmissionCompleted;
         internal async void OnSubmit_Clicked(object sender, EventArgs e)
         {
             try
             {
-                _logger.LogInformation("OnSubmit_clicked ran (Information)"); // Level 2
                 bool Valid = await ValidFormAsync();
                 _logger.LogInformation("Valid: {Valid}", Valid);
                 if (Valid)
                 {
-                    _dataForm.OnSubmissionComplete(this, EventArgs.Empty);
-                    SubmissionCompleted?.Invoke(this, EventArgs.Empty);
+                    _dataForm.OnSubmissionComplete(this, new SubmissionCompletedEventArgs(_dataForm.GetData(),_dataForm.Mode));
+                    SubmissionCompleted?.Invoke(this, new SubmissionCompletedEventArgs(_dataForm.GetData(), _dataForm.Mode));
                 }
             }
             catch (Exception ex)
