@@ -1,23 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using Serilog.Core;
 using StartSmartDeliveryForm.BusinessLogicLayer;
 using StartSmartDeliveryForm.DataLayer.DAOs;
 using StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models;
 using StartSmartDeliveryForm.PresentationLayer.TemplatePresenters;
 using StartSmartDeliveryForm.PresentationLayer.TemplateViews;
-using StartSmartDeliveryForm.SharedLayer;
 using StartSmartDeliveryForm.SharedLayer.Enums;
-using StartSmartDeliveryForm.SharedLayer.Interfaces;
 
 namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters
 {
@@ -35,17 +23,12 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters
             _dataFormValidator = dataFormValidator ?? new DataFormValidator();
             _logger = logger ?? NullLogger<DriverDataFormPresenter>.Instance;
 
-            _dataFormValidator.RequestMessageBox += EmitShowMessageBox;
+            _dataFormValidator.RequestMessageBox += _driverDataForm.ShowMessageBox;
         }
 
         public IDriverDataForm GetDataForm()
         {
             return _driverDataForm;
-        }
-
-        public void EmitShowMessageBox(string text, string caption, MessageBoxButtons buttons, MessageBoxIcon icon)
-        {
-            _driverDataForm.ShowMessageBox(text, caption, buttons, icon);
         }
 
         protected override async Task<bool> ValidFormAsync()

@@ -1,10 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using StartSmartDeliveryForm.PresentationLayer.TemplateModels;
-using StartSmartDeliveryForm.PresentationLayer.TemplatePresenters;
 using StartSmartDeliveryForm.SharedLayer;
 using StartSmartDeliveryForm.SharedLayer.Interfaces;
-using static StartSmartDeliveryForm.PresentationLayer.TemplateModels.IDataForm;
 using static StartSmartDeliveryForm.SharedLayer.EventHandlers.EventHandlers;
 
 namespace StartSmartDeliveryForm.PresentationLayer.TemplateViews
@@ -20,6 +18,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.TemplateViews
         public readonly ILogger<DataFormTemplate> _logger;
         private readonly IMessageBox _messageBox;
 
+        public DataFormTemplate() : this(NullLogger<DataFormTemplate>.Instance, new MessageBoxWrapper()) { }
         public DataFormTemplate(ILogger<DataFormTemplate>? logger = null, IMessageBox? messageBox = null)
         {
             InitializeComponent();

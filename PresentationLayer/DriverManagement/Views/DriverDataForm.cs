@@ -1,9 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using StartSmartDeliveryForm.DataLayer.DTOs;
 using StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models;
 using StartSmartDeliveryForm.PresentationLayer.TemplateViews;
-using StartSmartDeliveryForm.SharedLayer;
 using StartSmartDeliveryForm.SharedLayer.Enums;
 using StartSmartDeliveryForm.SharedLayer.Interfaces;
 
@@ -95,7 +93,5 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
                 bool.Parse(cboAvailability.SelectedItem!.ToString()!)
             );
         }
-
-
     }
 }

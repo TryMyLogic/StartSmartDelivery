@@ -33,7 +33,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DriverManagement
             _driversDAO = fixture.DriversDAO;
             _managementForm = fixture.DriverManagementForm;
             _connectionString = fixture.ConnectionString;
-            _dataform = new DriverDataForm(_driversDAO);
+          //  _dataform = new DriverDataForm(_driversDAO);
             _output = output;
         }
 
