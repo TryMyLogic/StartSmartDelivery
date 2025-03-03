@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters;
 using StartSmartDeliveryForm.PresentationLayer.TemplateModels;
-using static StartSmartDeliveryForm.SharedLayer.EventHandlers.EventHandlers;
+using static StartSmartDeliveryForm.SharedLayer.EventDelegates.CustomEventDelegates;
 
 namespace StartSmartDeliveryForm.PresentationLayer.TemplatePresenters
 {
@@ -24,7 +24,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.TemplatePresenters
             _logger = logger ?? NullLogger<DataFormPresenterTemplate>.Instance;
         }
 
-        public event SubmitEventHandler? SubmissionCompleted;
+        public event SubmitEventDelegate<EventArgs>? SubmissionCompleted;
         internal async void OnSubmit_Clicked(object sender, EventArgs e)
         {
             try

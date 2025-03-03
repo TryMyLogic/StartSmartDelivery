@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using StartSmartDeliveryForm.PresentationLayer.TemplateModels;
 using StartSmartDeliveryForm.SharedLayer;
 using StartSmartDeliveryForm.SharedLayer.Interfaces;
-using static StartSmartDeliveryForm.SharedLayer.EventHandlers.EventHandlers;
+using static StartSmartDeliveryForm.SharedLayer.EventDelegates.CustomEventDelegates;
 
 namespace StartSmartDeliveryForm.PresentationLayer.TemplateViews
 {
@@ -32,9 +32,9 @@ namespace StartSmartDeliveryForm.PresentationLayer.TemplateViews
             btnSubmit.FlatAppearance.BorderSize = 0;
         }
 
-        private event SubmitEventHandler? _submitClicked;
+        private event SubmitEventDelegate<EventArgs>? _submitClicked;
 
-        event SubmitEventHandler? IDataForm.SubmitClicked
+        event SubmitEventDelegate<EventArgs>? IDataForm.SubmitClicked
         {
             add { _submitClicked += value; }
             remove { _submitClicked -= value; }
