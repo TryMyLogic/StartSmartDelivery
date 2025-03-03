@@ -47,10 +47,10 @@ namespace StartSmartDeliveryForm.PresentationLayer.TemplateViews
             _submitClicked?.Invoke(this, SubmissionCompletedEventArgs.Empty);
         }
 
-        void IDataForm.OnSubmissionComplete(object sender, SubmissionCompletedEventArgs e) { }
-        void IDataForm.InitializeEditing(object data) { }
-        void IDataForm.ClearData() { }
-        object IDataForm.GetData() { return -1; }
+        public virtual void OnSubmissionComplete(object sender, SubmissionCompletedEventArgs e) { }
+        public virtual void InitializeEditing(object data) { }
+        public virtual void ClearData() { }
+        public virtual object GetData() { return -1; }
 
         public void ShowMessageBox(string text, string caption, MessageBoxButtons buttons, MessageBoxIcon icon)
         {

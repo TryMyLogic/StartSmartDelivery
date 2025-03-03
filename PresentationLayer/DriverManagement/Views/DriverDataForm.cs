@@ -60,7 +60,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             set => cboAvailability.SelectedItem = value.ToString();
         }
 
-        public void InitializeEditing(object DriverData)
+        public override void InitializeEditing(object DriverData)
         {
             // Populate form with existing driver data for editing
             DriversDTO driverData = (DriversDTO)DriverData;
@@ -72,7 +72,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             cboAvailability.SelectedItem = driverData.Availability.ToString();
         }
 
-        public void ClearData()
+        public override void ClearData()
         {
             txtName.Clear();
             txtSurname.Clear();
@@ -81,7 +81,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             cboAvailability.SelectedIndex = 0;
         }
 
-        public DriversDTO GetData()
+        public override DriversDTO GetData()
         {
             //Valid form ensures data here is never null and can be succefully parsed
             return new DriversDTO(
