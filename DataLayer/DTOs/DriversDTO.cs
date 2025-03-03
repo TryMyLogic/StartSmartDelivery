@@ -22,5 +22,9 @@ namespace StartSmartDeliveryForm.DataLayer.DTOs
       string EmployeeNo,
       LicenseType LicenseType,
       bool Availability
-  );
+    )
+    {
+        public static readonly DriversDTO Empty = new(0, string.Empty, string.Empty, string.Empty, default, false);
+    }
+
 }

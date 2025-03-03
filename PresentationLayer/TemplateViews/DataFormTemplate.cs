@@ -33,21 +33,21 @@ namespace StartSmartDeliveryForm.PresentationLayer.TemplateViews
             btnSubmit.FlatAppearance.BorderSize = 0;
         }
 
-        private event SubmitEventDelegate<SubmissionCompletedEventArgs>? _submitClicked;
+        private event EventHandler<SubmissionCompletedEventArgs>? _submitClicked;
 
-        event SubmitEventDelegate<SubmissionCompletedEventArgs>? IDataForm.SubmitClicked
+        event EventHandler<SubmissionCompletedEventArgs>? IDataForm.SubmitClicked
         {
             add { _submitClicked += value; }
             remove { _submitClicked -= value; }
         }
 
-        public void btnSubmit_Click(object sender, EventArgs e)
+        public void btnSubmit_Click(object? sender, EventArgs e)
         {
             _logger.LogInformation("btnSubmit clicked");
             _submitClicked?.Invoke(this, SubmissionCompletedEventArgs.Empty);
         }
 
-        public virtual void OnSubmissionComplete(object sender, SubmissionCompletedEventArgs e) { }
+        public virtual void OnSubmissionComplete(object? sender, SubmissionCompletedEventArgs e) { }
         public virtual void InitializeEditing(object data) { }
         public virtual void ClearData() { }
         public virtual object GetData() { return -1; }

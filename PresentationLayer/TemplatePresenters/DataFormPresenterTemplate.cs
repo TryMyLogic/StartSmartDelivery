@@ -25,8 +25,8 @@ namespace StartSmartDeliveryForm.PresentationLayer.TemplatePresenters
             _logger = logger ?? NullLogger<DataFormPresenterTemplate>.Instance;
         }
 
-        public event SubmitEventDelegate<SubmissionCompletedEventArgs>? SubmissionCompleted;
-        internal async void OnSubmit_Clicked(object sender, EventArgs e)
+        public event EventHandler<SubmissionCompletedEventArgs>? SubmissionCompleted;
+        internal async void OnSubmit_Clicked(object? sender, EventArgs e)
         {
             try
             {

@@ -17,6 +17,7 @@ using StartSmartDeliveryForm.BusinessLogicLayer;
 using StartSmartDeliveryForm.DataLayer;
 using StartSmartDeliveryForm.DataLayer.DAOs;
 using StartSmartDeliveryForm.DataLayer.DTOs;
+using StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models;
 using StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters;
 using StartSmartDeliveryForm.PresentationLayer.TemplateModels;
 using StartSmartDeliveryForm.PresentationLayer.TemplateViews;
@@ -34,6 +35,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
         private readonly ILogger<DriverManagementForm> _logger;
         private CancellationTokenSource? _cts;
         private readonly RetryEventService _retryEventService;
+        private DriverDataForm? _driverDataForm;
         public DriverManagementForm(DriversDAO driversDAO, ILogger<DriverManagementForm>? logger = null, RetryEventService? retryEventService = null)
         {
             InitializeComponent();
@@ -127,14 +129,14 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
         {
             _logger.LogInformation("btnAdd Clicked");
             ILogger<DriverDataForm> dataFormLogger = Program.ServiceProvider.GetRequiredService<ILogger<DriverDataForm>>();
-            DriverDataForm driverDataForm = new(dataFormLogger);
+            _driverDataForm = new(dataFormLogger);
 
             ILogger<DriverDataFormPresenter> presenterLogger = Program.ServiceProvider.GetRequiredService<ILogger<DriverDataFormPresenter>>();
             DataFormValidator validator = Program.ServiceProvider.GetRequiredService<DataFormValidator>();
-            DriverDataFormPresenter presenter = new(driverDataForm, _driversDAO, validator, presenterLogger);
+            DriverDataFormPresenter presenter = new(_driverDataForm, _driversDAO, validator, presenterLogger);
             presenter.SubmissionCompleted += DriverDataForm_SubmitClicked;
 
-            driverDataForm.Show();
+            _driverDataForm.Show();
         }
 
         protected override void btnEdit_Click(int rowIndex)
@@ -209,58 +211,56 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
         }
 
         // DriverDataForm submit button event handlers
-        private async void DriverDataForm_SubmitClicked(object sender, EventArgs e) { await DriverDataForm_SubmitClickedAsync(sender, e); }
-        private async Task DriverDataForm_SubmitClickedAsync(object sender, EventArgs e)
+        private async void DriverDataForm_SubmitClicked(object? sender, EventArgs e) { await DriverDataForm_SubmitClickedAsync(sender, e); }
+        private async Task DriverDataForm_SubmitClickedAsync(object? sender, EventArgs e)
         {
             _cts = new CancellationTokenSource();
+
+            if (_driverDataForm == null) return;
 
             try
             {
                 _logger.LogInformation("sender is: {Sender}", sender);
 
-                if(e is SubmissionCompletedEventArgs args)
+                if (e is SubmissionCompletedEventArgs args)
                 {
                     _logger.LogInformation("object is: {Object}", args.Data);
-                }
 
-                if (sender is DriverDataFormPresenter presenterForm)
-                {
-                    DriverDataForm form = (DriverDataForm) presenterForm.GetDataForm();
-                    DriversDTO driverDTO = form.GetData();
-
-                    if (driverDTO != null)
+                    object? argumentData = args.Data;
+                    if (args.Data is DriversDTO driverDTO)
                     {
-                        if (form.Mode == FormMode.Add)
                         {
-                            int newDriverId = await _driversDAO.InsertDriverAsync(driverDTO, _cts.Token);
-                            _logger.LogInformation("NewDriverID: {newDriverID}", newDriverId);
-                            if (newDriverId != -1) // Check for success
+                            if (args.Mode == FormMode.Add)
                             {
-                                DataRow newRow = _driverData.NewRow();
-                                PopulateDataRow(newRow, driverDTO);
-                                newRow[DriverColumns.DriverID] = newDriverId;
+                                int newDriverId = await _driversDAO.InsertDriverAsync(driverDTO, _cts.Token);
+                                _logger.LogInformation("NewDriverID: {newDriverID}", newDriverId);
+                                if (newDriverId != -1) // Check for success
+                                {
+                                    DataRow newRow = _driverData.NewRow();
+                                    PopulateDataRow(newRow, driverDTO);
+                                    newRow[DriverColumns.DriverID] = newDriverId;
 
-                                _driverData.Rows.Add(newRow);
-                                _paginationManager.UpdateRecordCount(_paginationManager.RecordCount + 1);
-                                await _paginationManager.GoToLastPage(); // Allows user to see successful insert
+                                    _driverData.Rows.Add(newRow);
+                                    _paginationManager.UpdateRecordCount(_paginationManager.RecordCount + 1);
+                                    await _paginationManager.GoToLastPage(); // Allows user to see successful insert
+                                }
                             }
-                        }
-                        else if (form.Mode == FormMode.Edit)
-                        {
-                            DataRow? rowToUpdate = _driverData.Rows.Find(driverDTO.DriverID); // Assuming EmployeeNo is the primary key
-                            if (rowToUpdate == null)
+                            else if (args.Mode == FormMode.Edit)
                             {
-                                FormConsole.Instance.Log("Row not found for update.");
-                                return;
-                            }
-                            PopulateDataRow(rowToUpdate, driverDTO);
+                                DataRow? rowToUpdate = _driverData.Rows.Find(driverDTO.DriverID); // Assuming EmployeeNo is the primary key
+                                if (rowToUpdate == null)
+                                {
+                                    FormConsole.Instance.Log("Row not found for update.");
+                                    return;
+                                }
+                                PopulateDataRow(rowToUpdate, driverDTO);
 
-                            await _driversDAO.UpdateDriverAsync(driverDTO, _cts.Token);
-                            form.Close();
+                                await _driversDAO.UpdateDriverAsync(driverDTO, _cts.Token);
+                                _driverDataForm.Close();
+                            }
                         }
                     }
-
-                    form.ClearData(); //Clear form for next batch of data
+                    _driverDataForm.ClearData();
                 }
             }
             catch (OperationCanceledException)

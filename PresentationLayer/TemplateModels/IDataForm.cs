@@ -12,7 +12,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.TemplateModels
     public interface IDataForm
     {
         public FormMode Mode { get; set; }
-        public event SubmitEventDelegate<SubmissionCompletedEventArgs>? SubmitClicked;
+        public event EventHandler<SubmissionCompletedEventArgs>? SubmitClicked;
 
         void OnSubmissionComplete(object sender, SubmissionCompletedEventArgs e);
         void InitializeEditing(object data);
