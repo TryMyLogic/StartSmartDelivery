@@ -242,7 +242,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
                                 DataRow? rowToUpdate = _driverData.Rows.Find(driverDTO.DriverID); // Assuming EmployeeNo is the primary key
                                 if (rowToUpdate == null)
                                 {
-                                    FormConsole.Instance.Log("Row not found for update.");
+                                    _logger.LogInformation("Row not found for update.");
                                     return;
                                 }
                                 PopulateDataRow(rowToUpdate, driverDTO);

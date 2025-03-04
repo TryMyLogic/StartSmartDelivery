@@ -30,7 +30,7 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
             {
                 int count = await driversDAO.GetEmployeeNoCountAsync(EmployeeNo, Cts.Token);
                 bool isUnique = count == 0;
-                FormConsole.Instance.Log($"Employee Unique: {isUnique}");
+                Log.Information($"Employee Unique: {isUnique}");
                 return isUnique;
             }
             catch (OperationCanceledException)

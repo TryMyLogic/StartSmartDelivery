@@ -8,6 +8,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using StartSmartDeliveryForm.DataLayer.DAOs;
 using StartSmartDeliveryForm.DataLayer.DTOs;
 using StartSmartDeliveryForm.SharedLayer;
@@ -21,23 +23,26 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
         private readonly int _totalPages;
         private readonly DataGridView? _dataGridView;
         private CancellationTokenSource? _cts;
+        private readonly ILogger<PrintDriverDataForm> _logger;
 
         // TODO - Print all databases pages, ensuring each page contains as many records (within reason)
-        public PrintDriverDataForm(DriversDAO driversDAO)
+        public PrintDriverDataForm(DriversDAO driversDAO, ILogger<PrintDriverDataForm>? logger = null)
         {
             InitializeComponent();
             printPreviewControl.Document = printDocument;
             _driversDAO = driversDAO;
+            _logger = logger ?? NullLogger<PrintDriverDataForm>.Instance;
 
             // _totalPages = (int)Math.Ceiling((double)_recordsCount / GlobalConstants.s_recordLimit);
         }
 
         // Used for printing all the database pages, according to the appsettings row count
-        public PrintDriverDataForm(int totalPages, DriversDAO driversDAO)
+        public PrintDriverDataForm(int totalPages, DriversDAO driversDAO, ILogger<PrintDriverDataForm>? logger = null)
         {
             InitializeComponent();
             printPreviewControl.Document = printDocument;
             _driversDAO = driversDAO;
+            _logger = logger ?? NullLogger<PrintDriverDataForm>.Instance;
 
             _totalPages = totalPages;
 
@@ -67,10 +72,9 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 
         private async Task printDocument_PrintPageAsync(object sender, PrintPageEventArgs e)
         {
-            FormConsole.Instance.Log("Hello");
             if (e.Graphics == null)
             {
-                FormConsole.Instance.Log("e.Graphics was null"); // Shouldnt get here in most cases.
+                _logger.LogWarning("e.Graphics was null"); // Shouldnt get here in most cases.
                 return;
             }
 
@@ -94,7 +98,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
                 dataTable = await _driversDAO.GetDriversAtPageAsync(_currentPage, _cts.Token);
                 if (dataTable == null)
                 {
-                    FormConsole.Instance.Log("GetDriversAtPage returned null datatable");
+                    _logger.LogWarning("GetDriversAtPage returned null datatable");
                     return;
                 }
             }

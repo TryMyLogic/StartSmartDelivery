@@ -1,17 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
+﻿using System.Data;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using Microsoft.IdentityModel.Tokens;
 using StartSmartDeliveryForm.SharedLayer;
 using StartSmartDeliveryForm.SharedLayer.Enums;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using Serilog;
 
 namespace StartSmartDeliveryForm.PresentationLayer
 {
@@ -81,7 +72,7 @@ namespace StartSmartDeliveryForm.PresentationLayer
             dataGridView.Parent.Height = newHeight;
 
             // Optionally log the values for debugging
-            FormConsole.Instance.Log($"Row Height: {rowHeight}, Column Headers Height: {dataGridView.ColumnHeadersHeight}, New Height: {newHeight}");
+            Log.Information($"Row Height: {rowHeight}, Column Headers Height: {dataGridView.ColumnHeadersHeight}, New Height: {newHeight}");
         }
 
         private void ManagementTemplateForm_Load(object sender, EventArgs e)
@@ -170,7 +161,7 @@ namespace StartSmartDeliveryForm.PresentationLayer
             }
             else
             {
-                FormConsole.Instance.Log("Search coloumn was not set properly");
+                Log.Warning("Search coloumn was not set properly");
             }
         }
 
@@ -193,13 +184,13 @@ namespace StartSmartDeliveryForm.PresentationLayer
         {
             if (searchTerm != null)
             {
-                FormConsole.Instance.Log(searchTerm);
+                Log.Warning(searchTerm);
             }
 
             if (dataTable == null || string.IsNullOrEmpty(selectedOption))
             {
                 // Refresh dgv or show an error message
-                FormConsole.Instance.Log("Invalid parameters for filtering.");
+                Log.Warning("Invalid parameters for filtering.");
                 return;
             }
 
@@ -213,7 +204,7 @@ namespace StartSmartDeliveryForm.PresentationLayer
 
             dgvMain.DataSource = filteredData;
 
-            FormConsole.Instance.Log($"Filtered {filteredRows.Count} rows for '{selectedOption}' with search term '{searchTerm}' (CaseSensitive: {isCaseSensitive}).");
+            Log.Information($"Filtered {filteredRows.Count} rows for '{selectedOption}' with search term '{searchTerm}' (CaseSensitive: {isCaseSensitive}).");
         }
 
         public static List<DataRow> FilterRows(DataTable dataTable, string selectedOption, string? searchTerm, bool isCaseSensitive)
