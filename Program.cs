@@ -5,6 +5,7 @@ using Serilog;
 using StartSmartDeliveryForm.DataLayer.DAOs;
 using StartSmartDeliveryForm.PresentationLayer;
 using StartSmartDeliveryForm.PresentationLayer.DriverManagement;
+using StartSmartDeliveryForm.PresentationLayer.TemplatePresenters;
 using StartSmartDeliveryForm.SharedLayer;
 
 namespace StartSmartDeliveryForm
@@ -23,6 +24,7 @@ namespace StartSmartDeliveryForm
 
             // IoC in action
             DriverManagementForm driverManagementForm = serviceRegistry.GetRequiredService<DriverManagementForm>();
+            ManagementFormPresenterTemplate presenter = new(driverManagementForm);
 
             Application.Run(driverManagementForm);
         }

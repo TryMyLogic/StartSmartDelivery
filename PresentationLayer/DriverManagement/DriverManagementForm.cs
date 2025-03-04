@@ -36,7 +36,6 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 
             _paginationManager = new PaginationManager("Drivers", driversDAO);
             _paginationManager.PageChanged += OnPageChanged;
-
         }
 
         private async Task InitializeAsync()
@@ -305,10 +304,9 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
                 dataTable = dt;
             }
 
-            // Remove any filters that were applied
             if (dataTable != null)
             {
-                dataTable.DefaultView.RowFilter = string.Empty;  // Clear any applied filters
+                dataTable.DefaultView.RowFilter = string.Empty; 
             }
 
             // Rebind

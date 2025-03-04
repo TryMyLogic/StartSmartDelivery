@@ -3,10 +3,14 @@ using System.Reflection;
 using StartSmartDeliveryForm.SharedLayer;
 using StartSmartDeliveryForm.SharedLayer.Enums;
 using Serilog;
+using StartSmartDeliveryForm.PresentationLayer.TemplatePresenters;
+using StartSmartDeliveryForm.PresentationLayer.TemplateModels;
+using StartSmartDeliveryForm.SharedLayer.Interfaces;
+using static StartSmartDeliveryForm.SharedLayer.EventArgs.CustomEventArgs;
 
 namespace StartSmartDeliveryForm.PresentationLayer
 {
-    public partial class ManagementTemplateForm : Form
+    public partial class ManagementTemplateForm : Form, IManagementForm, ISearchableView
     {
         public ManagementTemplateForm()
         {
@@ -19,7 +23,7 @@ namespace StartSmartDeliveryForm.PresentationLayer
             return resizedImage;
         }
 
-        public void SetTheme()
+        private void SetTheme()
         {
             tsSearchbar.BackColor = GlobalConstants.SoftBeige;
             pnlGap.BackColor = GlobalConstants.SoftBeige;
@@ -53,26 +57,23 @@ namespace StartSmartDeliveryForm.PresentationLayer
         //DO NOT use this in the ManagementTemplateForm_Load.It interferes with children initialization, breaking the child designer. 
         protected static void AdjustDataGridViewHeight(DataGridView dataGridView)
         {
-            // Set the maximum record limit to 30 or the global constant, whichever is smaller
-            int records = Math.Min(GlobalConstants.s_recordLimit, 30); // Select the minimum of the two values
+            int records = Math.Min(GlobalConstants.s_recordLimit, 30);
 
-            // Get the row height
             int rowHeight = dataGridView.RowTemplate.Height;
 
-            // Calculate the required height for the DataGridView (rows + column headers)
             int requiredHeight = rowHeight * (records + 1) + dataGridView.ColumnHeadersHeight + 2;
 
-            // Calculate the new height for the parent container (form or panel)
-            int formHeightWithoutDataGridView = dataGridView.Parent.Height - dataGridView.Height;
-
-            // Adjust the new height to fit the calculated required height
-            int newHeight = formHeightWithoutDataGridView + requiredHeight;
-
-            // Set the new height of the parent container (Form or Panel)
-            dataGridView.Parent.Height = newHeight;
-
-            // Optionally log the values for debugging
-            Log.Information($"Row Height: {rowHeight}, Column Headers Height: {dataGridView.ColumnHeadersHeight}, New Height: {newHeight}");
+            if (dataGridView.Parent != null)
+            {
+                int formHeightWithoutDataGridView = dataGridView.Parent.Height - dataGridView.Height;
+                int newHeight = formHeightWithoutDataGridView + requiredHeight;
+                dataGridView.Parent.Height = newHeight;
+                Log.Information($"Row Height: {rowHeight}, Column Headers Height: {dataGridView.ColumnHeadersHeight}, New Height: {newHeight}");
+            }
+            else
+            {
+                Log.Warning("DataGridView parent is null.");
+            }
         }
 
         private void ManagementTemplateForm_Load(object sender, EventArgs e)
@@ -150,26 +151,37 @@ namespace StartSmartDeliveryForm.PresentationLayer
             }
         }
 
+        private bool _isCaseSensitive = false;
+        public bool IsCaseSensitive => _isCaseSensitive;
+
+        public event EventHandler<SearchRequestEventArgs>? SearchClicked;
+
+        public void UpdateDataGrid(DataTable UpdatedDataTable) {
+
+            Log.Information("Wtf"); 
+            dgvMain.DataSource = UpdatedDataTable; }
         private void btnSearch_Click(object sender, EventArgs e)
         {
+            Log.Information("Search clicked");
             string? SelectedOption = cboSearchOptions.SelectedItem?.ToString();
             string SearchTerm = txtSearchBox.Text.Trim();
 
             if (SelectedOption != null)
             {
-                ApplyFilter((DataTable)dgvMain.DataSource, SelectedOption, SearchTerm);
+                Log.Information("Search ran");
+                SearchClicked?.Invoke(this, new SearchRequestEventArgs((DataTable)dgvMain.DataSource, SelectedOption, SearchTerm));
             }
             else
             {
-                Log.Warning("Search coloumn was not set properly");
+                Log.Error("Search coloumn was not set properly");
             }
         }
 
         private void btnMatchCase_Click(object sender, EventArgs e)
         {
-            isCaseSensitive = !isCaseSensitive;
+            _isCaseSensitive = !_isCaseSensitive;
 
-            if (isCaseSensitive)
+            if (_isCaseSensitive)
             {
                 btnMatchCase.BackColor = Color.White;
             }
@@ -177,102 +189,6 @@ namespace StartSmartDeliveryForm.PresentationLayer
             {
                 btnMatchCase.BackColor = GlobalConstants.SoftBeige;
             }
-        }
-
-        public bool isCaseSensitive = false; //Not case sensitive by default
-        public void ApplyFilter(DataTable dataTable, string selectedOption, string? searchTerm)
-        {
-            if (searchTerm != null)
-            {
-                Log.Warning(searchTerm);
-            }
-
-            if (dataTable == null || string.IsNullOrEmpty(selectedOption))
-            {
-                // Refresh dgv or show an error message
-                Log.Warning("Invalid parameters for filtering.");
-                return;
-            }
-
-            List<DataRow> filteredRows = FilterRows(dataTable, selectedOption, searchTerm, isCaseSensitive);
-
-            DataTable filteredData = dataTable.Clone(); //Does not clone data, only the schema
-            foreach (DataRow row in filteredRows)
-            {
-                filteredData.Rows.Add(row.ItemArray);  // Add the filtered rows directly to the DataTable
-            }
-
-            dgvMain.DataSource = filteredData;
-
-            Log.Information($"Filtered {filteredRows.Count} rows for '{selectedOption}' with search term '{searchTerm}' (CaseSensitive: {isCaseSensitive}).");
-        }
-
-        public static List<DataRow> FilterRows(DataTable dataTable, string selectedOption, string? searchTerm, bool isCaseSensitive)
-        {
-            // Return an empty list if the search term is null/empty or if the column does not exist
-            // null is a possible value for certain database tables. IsNullOrEmpty wont filter out "null"
-            if (string.IsNullOrEmpty(searchTerm) || !dataTable.Columns.Contains(selectedOption))
-                return [];
-
-            Type columnType = dataTable.Columns[selectedOption]!.DataType;
-
-            if (columnType == typeof(int))
-            {
-                //Handle enum with case sensitivity
-                if (Enum.TryParse(typeof(LicenseType), searchTerm, !isCaseSensitive, out object? enumValue) && enumValue != null)
-                {
-                    int enumIntValue = (int)enumValue;
-                    return [.. dataTable.AsEnumerable().Where(row => row.Field<int?>(selectedOption) == enumIntValue)];
-                }
-                return [];
-            }
-
-            // Handle string columns with case sensitivity and partial matching
-            if (columnType == typeof(string))
-            {
-                return [.. dataTable.AsEnumerable()
-                                .Where(row =>
-                                {
-                                    string fieldValue = row.Field<string>(selectedOption)!;
-                                    if (fieldValue == null) return false;
-
-                                    return isCaseSensitive
-                                        ? fieldValue.Contains(searchTerm)
-                                        : fieldValue.Contains(searchTerm, StringComparison.OrdinalIgnoreCase);
-                                })];
-            }
-
-            if (columnType == typeof(bool))
-            {
-                bool? boolSearchTerm = null;
-
-                // Need to explicity look for accepted values else any unknown value resolves as true.
-                if (searchTerm.Equals("1", StringComparison.OrdinalIgnoreCase))
-                {
-                    boolSearchTerm = true;
-                }
-                else if (searchTerm.Equals("0", StringComparison.OrdinalIgnoreCase))
-                {
-                    boolSearchTerm = false;
-                }
-                else if (searchTerm.Equals("true", StringComparison.OrdinalIgnoreCase))
-                {
-                    boolSearchTerm = true;
-                }
-                else if (searchTerm.Equals("false", StringComparison.OrdinalIgnoreCase))
-                {
-                    boolSearchTerm = false;
-                }
-
-                if (boolSearchTerm == null)
-                {
-                    return [];
-                }
-
-                return [.. dataTable.AsEnumerable().Where(row => row.Field<bool>(selectedOption) == boolSearchTerm)];
-            }
-
-            return [];
         }
 
         private void txtSearchBox_Enter(object sender, EventArgs e)
@@ -334,18 +250,6 @@ namespace StartSmartDeliveryForm.PresentationLayer
 
         protected virtual void btnPrint_Click(object sender, EventArgs e) { }
 
-        //Required by xUnit Tests. Will only be usable during development
-#if DEBUG
-        public void OverrideDatagridView(DataTable table)
-        {
-            dgvMain.DataSource = table;
-        }
 
-
-        public DataTable GetDatagridViewTable()
-        {
-            return (DataTable)dgvMain.DataSource;
-        }
-#endif
     }
 }
