@@ -1,25 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.DirectoryServices.ActiveDirectory;
-using System.Drawing;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using System.Data;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using Serilog.Core;
 using StartSmartDeliveryForm.BusinessLogicLayer;
 using StartSmartDeliveryForm.DataLayer;
 using StartSmartDeliveryForm.DataLayer.DAOs;
 using StartSmartDeliveryForm.DataLayer.DTOs;
-using StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models;
 using StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters;
-using StartSmartDeliveryForm.PresentationLayer.TemplateModels;
 using StartSmartDeliveryForm.PresentationLayer.TemplateViews;
 using StartSmartDeliveryForm.SharedLayer;
 using StartSmartDeliveryForm.SharedLayer.Enums;
@@ -125,15 +112,17 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             return [DriverColumns.DriverID]; // By default, exclude nothing.
         }
 
+        private readonly ILogger<DriverDataForm> _dataFormLogger = Program.ServiceProvider.GetRequiredService<ILogger<DriverDataForm>>();
+        private readonly ILogger<DriverDataFormPresenter> _presenterLogger = Program.ServiceProvider.GetRequiredService<ILogger<DriverDataFormPresenter>>();
+        private readonly DataFormValidator _validator = Program.ServiceProvider.GetRequiredService<DataFormValidator>();
+
         protected override void btnAdd_Click(object sender, EventArgs e)
         {
             _logger.LogInformation("btnAdd Clicked");
-            ILogger<DriverDataForm> dataFormLogger = Program.ServiceProvider.GetRequiredService<ILogger<DriverDataForm>>();
-            _driverDataForm = new(dataFormLogger);
 
-            ILogger<DriverDataFormPresenter> presenterLogger = Program.ServiceProvider.GetRequiredService<ILogger<DriverDataFormPresenter>>();
-            DataFormValidator validator = Program.ServiceProvider.GetRequiredService<DataFormValidator>();
-            DriverDataFormPresenter presenter = new(_driverDataForm, _driversDAO, validator, presenterLogger);
+            _driverDataForm = new(_dataFormLogger);
+
+            DriverDataFormPresenter presenter = new(_driverDataForm, _driversDAO, _validator, _presenterLogger);
             presenter.SubmissionCompleted += DriverDataForm_SubmitClicked;
 
             _driverDataForm.Show();
@@ -169,14 +158,17 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
                     availability
                 );
 
-                DriverDataForm driverDataForm = new()
+                _driverDataForm = new()
                 {
                     Mode = FormMode.Edit
                 };
 
-                driverDataForm.InitializeEditing(driverData);
-                // driverDataForm.SubmitClicked += DriverDataForm_SubmitClicked;
-                driverDataForm.Show();
+                _driverDataForm.InitializeEditing(driverData);
+
+                DriverDataFormPresenter presenter = new(_driverDataForm, _driversDAO, _validator, _presenterLogger);
+                presenter.SubmissionCompleted += DriverDataForm_SubmitClicked;
+
+                _driverDataForm.Show();
             }
             else
             {
@@ -349,7 +341,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 
         protected override void rollbackToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            // TODO
         }
 
         protected override void dgvMain_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
