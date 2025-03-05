@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using StartSmartDeliveryForm.DataLayer.DTOs;
-using StartSmartDeliveryForm.PresentationLayer.TemplateModels;
+using StartSmartDeliveryForm.PresentationLayer.TemplateViews;
 using StartSmartDeliveryForm.SharedLayer.Enums;
 
-namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models
+namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Views
 {
     public interface IDriverDataForm : IDataForm
     {
@@ -18,5 +18,4 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models
         LicenseType LicenseType { get; set; }
         bool Availability { get; set; }
     }
-
 }

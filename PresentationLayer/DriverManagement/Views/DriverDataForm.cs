@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using StartSmartDeliveryForm.DataLayer.DTOs;
-using StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models;
+using StartSmartDeliveryForm.PresentationLayer.DriverManagement.Views;
 using StartSmartDeliveryForm.PresentationLayer.TemplateViews;
 using StartSmartDeliveryForm.SharedLayer.Enums;
 using StartSmartDeliveryForm.SharedLayer.Interfaces;

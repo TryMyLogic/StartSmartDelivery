@@ -19,7 +19,6 @@ using Microsoft.Data.SqlClient;
 using StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters;
 using StartSmartDeliveryForm.PresentationLayer.TemplatePresenters;
 using StartSmartDeliveryForm.PresentationLayer.TemplateViews;
-using StartSmartDeliveryForm.PresentationLayer.TemplateModels;
 
 
 namespace StartSmartDeliveryForm.SharedLayer

@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace StartSmartDeliveryForm.PresentationLayer.TemplateModels
 {
-    internal interface IManagementForm
+    internal class ManagementModel : IManagementModel
     {
-       
+
     }
 }

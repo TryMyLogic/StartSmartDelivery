@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using StartSmartDeliveryForm.PresentationLayer.TemplateViews;
-using static StartSmartDeliveryForm.SharedLayer.EventArgs.CustomEventArgs;
+using StartSmartDeliveryForm.SharedLayer.EventArgs;
 using static StartSmartDeliveryForm.SharedLayer.EventDelegates.CustomEventDelegates;
 
-namespace StartSmartDeliveryForm.PresentationLayer.TemplateModels
+namespace StartSmartDeliveryForm.PresentationLayer.TemplateViews
 {
     public interface IDataForm
     {

@@ -10,7 +10,7 @@ using StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters;
 using StartSmartDeliveryForm.PresentationLayer.TemplateViews;
 using StartSmartDeliveryForm.SharedLayer;
 using StartSmartDeliveryForm.SharedLayer.Enums;
-using static StartSmartDeliveryForm.SharedLayer.EventArgs.CustomEventArgs;
+using StartSmartDeliveryForm.SharedLayer.EventArgs;
 
 namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 {

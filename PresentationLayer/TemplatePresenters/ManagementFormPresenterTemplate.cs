@@ -1,9 +1,9 @@
 ﻿using System.Data;
 using StartSmartDeliveryForm.SharedLayer.Enums;
 using Serilog;
-using StartSmartDeliveryForm.PresentationLayer.TemplateModels;
 using StartSmartDeliveryForm.SharedLayer.Interfaces;
 using StartSmartDeliveryForm.SharedLayer.EventArgs;
+using StartSmartDeliveryForm.PresentationLayer.TemplateViews;
 
 namespace StartSmartDeliveryForm.PresentationLayer.TemplatePresenters
 {
@@ -15,24 +15,18 @@ namespace StartSmartDeliveryForm.PresentationLayer.TemplatePresenters
         {
             _managementForm = managementForm;
 
-            if (managementForm is ISearchableView view) {
                 Log.Information("ManagementForm is searchable");
-                view.SearchClicked += ApplyFilter;
-            }
+            _managementForm.SearchClicked += ApplyFilter;
+            
         }
 
-        private void ApplyFilter(object? sender, CustomEventArgs.SearchRequestEventArgs e)
+        private void ApplyFilter(object? sender, SearchRequestEventArgs e)
         {
             Log.Information("Applying Filter");
             string? searchTerm = e.SearchTerm;
             DataTable dataTable = e.DataTable;
             string selectedOption = e.SelectedOption;
-            
-            if (_managementForm is not ISearchableView searchableView)
-            {
-                Log.Error("View is not searchable");
-                return;
-            }
+            bool isCaseSensitive = e.IsCaseSensitive;
 
             if (searchTerm != null)
             {
@@ -46,7 +40,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.TemplatePresenters
                 return;
             }
 
-            List<DataRow> filteredRows = FilterRows(dataTable, selectedOption, searchTerm, searchableView.IsCaseSensitive);
+            List<DataRow> filteredRows = FilterRows(dataTable, selectedOption, searchTerm, isCaseSensitive);
 
             DataTable filteredData = dataTable.Clone(); //Does not clone data, only the schema
             foreach (DataRow row in filteredRows)
@@ -54,9 +48,9 @@ namespace StartSmartDeliveryForm.PresentationLayer.TemplatePresenters
                 filteredData.Rows.Add(row.ItemArray); 
             }
 
-            searchableView.UpdateDataGrid(filteredData);
+            _managementForm.DgvTable = filteredData;
 
-            Log.Information($"Filtered {filteredRows.Count} rows for '{selectedOption}' with search term '{searchTerm}' (CaseSensitive: {searchableView.IsCaseSensitive}).");
+            Log.Information($"Filtered {filteredRows.Count} rows for '{selectedOption}' with search term '{searchTerm}' (CaseSensitive: {isCaseSensitive}).");
         }
 
         public static List<DataRow> FilterRows(DataTable dataTable, string selectedOption, string? searchTerm, bool isCaseSensitive)

@@ -4,9 +4,9 @@ using StartSmartDeliveryForm.SharedLayer;
 using StartSmartDeliveryForm.SharedLayer.Enums;
 using Serilog;
 using StartSmartDeliveryForm.PresentationLayer.TemplatePresenters;
-using StartSmartDeliveryForm.PresentationLayer.TemplateModels;
 using StartSmartDeliveryForm.SharedLayer.Interfaces;
-using static StartSmartDeliveryForm.SharedLayer.EventArgs.CustomEventArgs;
+using StartSmartDeliveryForm.SharedLayer.EventArgs;
+using StartSmartDeliveryForm.PresentationLayer.TemplateViews;
 
 namespace StartSmartDeliveryForm.PresentationLayer
 {
@@ -117,7 +117,7 @@ namespace StartSmartDeliveryForm.PresentationLayer
             {
                 Name = "Edit",
                 HeaderText = "",
-                Image = Image.FromFile(editIconPath),  // Replace with your edit icon
+                Image = Image.FromFile(editIconPath),
                 Width = 30,
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.None
             };
@@ -126,12 +126,11 @@ namespace StartSmartDeliveryForm.PresentationLayer
             {
                 Name = "Delete",
                 HeaderText = "",
-                Image = Image.FromFile(deleteIconPath),  // Replace with your delete icon
+                Image = Image.FromFile(deleteIconPath),
                 Width = 30,
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.None
             };
 
-            // Add Edit and Delete buttons
             dgvMain.Columns.Add(editButtonColumn);
             dgvMain.Columns.Add(deleteButtonColumn);
         }
@@ -154,12 +153,15 @@ namespace StartSmartDeliveryForm.PresentationLayer
         private bool _isCaseSensitive = false;
         public bool IsCaseSensitive => _isCaseSensitive;
 
+
+        DataTable IManagementForm.DgvTable
+        {
+            get => dgvMain.DataSource as DataTable ?? throw new InvalidOperationException("DataSource is not a DataTable.");
+            set => dgvMain.DataSource = value;
+        }
+
         public event EventHandler<SearchRequestEventArgs>? SearchClicked;
 
-        public void UpdateDataGrid(DataTable UpdatedDataTable) {
-
-            Log.Information("Wtf"); 
-            dgvMain.DataSource = UpdatedDataTable; }
         private void btnSearch_Click(object sender, EventArgs e)
         {
             Log.Information("Search clicked");
@@ -211,7 +213,7 @@ namespace StartSmartDeliveryForm.PresentationLayer
 
         private void txtStartPage_Enter(object sender, EventArgs e)
         {
-            if (sender is System.Windows.Forms.TextBox textBox)
+            if (sender is TextBox textBox)
             {
                 BeginInvoke(new Action(() => textBox.SelectAll()));
             }
@@ -249,7 +251,5 @@ namespace StartSmartDeliveryForm.PresentationLayer
         protected virtual async Task btnGotoPage_ClickAsync(object sender, EventArgs e) { await Task.Delay(500); }
 
         protected virtual void btnPrint_Click(object sender, EventArgs e) { }
-
-
     }
 }

@@ -1,9 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using StartSmartDeliveryForm.PresentationLayer.TemplateModels;
 using StartSmartDeliveryForm.SharedLayer;
+using StartSmartDeliveryForm.SharedLayer.EventArgs;
 using StartSmartDeliveryForm.SharedLayer.Interfaces;
-using static StartSmartDeliveryForm.SharedLayer.EventArgs.CustomEventArgs;
 using static StartSmartDeliveryForm.SharedLayer.EventDelegates.CustomEventDelegates;
 
 namespace StartSmartDeliveryForm.PresentationLayer.TemplateViews

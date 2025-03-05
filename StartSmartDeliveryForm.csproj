@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="PresentationLayer\DriverManagement\Models\" />
     <Folder Include="PresentationLayer\Images\" />
   </ItemGroup>
 
