@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using StartSmartDeliveryForm.SharedLayer.EventArgs;
-using static StartSmartDeliveryForm.SharedLayer.EventDelegates.CustomEventDelegates;
+﻿using StartSmartDeliveryForm.SharedLayer.EventArgs;
 
 namespace StartSmartDeliveryForm.PresentationLayer.TemplateViews
 {
@@ -17,6 +11,6 @@ namespace StartSmartDeliveryForm.PresentationLayer.TemplateViews
         void InitializeEditing(object data);
         void ClearData();
         object GetData();
-        void ShowMessageBox(string text, string caption, MessageBoxButtons buttons, MessageBoxIcon icon);
+        void ShowMessageBox(string Text, string Caption, MessageBoxButtons Buttons, MessageBoxIcon Icon);
     }
 }

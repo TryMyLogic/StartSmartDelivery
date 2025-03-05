@@ -1,18 +1,16 @@
 ﻿using System.Data;
 using System.Reflection;
-using StartSmartDeliveryForm.SharedLayer;
-using StartSmartDeliveryForm.SharedLayer.Enums;
 using Serilog;
-using StartSmartDeliveryForm.PresentationLayer.TemplatePresenters;
-using StartSmartDeliveryForm.SharedLayer.Interfaces;
-using StartSmartDeliveryForm.SharedLayer.EventArgs;
 using StartSmartDeliveryForm.PresentationLayer.TemplateViews;
+using StartSmartDeliveryForm.SharedLayer;
+using StartSmartDeliveryForm.SharedLayer.EventArgs;
+using StartSmartDeliveryForm.SharedLayer.Interfaces;
 
 namespace StartSmartDeliveryForm.PresentationLayer
 {
-    public partial class ManagementTemplateForm : Form, IManagementForm, ISearchableView
+    public partial class ManagementFormTemplate : Form, IManagementForm, ISearchableView
     {
-        public ManagementTemplateForm()
+        public ManagementFormTemplate()
         {
             InitializeComponent();
         }
@@ -23,9 +21,16 @@ namespace StartSmartDeliveryForm.PresentationLayer
             dgvMain.RowHeadersVisible = false; // Hides Row Number Column
         }
 
+        public event EventHandler? FormLoadOccurred;
+        protected virtual void OnLoad()
+        {
+            FormLoadOccurred?.Invoke(this, EventArgs.Empty);
+        }
+
         public event EventHandler<SearchRequestEventArgs>? SearchClicked;
         private bool _isCaseSensitive = false;
-        DataTable IManagementForm.DgvTable
+        public DataGridView DgvMain { get => dgvMain; }
+        public DataTable DataSource
         {
             get => dgvMain.DataSource as DataTable ?? throw new InvalidOperationException("DataSource is not a DataTable.");
             set => dgvMain.DataSource = value;
@@ -49,15 +54,7 @@ namespace StartSmartDeliveryForm.PresentationLayer
         private void btnMatchCase_Click(object sender, EventArgs e)
         {
             _isCaseSensitive = !_isCaseSensitive;
-
-            if (_isCaseSensitive)
-            {
-                btnMatchCase.BackColor = Color.White;
-            }
-            else
-            {
-                btnMatchCase.BackColor = GlobalConstants.SoftBeige;
-            }
+            btnMatchCase.BackColor = _isCaseSensitive ? Color.White : GlobalConstants.SoftBeige;
         }
 
         private void txtSearchBox_Enter(object sender, EventArgs e)
@@ -86,10 +83,9 @@ namespace StartSmartDeliveryForm.PresentationLayer
             }
         }
 
-        private static Bitmap ResizeImage(Image img, int width, int height)
+        private static Bitmap ResizeImage(Image Img, int Width, int Height)
         {
-            Bitmap resizedImage = new(img, new Size(width, height));
-            return resizedImage;
+            return new Bitmap(Img, new Size(Width, Height));
         }
 
         private void SetTheme()
@@ -112,40 +108,31 @@ namespace StartSmartDeliveryForm.PresentationLayer
             btnAdd.FlatAppearance.BorderSize = 0;
 
             //Prevents image from touching borders
-            if (btnFirst.Image != null)
-            {
-                btnFirst.Image = ResizeImage(btnFirst.Image, 20, 20);
-            }
-
-            if (btnLast.Image != null)
-            {
-                btnLast.Image = ResizeImage(btnLast.Image, 20, 20);
-            }
+            if (btnFirst.Image != null) btnFirst.Image = ResizeImage(btnFirst.Image, 20, 20);
+            if (btnLast.Image != null) btnLast.Image = ResizeImage(btnLast.Image, 20, 20);
         }
 
         //DO NOT use this in the ManagementTemplateForm_Load.It interferes with children initialization, breaking the child designer. 
-        protected static void AdjustDataGridViewHeight(DataGridView dataGridView)
+        protected static void AdjustDataGridViewHeight(DataGridView DataGridView)
         {
             int records = Math.Min(GlobalConstants.s_recordLimit, 30);
 
-            int rowHeight = dataGridView.RowTemplate.Height;
+            int rowHeight = DataGridView.RowTemplate.Height;
 
-            int requiredHeight = rowHeight * (records + 1) + dataGridView.ColumnHeadersHeight + 2;
+            int requiredHeight = rowHeight * (records + 1) + DataGridView.ColumnHeadersHeight + 2;
 
-            if (dataGridView.Parent != null)
+            if (DataGridView.Parent != null)
             {
-                int formHeightWithoutDataGridView = dataGridView.Parent.Height - dataGridView.Height;
+                int formHeightWithoutDataGridView = DataGridView.Parent.Height - DataGridView.Height;
                 int newHeight = formHeightWithoutDataGridView + requiredHeight;
-                dataGridView.Parent.Height = newHeight;
-                Log.Information($"Row Height: {rowHeight}, Column Headers Height: {dataGridView.ColumnHeadersHeight}, New Height: {newHeight}");
+                DataGridView.Parent.Height = newHeight;
+                Log.Information($"Row Height: {rowHeight}, Column Headers Height: {DataGridView.ColumnHeadersHeight}, New Height: {newHeight}");
             }
             else
             {
                 Log.Warning("DataGridView parent is null.");
             }
         }
-
-
 
         protected virtual HashSet<string> GetExcludedColumns()
         {
@@ -158,8 +145,7 @@ namespace StartSmartDeliveryForm.PresentationLayer
 
             //Makes comparison case insensitive
             var ExcludedColumns = GetExcludedColumns().Select(c => c.ToLower()).ToHashSet();
-            PropertyInfo[] properties = Dto.GetProperties();
-            foreach (PropertyInfo property in properties)
+            foreach (PropertyInfo property in Dto.GetProperties())
             {
                 if (!ExcludedColumns.Contains(property.Name.ToLower()))
                     cboSearchOptions.Items.Add(property.Name);
@@ -168,7 +154,7 @@ namespace StartSmartDeliveryForm.PresentationLayer
             cboSearchOptions.SelectedIndex = 0;
         }
 
-        protected void AddEditDeleteButtons()
+        public void AddEditDeleteButtons()
         {
             string filepath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "PresentationLayer", "Images", "EditIcon.png");
             string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "PresentationLayer", "Images", "DeleteIcon.png");
@@ -219,7 +205,6 @@ namespace StartSmartDeliveryForm.PresentationLayer
         public event EventHandler? AddClicked;
         public event EventHandler<int>? EditClicked;
         public event EventHandler<int>? DeleteClicked;
-        public event EventHandler? RefreshClicked;
         public event EventHandler? ReloadClicked;
         public event EventHandler? RollbackClicked;
         public event EventHandler? PrintAllPagesByRowCountClicked;
@@ -227,64 +212,29 @@ namespace StartSmartDeliveryForm.PresentationLayer
         public event EventHandler? PreviousPageClicked;
         public event EventHandler? NextPageClicked;
         public event EventHandler? LastPageClicked;
-        public event EventHandler? GoToPageClicked;
+        public event EventHandler<int>? GoToPageClicked;
         public event EventHandler? PrintClicked;
 
-        // Presenter
         protected virtual void btnAdd_Click(object sender, EventArgs e) { AddClicked?.Invoke(sender, e); }
         protected virtual void btnEdit_Click(int RowIndex) { EditClicked?.Invoke(this, RowIndex); }
-        private async void btnDelete_Click(int RowIndex)
-        {
-            await btnDelete_ClickAsync(RowIndex);
-            DeleteClicked?.Invoke(this, RowIndex);
-        }
-        protected virtual async Task btnDelete_ClickAsync(int RowIndex) { await Task.Delay(500); }
-        protected virtual void btnRefresh_Click(object sender, EventArgs e) { RefreshClicked?.Invoke(sender, e); }
-
-        private async void reloadToolStripMenuItem_Click(object sender, EventArgs e) { await reloadToolStripMenuItem_ClickAsync(sender, e); }
-        protected virtual async Task reloadToolStripMenuItem_ClickAsync(object sender, EventArgs e)
-        {
-            await Task.Delay(500);
-            ReloadClicked?.Invoke(sender, e);
-        }
-
+        protected virtual void btnDelete_Click(int RowIndex) { DeleteClicked?.Invoke(this, RowIndex); }
+        protected virtual void btnRefresh_Click(object sender, EventArgs e) { }
+        protected virtual void reloadToolStripMenuItem_Click(object sender, EventArgs e) { ReloadClicked?.Invoke(sender, e); }
         protected virtual void rollbackToolStripMenuItem_Click(object sender, EventArgs e) { RollbackClicked?.Invoke(sender, e); }
         protected virtual void printAllPagesByRowCountToolStripMenuItem_Click(object sender, EventArgs e) { PrintAllPagesByRowCountClicked?.Invoke(sender, e); }
-
-
-        private async void btnFirst_Click(object sender, EventArgs e) { await btnFirst_ClickAsync(sender, e); }
-        protected virtual async Task btnFirst_ClickAsync(object sender, EventArgs e)
-        {
-            await Task.Delay(500);
-            FirstPageClicked?.Invoke(sender, e);
-        }
-
-        private async void btnPrevious_Click(object sender, EventArgs e) { await btnPrevious_ClickAsync(sender, e); }
-        protected virtual async Task btnPrevious_ClickAsync(object sender, EventArgs e)
-        {
-            await Task.Delay(500);
-            PreviousPageClicked?.Invoke(sender, e);
-        }
-
-        private async void btnNext_Click(object sender, EventArgs e) { await btnNext_ClickAsync(sender, e); }
-        protected virtual async Task btnNext_ClickAsync(object sender, EventArgs e) { await Task.Delay(500);
-            NextPageClicked?.Invoke(sender, e);
-        }
-
-        private async void btnLast_Click(object sender, EventArgs e) { await btnLast_ClickAsync(sender, e); }
-        protected virtual async Task btnLast_ClickAsync(object sender, EventArgs e) { await Task.Delay(500);
-            LastPageClicked?.Invoke(sender, e);
-        }
-
-        private async void btnGotoPage_Click(object sender, EventArgs e) { await btnGotoPage_ClickAsync(sender, e); }
-        protected virtual async Task btnGotoPage_ClickAsync(object sender, EventArgs e) { await Task.Delay(500);
-            GoToPageClicked?.Invoke(sender, e);
-        }
+        protected virtual void btnFirst_Click(object sender, EventArgs e) { FirstPageClicked?.Invoke(sender, e); }
+        protected virtual void btnPrevious_Click(object sender, EventArgs e) { PreviousPageClicked?.Invoke(sender, e); }
+        protected virtual void btnNext_Click(object sender, EventArgs e) { NextPageClicked?.Invoke(sender, e); }
+        protected virtual void btnLast_Click(object sender, EventArgs e) { LastPageClicked?.Invoke(sender, e); }
+        protected virtual void btnGotoPage_Click(object sender, EventArgs e) { GoToPageClicked?.Invoke(this, GoToPageValue()); }
+        protected virtual int GoToPageValue() { return 1; }
 
         protected virtual void btnPrint_Click(object sender, EventArgs e) { PrintClicked?.Invoke(sender, e); }
 
-        // View specific
-
         protected virtual void dgvMain_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e) { }
+        public void ShowMessageBox(string Text, string Caption, MessageBoxButtons Buttons, MessageBoxIcon Icon)
+        {
+            MessageBox.Show(Text, Caption, Buttons, Icon);
+        }
     }
 }

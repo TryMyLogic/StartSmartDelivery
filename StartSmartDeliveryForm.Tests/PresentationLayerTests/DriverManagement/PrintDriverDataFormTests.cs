@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using StartSmartDeliveryForm.DataLayer.DAOs;
+﻿using StartSmartDeliveryForm.DataLayer.DAOs;
 using Xunit.Abstractions;
 
 namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DriverManagement

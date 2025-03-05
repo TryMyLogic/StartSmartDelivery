@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Data;
+using StartSmartDeliveryForm.SharedLayer.EventArgs;
 
 namespace StartSmartDeliveryForm.PresentationLayer.TemplateModels
 {
-    internal class IManagementModel
+    public interface IManagementModel
     {
-        public DataTable DgvTable { get; set; }
+        public DataTable DgvTable { get; }
+        Task InitializeAsync();
+        void ApplyFilter(object? sender, SearchRequestEventArgs e);
     }
 }

@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Core;
 using Serilog.Sinks.InMemory;
-using StartSmartDeliveryForm.DataLayer.DAOs;
 using Xunit.Abstractions;
 
 namespace StartSmartDeliveryForm.Tests.SharedTestItems
@@ -45,7 +39,7 @@ namespace StartSmartDeliveryForm.Tests.SharedTestItems
 
             ILogger<T> logger = memoryLoggerFactory.CreateLogger<T>();
 
-            return (logger,memorySink);
+            return (logger, memorySink);
         }
     }
 }

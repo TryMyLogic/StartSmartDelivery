@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace StartSmartDeliveryForm.SharedLayer.EventDelegates
+﻿namespace StartSmartDeliveryForm.SharedLayer.EventDelegates
 {
     public static class CustomEventDelegates
     {

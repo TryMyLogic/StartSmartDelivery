@@ -4,8 +4,6 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Polly;
 using Polly.Registry;
-using Serilog;
-using Serilog.Core;
 using Serilog.Events;
 using Serilog.Sinks.InMemory;
 using StartSmartDeliveryForm.DataLayer.DAOs;
@@ -89,7 +87,7 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
         [SkippableTheory]
         [InlineData("EMP1234", false)]
         [InlineData("EMP99999", true)]
-        public async Task GetEmployeeNoCountAsync_EnsuresValueIsUnique(string EmployeeNo,bool isUnique)
+        public async Task GetEmployeeNoCountAsync_EnsuresValueIsUnique(string EmployeeNo, bool isUnique)
         {
             Skip.If(_shouldSkipTests, "Test Database is not available. Skipping this test");
 
@@ -97,7 +95,7 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
             _cts = new CancellationTokenSource();
 
             // Act
-           int result = await _driversDAO.GetEmployeeNoCountAsync(EmployeeNo, _cts.Token);
+            int result = await _driversDAO.GetEmployeeNoCountAsync(EmployeeNo, _cts.Token);
 
             // Assert
             if (isUnique)

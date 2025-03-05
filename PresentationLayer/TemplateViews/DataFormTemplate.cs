@@ -3,7 +3,6 @@ using Microsoft.Extensions.Logging.Abstractions;
 using StartSmartDeliveryForm.SharedLayer;
 using StartSmartDeliveryForm.SharedLayer.EventArgs;
 using StartSmartDeliveryForm.SharedLayer.Interfaces;
-using static StartSmartDeliveryForm.SharedLayer.EventDelegates.CustomEventDelegates;
 
 namespace StartSmartDeliveryForm.PresentationLayer.TemplateViews
 {
@@ -51,9 +50,9 @@ namespace StartSmartDeliveryForm.PresentationLayer.TemplateViews
         public virtual void ClearData() { }
         public virtual object GetData() { return -1; }
 
-        public void ShowMessageBox(string text, string caption, MessageBoxButtons buttons, MessageBoxIcon icon)
+        public void ShowMessageBox(string Text, string Caption, MessageBoxButtons Buttons, MessageBoxIcon Icon)
         {
-            _messageBox.Show(text, caption, buttons, icon);
+            _messageBox.Show(Text, Caption, Buttons, Icon);
         }
     }
 }

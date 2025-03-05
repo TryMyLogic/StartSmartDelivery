@@ -1,11 +1,9 @@
-using System.Runtime.InteropServices;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
+using Microsoft.Extensions.Logging;
 using StartSmartDeliveryForm.DataLayer.DAOs;
-using StartSmartDeliveryForm.PresentationLayer;
 using StartSmartDeliveryForm.PresentationLayer.DriverManagement;
-using StartSmartDeliveryForm.PresentationLayer.TemplatePresenters;
+using StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models;
+using StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters;
 using StartSmartDeliveryForm.SharedLayer;
 
 namespace StartSmartDeliveryForm
@@ -24,7 +22,10 @@ namespace StartSmartDeliveryForm
 
             // IoC in action
             DriverManagementForm driverManagementForm = serviceRegistry.GetRequiredService<DriverManagementForm>();
-            ManagementFormPresenterTemplate presenter = new(driverManagementForm);
+            ILogger<DriverManagementFormPresenter> logger = serviceRegistry.GetRequiredService<ILogger<DriverManagementFormPresenter>>();
+            DriverManagementModel model = serviceRegistry.GetRequiredService<DriverManagementModel>();
+            DriversDAO dao = serviceRegistry.GetRequiredService<DriversDAO>();
+            DriverManagementFormPresenter presenter = new(driverManagementForm, model, dao, logger);
 
             Application.Run(driverManagementForm);
         }

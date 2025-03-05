@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using Serilog.Core;
 using StartSmartDeliveryForm.DataLayer.DAOs;
 using StartSmartDeliveryForm.SharedLayer;
 
@@ -65,6 +58,7 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
 
         private async Task<int> GetTotalRecordCount()
         {
+            _logger.LogInformation($"Record count: {RecordCount}");
             _cts = new CancellationTokenSource();
 
             try
@@ -81,7 +75,7 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
             catch (InvalidOperationException ex)
             {
                 _logger.LogError("Error: {ErrorMessage}", ex.Message);
-                return 0; 
+                return 0;
             }
             catch (OperationCanceledException)
             {
@@ -91,7 +85,7 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
             catch (Exception ex)
             {
                 _logger.LogError("Unexpected error: {ErrorMessage}", ex.Message);
-                return 0; 
+                return 0;
             }
         }
 
@@ -125,9 +119,9 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
             await EmitPageChanged();
         }
 
-        public async Task GoToPage(int page)
+        public async Task GoToPage(int Page)
         {
-            CurrentPage = Math.Clamp(page, 1, TotalPages);
+            CurrentPage = Math.Clamp(Page, 1, TotalPages);
             await EmitPageChanged();
         }
 

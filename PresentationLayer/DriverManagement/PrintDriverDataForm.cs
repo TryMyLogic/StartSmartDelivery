@@ -1,18 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
+﻿using System.Data;
 using System.Drawing.Printing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using StartSmartDeliveryForm.DataLayer.DAOs;
-using StartSmartDeliveryForm.DataLayer.DTOs;
-using StartSmartDeliveryForm.SharedLayer;
 
 namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 {

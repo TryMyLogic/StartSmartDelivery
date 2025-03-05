@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace StartSmartDeliveryForm.SharedLayer
+﻿namespace StartSmartDeliveryForm.SharedLayer
 {
     public class RetryEventService
     {
@@ -26,7 +20,7 @@ namespace StartSmartDeliveryForm.SharedLayer
             if (_hasRetried)
             {
                 RetrySucceeded?.Invoke();
-                _hasRetried = false; 
+                _hasRetried = false;
             }
         }
     }

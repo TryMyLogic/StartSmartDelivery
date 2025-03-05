@@ -1,13 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using Microsoft.VisualStudio.TestPlatform.Utilities;
+﻿using System.Data;
 using StartSmartDeliveryForm.PresentationLayer;
-using StartSmartDeliveryForm.SharedLayer;
 using StartSmartDeliveryForm.SharedLayer.Enums;
 using Xunit.Abstractions;
 
@@ -40,7 +32,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests
             dataTable.Rows.Add(3, "John", (int)LicenseType.Code14, true);
             dataTable.Rows.Add(4, "Doe", (int)LicenseType.Code8, false);
 
-            ManagementTemplateForm form = new();
+            ManagementFormTemplate form = new();
             form.OverrideDatagridView(dataTable);
 
             // Act
@@ -80,7 +72,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests
             dataTable.Rows.Add(3, "John", (int)LicenseType.Code14, true);
             dataTable.Rows.Add(4, "null", (int)LicenseType.Code8, false);
 
-            ManagementTemplateForm form = new()
+            ManagementFormTemplate form = new()
             {
                 isCaseSensitive = isCaseSensitive
             };
@@ -124,7 +116,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests
 
             dataTable.Rows.Add(1, "John", (int)LicenseType.Code8, true);
 
-            ManagementTemplateForm form = new()
+            ManagementFormTemplate form = new()
             {
                 isCaseSensitive = isCaseSensitive
             };
@@ -170,7 +162,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests
             dataTable.Rows.Add(1, "John", (int)LicenseType.Code8, true);
             dataTable.Rows.Add(1, "John", (int)LicenseType.Code8, false);
 
-            ManagementTemplateForm form = new()
+            ManagementFormTemplate form = new()
             {
                 isCaseSensitive = isCaseSensitive
             };
@@ -243,7 +235,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests
 
 
             // Act
-            List<DataRow> filteredRows = ManagementTemplateForm.FilterRows(dataTable, selectedOption, searchTerm, isCaseSensitive);
+            List<DataRow> filteredRows = ManagementFormTemplate.FilterRows(dataTable, selectedOption, searchTerm, isCaseSensitive);
 
             // Assert
             if (expectedValue == null)
@@ -275,7 +267,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests
             bool expectedSensitivity = true;
 
             // Act
-            ManagementTemplateForm form = new()
+            ManagementFormTemplate form = new()
             {
                 isCaseSensitive = expectedSensitivity
             };

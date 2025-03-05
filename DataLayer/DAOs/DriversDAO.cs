@@ -1,18 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Transactions;
+﻿using System.Data;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Polly;
 using Polly.Registry;
-using StartSmartDeliveryForm.BusinessLogicLayer;
 using StartSmartDeliveryForm.DataLayer.DTOs;
 using StartSmartDeliveryForm.SharedLayer;
 
@@ -208,7 +200,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
 
                         int RowsAffected = await Command.ExecuteNonQueryAsync(_cancellationToken);
 
-                        if(RowsAffected > 0)
+                        if (RowsAffected > 0)
                         {
                             _logger.LogInformation("Driver updated successfully with ID: {DriverID}", driver.DriverID);
                         }
@@ -297,7 +289,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
                             Command.Parameters.Add(new SqlParameter("@EmployeeNo", SqlDbType.NVarChar, 50) { Value = EmployeeNo });
 
                             object? FoundRow = await Command.ExecuteScalarAsync(_cancellationToken);
-                            Result = (FoundRow != null) ? (int) FoundRow : 0;
+                            Result = (FoundRow != null) ? (int)FoundRow : 0;
 
                             return Result; // 1 if the EmployeeNo exists, 0 if not
                         }
@@ -397,7 +389,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
         }
 
         // Used only for testing
-        #if DEBUG
+#if DEBUG
         public async Task ReseedTable(string TableName, int SeedValue)
         {
             string Query = $"DBCC CHECKIDENT ('{TableName}', RESEED, {SeedValue})";
@@ -411,7 +403,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
                 }
             }
         }
-        #endif
+#endif
 
     }
 }

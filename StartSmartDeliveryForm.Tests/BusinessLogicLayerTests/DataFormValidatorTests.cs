@@ -1,16 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using StartSmartDeliveryForm.BusinessLogicLayer;
-using StartSmartDeliveryForm.DataLayer.DAOs;
-using StartSmartDeliveryForm.SharedLayer;
-using StartSmartDeliveryForm.SharedLayer.Enums;
-using StartSmartDeliveryForm.Tests.SharedTestItems;
-using Xunit.Abstractions;
-
-namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
+﻿namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
 {
     public class DataFormValidatorTests
     {

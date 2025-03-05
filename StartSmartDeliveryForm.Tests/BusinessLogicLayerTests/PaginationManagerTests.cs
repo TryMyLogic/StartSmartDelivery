@@ -1,10 +1,10 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Reflection;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Serilog;
 using StartSmartDeliveryForm.BusinessLogicLayer;
 using StartSmartDeliveryForm.DataLayer.DAOs;
 using Xunit.Abstractions;
-using System.Reflection;
 
 namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
 {
@@ -32,7 +32,7 @@ namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
 
             _testLogger = loggerFactory.CreateLogger<PaginationManager>();
 
-            if(fixture.CanConnectToDatabase == false)
+            if (fixture.CanConnectToDatabase == false)
             {
                 _shouldSkipTests = true;
             }
@@ -62,7 +62,7 @@ namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
             }
 
             // Assert
-            Assert.Equal(105, RecordCount); 
+            Assert.Equal(105, RecordCount);
         }
 
         [SkippableFact]

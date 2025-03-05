@@ -1,6 +1,6 @@
 ﻿namespace StartSmartDeliveryForm.PresentationLayer
 {
-    partial class ManagementTemplateForm
+    partial class ManagementFormTemplate
     {
         /// <summary>
         /// Required designer variable.
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ManagementTemplateForm));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ManagementFormTemplate));
             menuStrip1 = new MenuStrip();
             fileToolStripMenuItem = new ToolStripMenuItem();
             changeUserToolStripMenuItem = new ToolStripMenuItem();

@@ -1,12 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using StartSmartDeliveryForm.BusinessLogicLayer;
+using StartSmartDeliveryForm.DataLayer.DTOs;
+using StartSmartDeliveryForm.PresentationLayer.TemplateModels;
 
 namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models
 {
-    internal class IDriverManagementModel
+    internal interface IDriverManagementModel : IManagementModel
     {
+        public PaginationManager PaginationManager { get; }
+        public event EventHandler PageChanged;
+        Task AddDriverAsync(DriversDTO Driver);
+        Task UpdateDriverAsync(DriversDTO Driver);
+        Task DeleteDriverAsync(int DriverId);
+        DriversDTO GetDriverFromRow(DataGridViewRow SelectedRow);
+        void CancelOperations();
+        Task FetchAndBindDriversAtPage();
+        void RemoveRowAt(int RowIndex);
     }
 }

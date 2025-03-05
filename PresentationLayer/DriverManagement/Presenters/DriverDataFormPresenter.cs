@@ -50,7 +50,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters
             if (!_dataFormValidator.IsValidEnumValue<LicenseType>(_driverDataForm.LicenseType.ToString())) return false;
 
             if (!_dataFormValidator.IsValidBoolValue(_driverDataForm.Availability.ToString())) return false;
-            
+
             return true;
         }
     }

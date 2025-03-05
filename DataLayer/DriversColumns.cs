@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace StartSmartDeliveryForm.DataLayer
+﻿namespace StartSmartDeliveryForm.DataLayer
 {
     // Prevents introducing typos. Also improves maintainability by allow a string change in one location instead of multiple
     internal class DriverColumns

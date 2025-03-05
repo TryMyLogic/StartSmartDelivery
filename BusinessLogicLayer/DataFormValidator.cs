@@ -1,39 +1,34 @@
-﻿using System;
-using System.Windows.Forms;
-using StartSmartDeliveryForm.SharedLayer;
-using StartSmartDeliveryForm.SharedLayer.Interfaces;
-
-namespace StartSmartDeliveryForm.BusinessLogicLayer
+﻿namespace StartSmartDeliveryForm.BusinessLogicLayer
 {
     public class DataFormValidator()
     {
         public event Action<string, string, MessageBoxButtons, MessageBoxIcon>? RequestMessageBox;
 
-        public bool IsValidString(string input, string fieldName)
+        public bool IsValidString(string Input, string FieldName)
         {
-            if (string.IsNullOrWhiteSpace(input))
+            if (string.IsNullOrWhiteSpace(Input))
             {
-                RequestMessageBox?.Invoke($"{fieldName} cannot be empty.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                RequestMessageBox?.Invoke($"{FieldName} cannot be empty.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
             return true;
         }
 
-        public bool IsValidEnumValue<TEnum>(string input) where TEnum : struct
+        public bool IsValidEnumValue<TEnum>(string Input) where TEnum : struct
         {
-            if (!Enum.TryParse(input, out TEnum value) || !Enum.IsDefined(typeof(TEnum), value))
+            if (!Enum.TryParse(Input, out TEnum value) || !Enum.IsDefined(typeof(TEnum), value))
             {
-                RequestMessageBox?.Invoke($"' {input} ' is not a valid enum value.","Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                RequestMessageBox?.Invoke($"' {Input} ' is not a valid enum value.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
             return true;
         }
 
-        public bool IsValidBoolValue(string input)
+        public bool IsValidBoolValue(string Input)
         {
-            if (!bool.TryParse(input, out bool _))
+            if (!bool.TryParse(Input, out bool _))
             {
-                RequestMessageBox?.Invoke($"' {input} ' is not true or false.", input, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                RequestMessageBox?.Invoke($"' {Input} ' is not true or false.", Input, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
             return true;
