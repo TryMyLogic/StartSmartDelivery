@@ -17,6 +17,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.TemplatePresenters
         public ManagementFormPresenterTemplate(IManagementForm managementForm, ILogger<ManagementFormPresenterTemplate>? logger = null)
         {
             _managementForm = managementForm;
+            _logger = logger ?? NullLogger<ManagementFormPresenterTemplate>.Instance;
 
             _managementForm.SearchClicked += ApplyFilter;
             _managementForm.AddClicked += OnAddClicked;
@@ -24,8 +25,6 @@ namespace StartSmartDeliveryForm.PresentationLayer.TemplatePresenters
             _managementForm.DeleteClicked += OnDeleteClicked;
             _managementForm.RefreshClicked += OnRefreshClicked;
             _managementForm.ReloadClicked += OnReloadClicked;
-
-            _logger = logger ?? NullLogger<ManagementFormPresenterTemplate>.Instance;
         }
 
         protected virtual void OnAddClicked(object? sender, EventArgs e) { _logger.LogInformation("OnAddClicked Ran"); }
