@@ -4,6 +4,8 @@ using Serilog;
 using StartSmartDeliveryForm.SharedLayer.Interfaces;
 using StartSmartDeliveryForm.SharedLayer.EventArgs;
 using StartSmartDeliveryForm.PresentationLayer.TemplateViews;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace StartSmartDeliveryForm.PresentationLayer.TemplatePresenters
 {
@@ -11,14 +13,26 @@ namespace StartSmartDeliveryForm.PresentationLayer.TemplatePresenters
     {
 
         private readonly IManagementForm _managementForm;
-        public ManagementFormPresenterTemplate(IManagementForm managementForm)
+        private readonly ILogger<ManagementFormPresenterTemplate> _logger;
+        public ManagementFormPresenterTemplate(IManagementForm managementForm, ILogger<ManagementFormPresenterTemplate>? logger = null)
         {
             _managementForm = managementForm;
 
-                Log.Information("ManagementForm is searchable");
             _managementForm.SearchClicked += ApplyFilter;
-            
+            _managementForm.AddClicked += OnAddClicked;
+            _managementForm.EditClicked += OnEditClicked;
+            _managementForm.DeleteClicked += OnDeleteClicked;
+            _managementForm.RefreshClicked += OnRefreshClicked;
+            _managementForm.ReloadClicked += OnReloadClicked;
+
+            _logger = logger ?? NullLogger<ManagementFormPresenterTemplate>.Instance;
         }
+
+        protected virtual void OnAddClicked(object? sender, EventArgs e) { _logger.LogInformation("OnAddClicked Ran"); }
+        protected virtual void OnEditClicked(object? sender, int RowIndex) { _logger.LogInformation("OnEditClicked Ran"); }
+        protected virtual void OnDeleteClicked(object? sender, int RowIndex) { _logger.LogInformation("OnDeleteClicked Ran"); }
+        protected virtual void OnRefreshClicked(object? sender, EventArgs e) { _logger.LogInformation("OnRefreshClicked Ran"); }
+        protected virtual void OnReloadClicked(object? sender, EventArgs e) { _logger.LogInformation("OnRefreshClicked Ran"); }
 
         private void ApplyFilter(object? sender, SearchRequestEventArgs e)
         {
@@ -45,7 +59,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.TemplatePresenters
             DataTable filteredData = dataTable.Clone(); //Does not clone data, only the schema
             foreach (DataRow row in filteredRows)
             {
-                filteredData.Rows.Add(row.ItemArray); 
+                filteredData.Rows.Add(row.ItemArray);
             }
 
             _managementForm.DgvTable = filteredData;
