@@ -7,6 +7,7 @@ using StartSmartDeliveryForm.DataLayer.DAOs;
 using StartSmartDeliveryForm.DataLayer.DTOs;
 using StartSmartDeliveryForm.PresentationLayer.TemplateModels;
 using StartSmartDeliveryForm.SharedLayer.Enums;
+using StartSmartDeliveryForm.SharedLayer.EventDelegates;
 
 namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models
 {
@@ -57,9 +58,11 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models
             }
         }
 
+        public new event MessageBoxEventDelegate? DisplayErrorMessage;
         public async Task AddDriverAsync(DriversDTO Driver)
         {
             _cts = new CancellationTokenSource();
+
             int newDriverId = await _driversDAO.InsertDriverAsync(Driver, _cts.Token);
             if (newDriverId != -1) // Check for success
             {
@@ -75,16 +78,26 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models
         public async Task UpdateDriverAsync(DriversDTO Driver)
         {
             _cts = new CancellationTokenSource();
+
             DataRow? rowToUpdate = _dgvTable.Rows.Find(Driver.DriverID);
-            if (rowToUpdate != null)
+            if (rowToUpdate == null)
             {
-                PopulateDataRow(rowToUpdate, Driver);
-                await _driversDAO.UpdateDriverAsync(Driver, _cts.Token);
+                _logger.LogWarning("Driver with ID {DriverID} was not found for update.", Driver.DriverID);
+                return;
+            }
+
+            bool success = await _driversDAO.UpdateDriverAsync(Driver, _cts.Token);
+            if (success)
+            {
+                _logger.LogInformation("Driver with ID {DriverId} was updated successfully.", Driver.DriverID);
             }
             else
             {
-                _logger.LogInformation("Row not found for update.");
+                DisplayErrorMessage?.Invoke("Failed to update driver in database", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
             }
+
+            PopulateDataRow(rowToUpdate, Driver);
         }
 
         public async Task DeleteDriverAsync(int DriverID)
@@ -94,17 +107,24 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models
             DataRow? rowToDelete = _dgvTable.Rows.Find(DriverID);
             if (rowToDelete == null)
             {
-                _logger.LogWarning("Driver with ID {DriverId} not found in the current data table.", DriverID);
+                _logger.LogWarning("Driver with ID {DriverID} was not found for delete.", DriverID);
                 return;
             }
+
+            bool success = await _driversDAO.DeleteDriverAsync(DriverID, _cts.Token);
+            if (success)
+            {
+                _paginationManager.UpdateRecordCount(_paginationManager.RecordCount - 1);
+                await _paginationManager.EnsureValidPage();
+                _logger.LogInformation("Driver with ID {DriverId} deleted successfully.", DriverID);
+            }
+            else
+            {
+                DisplayErrorMessage?.Invoke("Failed to delete driver from database", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             _dgvTable.Rows.Remove(rowToDelete);
-
-            await _driversDAO.DeleteDriverAsync(DriverID, _cts.Token);
-
-            _paginationManager.UpdateRecordCount(_paginationManager.RecordCount - 1);
-            await _paginationManager.EnsureValidPage();
-
-            _logger.LogInformation("Driver with ID {DriverId} deleted successfully.", DriverID);
         }
 
         public void CancelOperations()

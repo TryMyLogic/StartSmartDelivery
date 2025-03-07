@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using StartSmartDeliveryForm.SharedLayer.EventArgs;
+using StartSmartDeliveryForm.SharedLayer.EventDelegates;
 
 namespace StartSmartDeliveryForm.PresentationLayer.TemplateModels
 {
@@ -8,5 +9,6 @@ namespace StartSmartDeliveryForm.PresentationLayer.TemplateModels
         public DataTable DgvTable { get; }
         Task InitializeAsync();
         void ApplyFilter(object? sender, SearchRequestEventArgs e);
+        public event MessageBoxEventDelegate? DisplayErrorMessage;
     }
 }

@@ -2,6 +2,7 @@
 using Serilog;
 using StartSmartDeliveryForm.SharedLayer.Enums;
 using StartSmartDeliveryForm.SharedLayer.EventArgs;
+using StartSmartDeliveryForm.SharedLayer.EventDelegates;
 
 namespace StartSmartDeliveryForm.PresentationLayer.TemplateModels
 {
@@ -15,6 +16,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.TemplateModels
         }
 
         public DataTable DgvTable => _dgvTable;
+        public event MessageBoxEventDelegate? DisplayErrorMessage;
 
         public virtual async Task InitializeAsync() { await Task.Delay(100); }
 

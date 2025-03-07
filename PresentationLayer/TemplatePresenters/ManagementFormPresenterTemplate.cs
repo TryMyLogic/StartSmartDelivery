@@ -31,7 +31,9 @@ namespace StartSmartDeliveryForm.PresentationLayer.TemplatePresenters
             _managementForm.LastPageClicked += (s, e) => HandleLastPageClicked(s, e);
             _managementForm.GoToPageClicked += (s, e) => HandleGoToPageClicked(s, e);
             _managementForm.PrintClicked += (s, e) => HandlePrintClicked(s, e);
-          
+
+            _managementModel.DisplayErrorMessage += _managementForm.ShowMessageBox;
+
         }
 
         protected virtual void HandleFormLoadOccurred(object? sender, EventArgs e) { _logger.LogInformation("HandleFormLoadOccurred Ran"); }

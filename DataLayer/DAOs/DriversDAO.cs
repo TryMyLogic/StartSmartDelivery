@@ -65,11 +65,6 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
                 _logger.LogError("An error occurred while accessing the database: {ErrorMessage}", ex.Message);
                 return null;
             }
-            catch (Exception ex)
-            {
-                _logger.LogError("An unexpected error occurred: {ErrorMessage}", ex.Message);
-                return null;
-            }
 
             return Dt;
         }
@@ -110,11 +105,6 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             catch (SqlException ex)
             {
                 _logger.LogError("An error occurred while accessing the database: {ErrorMessage}", ex.Message);
-                return null;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("An unexpected error occurred: {ErrorMessage}", ex.Message);
                 return null;
             }
 
@@ -161,11 +151,6 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
                 _logger.LogError("An error occurred while accessing the database: {ErrorMessage}", ex.Message);
                 return -1; // Indicates an error occurred
             }
-            catch (Exception ex)
-            {
-                _logger.LogError("An unexpected error occurred: {ErrorMessage}", ex.Message);
-                return -1;
-            }
             finally
             {
                 if (ShouldCloseCon) await Connection.CloseAsync();
@@ -173,7 +158,8 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             return newDriverId;
         }
 
-        public async Task UpdateDriverAsync(DriversDTO driver, CancellationToken CancellationToken, SqlConnection? Connection = null, SqlTransaction? Transaction = null)
+
+        public async Task<bool> UpdateDriverAsync(DriversDTO driver, CancellationToken CancellationToken, SqlConnection? Connection = null, SqlTransaction? Transaction = null)
         {
             string Query = "UPDATE Drivers SET Name = @Name, Surname = @Surname, EmployeeNo = @EmployeeNo, LicenseType = @LicenseType, Availability = @Availability WHERE DriverID = @DriverID;";
 
@@ -184,6 +170,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
                 ShouldCloseCon = true;
             }
 
+            bool success = false;
             try
             {
                 await _pipeline.ExecuteAsync(async (_cancellationToken) =>
@@ -203,22 +190,21 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
                         if (RowsAffected > 0)
                         {
                             _logger.LogInformation("Driver updated successfully with ID: {DriverID}", driver.DriverID);
+                            success = true;
                         }
                         else
                         {
                             _logger.LogWarning("No driver was found with ID: {DriverID}, update not performed", driver.DriverID);
+                            success &= false;
                         }
-
                     }
                 }, CancellationToken);
+                return success;
             }
             catch (SqlException ex)
             {
                 _logger.LogError("An error occurred while accessing the database: {ErrorMessage}", ex.Message);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("An unexpected error occurred: {ErrorMessage}", ex.Message);
+                return false;
             }
             finally
             {
@@ -226,7 +212,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             }
         }
 
-        public async Task DeleteDriverAsync(int DriverID, CancellationToken CancellationToken, SqlTransaction? Transaction = null, SqlConnection? Connection = null)
+        public async Task<bool> DeleteDriverAsync(int DriverID, CancellationToken CancellationToken, SqlTransaction? Transaction = null, SqlConnection? Connection = null)
         {
             string Query = "DELETE FROM Drivers WHERE DriverID = @DriverID";
             bool ShouldCloseCon = false;
@@ -236,6 +222,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
                 ShouldCloseCon = true;
             }
 
+            bool success = false;
             try
             {
                 await _pipeline.ExecuteAsync(async (_cancellationToken) =>
@@ -250,21 +237,21 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
                         if (RowsAffected > 0)
                         {
                             _logger.LogInformation("{RowsAffected} row(s) were deleted with the DriverID: {DriverID}", RowsAffected, DriverID);
+                            success = true;
                         }
                         else
                         {
                             _logger.LogWarning("No driver was found with ID: {DriverID}, delete not performed", DriverID);
+                            success = false;
                         }
                     }
                 }, CancellationToken);
+                return success;
             }
             catch (SqlException ex)
             {
                 _logger.LogError("An error occurred while accessing the database: {ErrorMessage}", ex.Message);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("An unexpected error occurred: {ErrorMessage}", ex.Message);
+                return success = false;
             }
             finally
             {
@@ -300,11 +287,6 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
                     _logger.LogError("An error occurred while accessing the database: {ErrorMessage}", ex.Message);
                     return 1; // Assume it's not unique on error
                 }
-                catch (Exception ex)
-                {
-                    _logger.LogError("An unexpected error occurred: {ErrorMessage}", ex.Message);
-                    return 1;
-                }
                 return Result;
             }
         }
@@ -334,11 +316,6 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             {
                 _logger.LogError("An error occurred while accessing the database: {ErrorMessage}", ex.Message);
                 return recordsCount; // Return 0 pages if an error occurs
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("An unexpected error occurred: {ErrorMessage}", ex.Message);
-                return recordsCount;
             }
 
             return recordsCount;
@@ -375,10 +352,6 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             catch (SqlException ex)
             {
                 _logger.LogError("An error occurred while accessing the database: {ErrorMessage}", ex.Message);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("An unexpected error occurred: {ErrorMessage}", ex.Message);
             }
             finally
             {
