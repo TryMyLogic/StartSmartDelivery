@@ -87,19 +87,26 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models
             }
         }
 
-        public async Task DeleteDriverAsync(int DriverId)
+        public async Task DeleteDriverAsync(int DriverID)
         {
             _cts = new CancellationTokenSource();
-            DataRow? row = _dgvTable.Rows.Find(DriverId);
-            if (row != null)
+
+            DataRow? rowToDelete = _dgvTable.Rows.Find(DriverID);
+            if (rowToDelete == null)
             {
-                int rowIndex = _dgvTable.Rows.IndexOf(row);
-                _dgvTable.Rows.RemoveAt(rowIndex);
-                await _driversDAO.DeleteDriverAsync(DriverId, _cts.Token);
-                _paginationManager.UpdateRecordCount(_paginationManager.RecordCount - 1);
-                await _paginationManager.EnsureValidPage();
+                _logger.LogWarning("Driver with ID {DriverId} not found in the current data table.", DriverID);
+                return;
             }
+            _dgvTable.Rows.Remove(rowToDelete);
+
+            await _driversDAO.DeleteDriverAsync(DriverID, _cts.Token);
+
+            _paginationManager.UpdateRecordCount(_paginationManager.RecordCount - 1);
+            await _paginationManager.EnsureValidPage();
+
+            _logger.LogInformation("Driver with ID {DriverId} deleted successfully.", DriverID);
         }
+
         public void CancelOperations()
         {
             _cts?.Cancel();
@@ -151,11 +158,5 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models
             _cts = new CancellationTokenSource();
             _dgvTable = await _driversDAO.GetDriversAtPageAsync(PaginationManager.CurrentPage, _cts.Token) ?? new DataTable();
         }
-
-        public void RemoveRowAt(int RowIndex)
-        {
-            _dgvTable.Rows.RemoveAt(RowIndex);
-        }
-       
     }
 }

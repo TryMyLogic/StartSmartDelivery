@@ -14,6 +14,5 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models
         DriversDTO GetDriverFromRow(DataGridViewRow SelectedRow);
         void CancelOperations();
         Task FetchAndBindDriversAtPage();
-        void RemoveRowAt(int RowIndex);
     }
 }

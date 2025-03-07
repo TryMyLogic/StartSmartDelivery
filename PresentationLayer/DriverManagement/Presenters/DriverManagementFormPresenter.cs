@@ -115,18 +115,13 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters
             try
             {
                 DataGridViewRow selectedRow = _driverManagementForm.DgvMain.Rows[RowIndex];
-
                 object? DriverID = selectedRow.Cells[DriverColumns.DriverID].Value;
 
                 DialogResult result = MessageBox.Show("Are you sure?", "Delete Row", MessageBoxButtons.YesNo);
                 if (result == DialogResult.Yes && int.TryParse(DriverID?.ToString(), out int driverID))
                 {
-                    _driverManagementModel.RemoveRowAt(RowIndex);
-            
+                    _logger.LogInformation("Deleting Driver with DriverID: {DriverID}", driverID);
                     await _driverManagementModel.DeleteDriverAsync(driverID);
-
-                    _driverManagementModel.PaginationManager.UpdateRecordCount(_driverManagementModel.PaginationManager.RecordCount - 1);
-                    await _driverManagementModel.PaginationManager.EnsureValidPage();
                 }
             }
             catch (OperationCanceledException)
