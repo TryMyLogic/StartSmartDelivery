@@ -12,7 +12,6 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models
         Task UpdateDriverAsync(DriversDTO Driver);
         Task DeleteDriverAsync(int DriverId);
         DriversDTO GetDriverFromRow(DataGridViewRow SelectedRow);
-        void CancelOperations();
         Task FetchAndBindDriversAtPage();
     }
 }

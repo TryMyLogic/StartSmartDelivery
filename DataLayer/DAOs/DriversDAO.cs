@@ -24,7 +24,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
         private readonly ILogger<DriversDAO> _logger = logger ?? NullLogger<DriversDAO>.Instance;
         private readonly ResiliencePipeline _pipeline = pipelineProvider.GetPipeline("sql-retry-pipeline");
         private readonly RetryEventService _retryEventService = retryEventService ?? new RetryEventService(); // New retry service ensures no "success" events are emitted.
-        public async Task<DataTable?> GetDriversAtPageAsync(int Page, CancellationToken CancellationToken)
+        public async Task<DataTable?> GetDriversAtPageAsync(int Page, CancellationToken cancellationToken = default)
         {
             string Query = @"
             SELECT * FROM Drivers
@@ -58,7 +58,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
                         }
                     }
                     _retryEventService.OnRetrySuccessOccurred(); // Does internally check if a retry has occurred. Else its skipped
-                }, CancellationToken);
+                }, cancellationToken);
             }
             catch (SqlException ex)
             {
@@ -69,7 +69,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             return Dt;
         }
 
-        public async Task<DataTable?> GetAllDriversAsync(CancellationToken CancellationToken)
+        public async Task<DataTable?> GetAllDriversAsync(CancellationToken cancellationToken = default)
         {
             string Query = @"SELECT * FROM Drivers;";
             DataTable Dt = new();
@@ -100,7 +100,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
                         }
                     }
                     _retryEventService.OnRetrySuccessOccurred(); // Does internally check if a retry has occurred. Else its skipped
-                }, CancellationToken);
+                }, cancellationToken);
             }
             catch (SqlException ex)
             {
@@ -111,7 +111,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             return Dt;
         }
 
-        public async Task<int> InsertDriverAsync(DriversDTO Driver, CancellationToken CancellationToken, SqlConnection? Connection = null, SqlTransaction? Transaction = null)
+        public async Task<int> InsertDriverAsync(DriversDTO Driver, SqlConnection? Connection = null, SqlTransaction? Transaction = null, CancellationToken cancellationToken = default)
         {
             string Query = @"
             INSERT INTO Drivers (Name, Surname, EmployeeNo, LicenseType, Availability) 
@@ -144,7 +144,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
                         _logger.LogInformation("Driver added successfully with ID: {DriverID}", newDriverId);
                         _retryEventService.OnRetrySuccessOccurred(); // Does internally check if a retry has occurred. Else its skipped
                     }
-                }, CancellationToken);
+                }, cancellationToken);
             }
             catch (SqlException ex)
             {
@@ -159,7 +159,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
         }
 
 
-        public async Task<bool> UpdateDriverAsync(DriversDTO driver, CancellationToken CancellationToken, SqlConnection? Connection = null, SqlTransaction? Transaction = null)
+        public async Task<bool> UpdateDriverAsync(DriversDTO driver, SqlConnection? Connection = null, SqlTransaction? Transaction = null, CancellationToken cancellationToken = default)
         {
             string Query = "UPDATE Drivers SET Name = @Name, Surname = @Surname, EmployeeNo = @EmployeeNo, LicenseType = @LicenseType, Availability = @Availability WHERE DriverID = @DriverID;";
 
@@ -198,7 +198,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
                             success &= false;
                         }
                     }
-                }, CancellationToken);
+                }, cancellationToken);
                 return success;
             }
             catch (SqlException ex)
@@ -212,7 +212,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             }
         }
 
-        public async Task<bool> DeleteDriverAsync(int DriverID, CancellationToken CancellationToken, SqlTransaction? Transaction = null, SqlConnection? Connection = null)
+        public async Task<bool> DeleteDriverAsync(int DriverID, SqlTransaction? Transaction = null, SqlConnection? Connection = null, CancellationToken cancellationToken = default)
         {
             string Query = "DELETE FROM Drivers WHERE DriverID = @DriverID";
             bool ShouldCloseCon = false;
@@ -245,7 +245,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
                             success = false;
                         }
                     }
-                }, CancellationToken);
+                }, cancellationToken);
                 return success;
             }
             catch (SqlException ex)
@@ -259,7 +259,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             }
         }
 
-        public async Task<int> GetEmployeeNoCountAsync(string EmployeeNo, CancellationToken CancellationToken)
+        public async Task<int> GetEmployeeNoCountAsync(string EmployeeNo, CancellationToken cancellationToken = default)
         {
             string Query = "SELECT COUNT(*) FROM Drivers WHERE EmployeeNo = @EmployeeNo";
             int Result = 1;
@@ -280,7 +280,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
 
                             return Result; // 1 if the EmployeeNo exists, 0 if not
                         }
-                    }, CancellationToken);
+                    }, cancellationToken);
                 }
                 catch (SqlException ex)
                 {
@@ -291,7 +291,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             }
         }
 
-        internal async Task<int> GetRecordCountAsync(CancellationToken CancellationToken)
+        internal async Task<int> GetRecordCountAsync(CancellationToken cancellationToken = default)
         {
             string Query = "SELECT COUNT(DriverID) FROM Drivers";
             int recordsCount = 0;
@@ -310,7 +310,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
                         }
                     }
                     _retryEventService.OnRetrySuccessOccurred(); // Does internally check if a retry has occurred. Else its skipped
-                }, CancellationToken);
+                }, cancellationToken);
             }
             catch (SqlException ex)
             {

@@ -16,7 +16,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models
         private readonly DriversDAO _driversDAO;
         protected readonly PaginationManager _paginationManager;
         private readonly ILogger<DriverManagementModel> _logger;
-        private CancellationTokenSource? _cts;
+
         public PaginationManager PaginationManager { get => _paginationManager; }
         public DriverManagementModel(DriversDAO driversDAO, PaginationManager paginationManager, ILogger<DriverManagementModel>? logger = null)
         {
@@ -35,35 +35,24 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models
                 await _paginationManager.GoToFirstPage();
                 _logger.LogInformation("CurrentPage: {CurrentPage}, TotalPages: {TotalPages}", PaginationManager.CurrentPage, PaginationManager.TotalPages);
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
                 _logger.LogError("Fatal error during initialization. Pagination will not function - Error: {Error}", ex);
-                MessageBox.Show("Fatal error during initialization. Pagination will not function", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                DisplayErrorMessage?.Invoke("Fatal error during initialization. Pagination will not function.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         public event EventHandler? PageChanged;
         public async Task OnPageChanged(int CurrentPage)
         {
-            _cts = new CancellationTokenSource();
-
-            try
-            {
-                _dgvTable = await _driversDAO.GetDriversAtPageAsync(CurrentPage, _cts.Token) ?? new DataTable();
-                PageChanged?.Invoke(this, new EventArgs());
-            }
-            catch (OperationCanceledException)
-            {
-                MessageBox.Show("The operation was canceled.");
-            }
+            _dgvTable = await _driversDAO.GetDriversAtPageAsync(CurrentPage) ?? new DataTable();
+            PageChanged?.Invoke(this, new EventArgs());
         }
 
         public new event MessageBoxEventDelegate? DisplayErrorMessage;
         public async Task AddDriverAsync(DriversDTO Driver)
         {
-            _cts = new CancellationTokenSource();
-
-            int newDriverId = await _driversDAO.InsertDriverAsync(Driver, _cts.Token);
+            int newDriverId = await _driversDAO.InsertDriverAsync(Driver);
             if (newDriverId != -1) // Check for success
             {
                 DataRow newRow = _dgvTable.NewRow();
@@ -77,8 +66,6 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models
 
         public async Task UpdateDriverAsync(DriversDTO Driver)
         {
-            _cts = new CancellationTokenSource();
-
             DataRow? rowToUpdate = _dgvTable.Rows.Find(Driver.DriverID);
             if (rowToUpdate == null)
             {
@@ -86,9 +73,10 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models
                 return;
             }
 
-            bool success = await _driversDAO.UpdateDriverAsync(Driver, _cts.Token);
+            bool success = await _driversDAO.UpdateDriverAsync(Driver);
             if (success)
             {
+                PopulateDataRow(rowToUpdate, Driver);
                 _logger.LogInformation("Driver with ID {DriverId} was updated successfully.", Driver.DriverID);
             }
             else
@@ -96,14 +84,10 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models
                 DisplayErrorMessage?.Invoke("Failed to update driver in database", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-
-            PopulateDataRow(rowToUpdate, Driver);
         }
 
         public async Task DeleteDriverAsync(int DriverID)
         {
-            _cts = new CancellationTokenSource();
-
             DataRow? rowToDelete = _dgvTable.Rows.Find(DriverID);
             if (rowToDelete == null)
             {
@@ -111,9 +95,10 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models
                 return;
             }
 
-            bool success = await _driversDAO.DeleteDriverAsync(DriverID, _cts.Token);
+            bool success = await _driversDAO.DeleteDriverAsync(DriverID);
             if (success)
             {
+                _dgvTable.Rows.Remove(rowToDelete);
                 _paginationManager.UpdateRecordCount(_paginationManager.RecordCount - 1);
                 await _paginationManager.EnsureValidPage();
                 _logger.LogInformation("Driver with ID {DriverId} deleted successfully.", DriverID);
@@ -123,16 +108,9 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models
                 DisplayErrorMessage?.Invoke("Failed to delete driver from database", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-
-            _dgvTable.Rows.Remove(rowToDelete);
         }
 
-        public void CancelOperations()
-        {
-            _cts?.Cancel();
-        }
-
-        private void PopulateDataRow(DataRow Row, DriversDTO DriverDTO)
+        private static void PopulateDataRow(DataRow Row, DriversDTO DriverDTO)
         {
             Row[DriverColumns.Name] = DriverDTO.Name;
             Row[DriverColumns.Surname] = DriverDTO.Surname;
@@ -175,8 +153,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models
 
         public async Task FetchAndBindDriversAtPage()
         {
-            _cts = new CancellationTokenSource();
-            _dgvTable = await _driversDAO.GetDriversAtPageAsync(PaginationManager.CurrentPage, _cts.Token) ?? new DataTable();
+            _dgvTable = await _driversDAO.GetDriversAtPageAsync(PaginationManager.CurrentPage) ?? new DataTable();
         }
     }
 }

@@ -12,7 +12,6 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
         private int _currentPage = 1;
         private readonly int _totalPages;
         private readonly DataGridView? _dataGridView;
-        private CancellationTokenSource? _cts;
         private readonly ILogger<PrintDriverDataForm> _logger;
 
         // TODO - Print all databases pages, ensuring each page contains as many records (within reason)
@@ -60,7 +59,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             await printDocument_PrintPageAsync(sender, e);
         }
 
-        private async Task printDocument_PrintPageAsync(object sender, PrintPageEventArgs e)
+        private async Task printDocument_PrintPageAsync(object sender, PrintPageEventArgs e, CancellationToken cancellationToken = default)
         {
             if (e.Graphics == null)
             {
@@ -83,9 +82,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             }
             else
             {
-                _cts = new CancellationTokenSource();
-
-                dataTable = await _driversDAO.GetDriversAtPageAsync(_currentPage, _cts.Token);
+                dataTable = await _driversDAO.GetDriversAtPageAsync(_currentPage, cancellationToken);
                 if (dataTable == null)
                 {
                     _logger.LogWarning("GetDriversAtPage returned null datatable");

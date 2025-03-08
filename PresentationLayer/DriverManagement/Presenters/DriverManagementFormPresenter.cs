@@ -67,6 +67,8 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters
             }
         }
 
+
+
         protected override void HandleAddClicked(object? sender, EventArgs e)
         {
             _logger.LogInformation("Overridden OnAddClicked Ran");
@@ -83,26 +85,20 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters
             DataGridViewRow selectedRow = _driverManagementForm.DgvMain.Rows[RowIndex];
             DriversDTO driverData = _driverManagementModel.GetDriverFromRow(selectedRow);
 
-            try
+            if (driverData.DriverID == 0)
             {
-                if (driverData.DriverID == 0)
-                {
-                    _logger.LogError("Selected row returned no driverdata");
-                    _driverManagementForm.ShowMessageBox("Cannot open edit form", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
+                _logger.LogError("Selected row returned no driverdata");
+                _driverManagementForm.ShowMessageBox("Cannot open edit form", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
-                _driverDataForm = new() { Mode = FormMode.Edit };
-                _driverDataForm.InitializeEditing(driverData);
-                DriverDataFormPresenter presenter = new(_driverDataForm, _driversDAO, _validator, _presenterLogger);
-                presenter.SubmissionCompleted += DriverDataForm_SubmitClicked;
-                _driverDataForm.Show();
-            }
-            catch (OperationCanceledException)
-            {
-                _driverManagementForm.ShowMessageBox("Operation Canceled", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
+            _driverDataForm = new() { Mode = FormMode.Edit };
+            _driverDataForm.InitializeEditing(driverData);
+            DriverDataFormPresenter presenter = new(_driverDataForm, _driversDAO, _validator, _presenterLogger);
+            presenter.SubmissionCompleted += DriverDataForm_SubmitClicked;
+            _driverDataForm.Show();
         }
+
 
         protected override async void HandleDeleteClicked(object? sender, int RowIndex)
         {
@@ -112,21 +108,14 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters
 
         private async Task HandleDelete(int RowIndex)
         {
-            try
-            {
-                DataGridViewRow selectedRow = _driverManagementForm.DgvMain.Rows[RowIndex];
-                object? DriverID = selectedRow.Cells[DriverColumns.DriverID].Value;
+            DataGridViewRow selectedRow = _driverManagementForm.DgvMain.Rows[RowIndex];
+            object? DriverID = selectedRow.Cells[DriverColumns.DriverID].Value;
 
-                DialogResult result = MessageBox.Show("Are you sure?", "Delete Row", MessageBoxButtons.YesNo);
-                if (result == DialogResult.Yes && int.TryParse(DriverID?.ToString(), out int driverID))
-                {
-                    _logger.LogInformation("Deleting Driver with DriverID: {DriverID}", driverID);
-                    await _driverManagementModel.DeleteDriverAsync(driverID);
-                }
-            }
-            catch (OperationCanceledException)
+            DialogResult result = MessageBox.Show("Are you sure?", "Delete Row", MessageBoxButtons.YesNo);
+            if (result == DialogResult.Yes && int.TryParse(DriverID?.ToString(), out int driverID))
             {
-                _driverManagementForm.ShowMessageBox("Operation Canceled", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                _logger.LogInformation("Deleting Driver with DriverID: {DriverID}", driverID);
+                await _driverManagementModel.DeleteDriverAsync(driverID);
             }
         }
 
@@ -135,19 +124,12 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters
             _logger.LogInformation("Overridden OnReloadClicked Ran");
 
             //Refetch data and rebind
-            try
-            {
-                await _driverManagementModel.FetchAndBindDriversAtPage();
-                _driverManagementForm.DgvMain.DataSource = null;
-                _driverManagementForm.DgvMain.DataSource = _driverManagementModel.DgvTable;
-                _driverManagementForm.SetDataGridViewColumns();
+            await _driverManagementModel.FetchAndBindDriversAtPage();
+            _driverManagementForm.DgvMain.DataSource = null;
+            _driverManagementForm.DgvMain.DataSource = _driverManagementModel.DgvTable;
+            _driverManagementForm.SetDataGridViewColumns();
 
-                MessageBox.Show("Succesfully Reloaded", "Reload Status");
-            }
-            catch (OperationCanceledException)
-            {
-                _driverManagementForm.ShowMessageBox("Operation Canceled", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
+            MessageBox.Show("Succesfully Reloaded", "Reload Status");
         }
 
         protected override void HandleRollbackClicked(object? sender, EventArgs e) { _logger.LogInformation("Overridden OnRollbackClicked Ran"); }
@@ -200,38 +182,28 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters
         private async void DriverDataForm_SubmitClicked(object? sender, EventArgs e) { await DriverDataForm_SubmitClickedAsync(sender, e); }
         private async Task DriverDataForm_SubmitClickedAsync(object? sender, EventArgs e)
         {
-
             if (_driverDataForm == null) return;
 
-            try
+            _logger.LogInformation("sender is: {Sender}", sender);
+
+            if (e is SubmissionCompletedEventArgs args)
             {
-                _logger.LogInformation("sender is: {Sender}", sender);
-
-                if (e is SubmissionCompletedEventArgs args)
+                _logger.LogInformation("object is: {Object}", args.Data);
+                if (args.Data is DriversDTO driverDTO)
                 {
-                    _logger.LogInformation("object is: {Object}", args.Data);
-
-                    object? argumentData = args.Data;
-                    if (args.Data is DriversDTO driverDTO)
                     {
+                        if (args.Mode == FormMode.Add)
                         {
-                            if (args.Mode == FormMode.Add)
-                            {
-                                await _driverManagementModel.AddDriverAsync(driverDTO);
-                            }
-                            else if (args.Mode == FormMode.Edit)
-                            {
-                                await _driverManagementModel.UpdateDriverAsync(driverDTO);
-                                _driverDataForm.Close();
-                            }
+                            await _driverManagementModel.AddDriverAsync(driverDTO);
+                        }
+                        else if (args.Mode == FormMode.Edit)
+                        {
+                            await _driverManagementModel.UpdateDriverAsync(driverDTO);
+                            _driverDataForm.Close();
                         }
                     }
-                    _driverDataForm.ClearData();
                 }
-            }
-            catch (OperationCanceledException)
-            {
-                _driverManagementForm.ShowMessageBox("Operation Canceled", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                _driverDataForm.ClearData();
             }
         }
     }

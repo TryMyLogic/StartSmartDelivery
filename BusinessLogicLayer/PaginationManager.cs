@@ -11,7 +11,6 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
         private readonly int _recordsPerPage = GlobalConstants.s_recordLimit;
         private readonly string _tableName;
         private readonly ILogger<PaginationManager> _logger;
-        private CancellationTokenSource? _cts;
 
         // Uses auto property:
         public int CurrentPage { get; private set; } = 1;
@@ -43,7 +42,6 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while initializing pagination.");
                 throw new InvalidOperationException("Initialization failed", ex);
             }
         }
@@ -56,36 +54,17 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
             await (PageChanged?.Invoke(CurrentPage) ?? Task.CompletedTask);
         }
 
-        private async Task<int> GetTotalRecordCount()
+        private async Task<int> GetTotalRecordCount(CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation($"Record count: {RecordCount}");
-            _cts = new CancellationTokenSource();
+            _logger.LogInformation("Record count: {RecordCount}", RecordCount);
 
-            try
+            if (_tableName == "Drivers")
             {
-                if (_tableName == "Drivers")
-                {
-                    return await _driversDAO.GetRecordCountAsync(_cts.Token);
-                }
-                else
-                {
-                    throw new InvalidOperationException("Total record count not supported for this table");
-                }
+                return await _driversDAO.GetRecordCountAsync(cancellationToken);
             }
-            catch (InvalidOperationException ex)
+            else
             {
-                _logger.LogError("Error: {ErrorMessage}", ex.Message);
-                return 0;
-            }
-            catch (OperationCanceledException)
-            {
-                _logger.LogInformation("GetRecordCount was cancelled");
-                return 0;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("Unexpected error: {ErrorMessage}", ex.Message);
-                return 0;
+                throw new InvalidOperationException("Total record count not supported for this table");
             }
         }
 
