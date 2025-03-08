@@ -38,4 +38,9 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="PresentationLayerTests\Template Presenters\" />
+    <Folder Include="PresentationLayerTests\Template Models\" />
+  </ItemGroup>
+
 </Project>

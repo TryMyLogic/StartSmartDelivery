@@ -1,7 +1,7 @@
 ﻿using StartSmartDeliveryForm.DataLayer.DAOs;
 using Xunit.Abstractions;
 
-namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DriverManagement
+namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DriverManagement.Views
 {
     internal class DriverDataFormTests : IClassFixture<DatabaseFixture>
     {

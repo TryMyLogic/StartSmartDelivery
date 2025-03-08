@@ -2,7 +2,7 @@
 using StartSmartDeliveryForm.PresentationLayer.DriverManagement;
 using Xunit.Abstractions;
 
-namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DriverManagement
+namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DriverManagement.Views
 {
     public class DriverManagementFormTests : IClassFixture<DatabaseFixture>
     {

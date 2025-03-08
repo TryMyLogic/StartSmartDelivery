@@ -33,7 +33,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.TemplateViews
 
         private event EventHandler<SubmissionCompletedEventArgs>? _submitClicked;
 
-        event EventHandler<SubmissionCompletedEventArgs>? IDataForm.SubmitClicked
+        public event EventHandler<SubmissionCompletedEventArgs>? SubmitClicked
         {
             add { _submitClicked += value; }
             remove { _submitClicked -= value; }
