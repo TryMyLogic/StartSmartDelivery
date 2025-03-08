@@ -321,7 +321,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             return recordsCount;
         }
 
-        public async Task<DataTable> GetDriverByIDAsync(int DriverID, CancellationToken CancellationToken, SqlConnection? Connection = null, SqlTransaction? Transaction = null)
+        public async Task<DataTable> GetDriverByIDAsync(int DriverID, SqlConnection? Connection = null, SqlTransaction? Transaction = null, CancellationToken cancellationToken = default)
         {
             string Query = "SELECT DriverID, Name, Surname, EmployeeNo, LicenseType, Availability FROM Drivers WHERE DriverID = @DriverID";
             DataTable driverDataTable = new();
@@ -347,7 +347,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
                             driverDataTable.Load(reader);
                         }
                     }
-                }, CancellationToken);
+                }, cancellationToken);
             }
             catch (SqlException ex)
             {
