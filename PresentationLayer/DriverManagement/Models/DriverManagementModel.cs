@@ -37,8 +37,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models
             }
             catch (InvalidOperationException ex)
             {
-                _logger.LogError("Fatal error during initialization. Pagination will not function - Error: {Error}", ex);
-                DisplayErrorMessage?.Invoke("Fatal error during initialization. Pagination will not function.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                throw new InvalidOperationException("Fatal error during initialization. Pagination will not function.", ex);
             }
         }
 

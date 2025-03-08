@@ -60,14 +60,12 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters
                 _driverManagementForm.AddEditDeleteButtons();
                 HideDriverIDColumn();
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
                 _logger.LogError("Initialization failed: {Error}", ex);
-                _driverManagementForm.ShowMessageBox("Initialization failed", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                _driverManagementForm.ShowMessageBox("Initialization failed. This may result in errors such as Pagination not functioning", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
-
 
         protected override void HandleAddClicked(object? sender, EventArgs e)
         {

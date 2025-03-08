@@ -1,8 +1,10 @@
-﻿namespace StartSmartDeliveryForm.BusinessLogicLayer
+﻿using StartSmartDeliveryForm.SharedLayer.EventDelegates;
+
+namespace StartSmartDeliveryForm.BusinessLogicLayer
 {
     public class DataFormValidator()
     {
-        public event Action<string, string, MessageBoxButtons, MessageBoxIcon>? RequestMessageBox;
+        public event MessageBoxEventDelegate? RequestMessageBox;
 
         public bool IsValidString(string Input, string FieldName)
         {
@@ -28,7 +30,7 @@
         {
             if (!bool.TryParse(Input, out bool _))
             {
-                RequestMessageBox?.Invoke($"' {Input} ' is not true or false.", Input, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                RequestMessageBox?.Invoke($"' {Input} ' is not true or false.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
             return true;
