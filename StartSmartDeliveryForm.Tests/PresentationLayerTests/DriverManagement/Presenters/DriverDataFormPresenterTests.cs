@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DriverManagement.Presenters
 {
-    internal class DriverDataFormPresenterTests
+    public class DriverDataFormPresenterTests
     {
     }
 }

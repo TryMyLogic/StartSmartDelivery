@@ -35,6 +35,9 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests
 
             // Assert
             Assert.True(eventRaised);
+
+            // Cleanup
+            _noMsgBoxDataForm.SubmitClicked -= eventHandler;
         }
 
         [Fact]

@@ -18,4 +18,5 @@ using System.Runtime.InteropServices;
 [assembly: Guid("01051dee-8ce9-4f6a-90c7-b1f893a49f92")]
 
 [assembly: InternalsVisibleTo("StartSmartDeliveryForm.Tests")]
+[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
 
