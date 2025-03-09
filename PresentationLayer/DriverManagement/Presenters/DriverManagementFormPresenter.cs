@@ -91,6 +91,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters
             }
 
             _driverDataForm = new() { Mode = FormMode.Edit };
+
             _driverDataForm.InitializeEditing(driverData);
             DriverDataFormPresenter presenter = new(_driverDataForm, _driversDAO, _validator, _presenterLogger);
             presenter.SubmissionCompleted += DriverDataForm_SubmitClicked;

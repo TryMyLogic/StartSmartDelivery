@@ -33,23 +33,23 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters
 
         protected override async Task<bool> ValidFormAsync()
         {
-            if (!_dataFormValidator.IsValidString(_driverDataForm.Name, "Name")) return false;
-            if (!_dataFormValidator.IsValidString(_driverDataForm.Surname, "Surname")) return false;
-            if (!_dataFormValidator.IsValidString(_driverDataForm.EmployeeNo, "EmployeeNo"))
+            if (!_dataFormValidator.IsValidString(_driverDataForm.DriverName, "Name")) return false;
+            if (!_dataFormValidator.IsValidString(_driverDataForm.DriverSurname, "Surname")) return false;
+            if (!_dataFormValidator.IsValidString(_driverDataForm.DriverEmployeeNo, "EmployeeNo"))
             {
                 Driver driver = new(_driversDAO);
 
                 // Only check uniqueness if the field isn't empty && Mode is not edit
-                if (_driverDataForm.Mode == FormMode.Add && !(await driver.IsEmployeeNoUnique(_driverDataForm.EmployeeNo)))
+                if (_driverDataForm.Mode == FormMode.Add && !(await driver.IsEmployeeNoUnique(_driverDataForm.DriverEmployeeNo)))
                 {
                     _driverDataForm.ShowMessageBox("Employee No is not unique.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return false;
                 }
             }
 
-            if (!_dataFormValidator.IsValidEnumValue<LicenseType>(_driverDataForm.LicenseType.ToString())) return false;
+            if (!_dataFormValidator.IsValidEnumValue<LicenseType>(_driverDataForm.DriverLicenseType.ToString())) return false;
 
-            if (!_dataFormValidator.IsValidBoolValue(_driverDataForm.Availability.ToString())) return false;
+            if (!_dataFormValidator.IsValidBoolValue(_driverDataForm.DriverAvailability.ToString())) return false;
 
             return true;
         }

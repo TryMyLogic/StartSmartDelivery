@@ -150,6 +150,16 @@
             Name = "DriverDataForm";
             Text = "DriverDataForm";
             Load += DriverDataForm_Load;
+            Controls.SetChildIndex(label1, 0);
+            Controls.SetChildIndex(txtName, 0);
+            Controls.SetChildIndex(label2, 0);
+            Controls.SetChildIndex(txtSurname, 0);
+            Controls.SetChildIndex(label4, 0);
+            Controls.SetChildIndex(txtEmployeeNo, 0);
+            Controls.SetChildIndex(label3, 0);
+            Controls.SetChildIndex(label5, 0);
+            Controls.SetChildIndex(cboAvailability, 0);
+            Controls.SetChildIndex(cboLicenseType, 0);
             ResumeLayout(false);
             PerformLayout();
         }

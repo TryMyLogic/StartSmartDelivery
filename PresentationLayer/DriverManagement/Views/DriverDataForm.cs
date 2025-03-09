@@ -21,31 +21,31 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             cboAvailability.SelectedIndex = 0;  //Is true by default
         }
 
-        int IDriverDataForm.DriverID
+        public int DriverID
         {
             get => _driverID;
             set => _driverID = value;
         }
 
-        string IDriverDataForm.Name
+        public string DriverName
         {
             get => txtName.Text;
             set => txtName.Text = value;
         }
 
-        string IDriverDataForm.Surname
+        public string DriverSurname
         {
             get => txtSurname.Text;
             set => txtSurname.Text = value;
         }
 
-        string IDriverDataForm.EmployeeNo
+        public string DriverEmployeeNo
         {
             get => txtEmployeeNo.Text;
             set => txtEmployeeNo.Text = value;
         }
 
-        LicenseType IDriverDataForm.LicenseType
+        public LicenseType DriverLicenseType
         {
             get => cboLicenseType.SelectedItem != null
                 ? (LicenseType)Enum.Parse(typeof(LicenseType), cboLicenseType.SelectedItem.ToString()!)
@@ -54,7 +54,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             set => cboLicenseType.SelectedItem = value.ToString();
         }
 
-        bool IDriverDataForm.Availability
+        public bool DriverAvailability
         {
             get => bool.Parse(cboAvailability.SelectedItem!.ToString()!);
             set => cboAvailability.SelectedItem = value.ToString();
@@ -74,6 +74,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 
         public override void ClearData()
         {
+            DriverID = 0;
             txtName.Clear();
             txtSurname.Clear();
             txtEmployeeNo.Clear();

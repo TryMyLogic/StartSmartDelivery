@@ -39,8 +39,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="PresentationLayerTests\Template Presenters\" />
     <Folder Include="PresentationLayerTests\Template Models\" />
+    <Folder Include="PresentationLayerTests\Template Presenters\" />
   </ItemGroup>
 
 </Project>
