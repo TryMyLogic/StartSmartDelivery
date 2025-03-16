@@ -26,11 +26,6 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters
             _dataFormValidator.RequestMessageBox += _driverDataForm.ShowMessageBox;
         }
 
-        public IDriverDataForm GetDataForm()
-        {
-            return _driverDataForm;
-        }
-
         protected override async Task<bool> ValidFormAsync()
         {
             if (!_dataFormValidator.IsValidString(_driverDataForm.DriverName, "Name")) return false;

@@ -21,7 +21,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.TemplatePresenters
         internal async void HandleSubmit_Clicked(object? sender, EventArgs e)
         {
             try
-            {     
+            {
                 bool Valid = await ValidFormAsync();
                 if (Valid)
                 {

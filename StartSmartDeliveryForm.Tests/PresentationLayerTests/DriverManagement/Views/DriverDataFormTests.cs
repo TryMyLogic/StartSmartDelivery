@@ -1,11 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Client;
-using StartSmartDeliveryForm.BusinessLogicLayer;
-using StartSmartDeliveryForm.DataLayer.DAOs;
 using StartSmartDeliveryForm.DataLayer.DTOs;
 using StartSmartDeliveryForm.PresentationLayer.DriverManagement;
-using StartSmartDeliveryForm.PresentationLayer.DriverManagement.Views;
-using StartSmartDeliveryForm.PresentationLayer.TemplateViews;
 using StartSmartDeliveryForm.SharedLayer.Enums;
 using StartSmartDeliveryForm.Tests.SharedTestItems;
 using Xunit.Abstractions;
@@ -107,7 +102,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DriverManagement.V
                 Availability: Availability
             );
 
-            _driverDataForm.InitializeEditing(mockDriver); 
+            _driverDataForm.InitializeEditing(mockDriver);
 
             // Act
             DriversDTO driver = _driverDataForm.GetData();

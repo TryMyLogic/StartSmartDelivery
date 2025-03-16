@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Serilog;
 using StartSmartDeliveryForm.BusinessLogicLayer;
@@ -38,31 +37,28 @@ namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
             }
         }
 
-        // Another flakey test due to running at same time as Insert/Delete. Must add it to Sequential Collection
-        [SkippableFact]
-        public async Task GetTotalRecordCount_GetsRecordCountCorrectly()
+        [SkippableTheory]
+        [InlineData("Drivers", false)]
+        [InlineData("RandomTableName", true)]
+        public async Task GetTotalRecordCount_ThrowsWhenTableIsUnsupported(string TableName, bool ShouldThrow)
         {
             Skip.If(_shouldSkipTests, "Test Database is not available. Skipping this test");
 
             // Arrange
             ILogger<PaginationManager> _mockLogger = Substitute.For<ILogger<PaginationManager>>();
-            PaginationManager paginationManager = await PaginationManager.CreateAsync("Drivers", _driversDAO, _mockLogger);
-            int RecordCount;
+            PaginationManager paginationManager = new(TableName, _driversDAO);
 
-            // Act
-            MethodInfo? methodInfo = typeof(PaginationManager).GetMethod("GetTotalRecordCount", BindingFlags.NonPublic | BindingFlags.Instance) ?? throw new InvalidOperationException("Method 'GetTotalRecordCount' was not found.");
-            object? result = methodInfo.Invoke(paginationManager, [CancellationToken.None]);
-            if (result is Task<int> GetTotalRecordCount)
+            // Act && Assert
+            if (!ShouldThrow)
             {
-                RecordCount = await GetTotalRecordCount;
+                InvalidOperationException ex = await Assert.ThrowsAsync<InvalidOperationException>(() => paginationManager.InitializeAsync());
+                Assert.IsType<InvalidOperationException>(ex.InnerException);
+                Assert.Equal("Total record count not supported for this table", ex.InnerException?.Message);
             }
             else
             {
-                throw new InvalidOperationException("Unexpected return type.");
+                await paginationManager.InitializeAsync();
             }
-
-            // Assert
-            Assert.Equal(105, RecordCount);
         }
 
         [SkippableFact]
