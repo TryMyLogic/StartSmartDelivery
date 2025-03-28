@@ -1,4 +1,6 @@
 ﻿using System.Data;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Serilog;
 using StartSmartDeliveryForm.SharedLayer.Enums;
 using StartSmartDeliveryForm.SharedLayer.EventArgs;
@@ -10,9 +12,12 @@ namespace StartSmartDeliveryForm.PresentationLayer.TemplateModels
     {
 
         protected DataTable _dgvTable;
-        public ManagementModel()
+        private readonly ILogger<ManagementModel> _logger;
+
+        public ManagementModel(ILogger<ManagementModel>? logger = null)
         {
             _dgvTable = new DataTable();
+            _logger = logger ?? NullLogger<ManagementModel>.Instance;
         }
 
         public DataTable DgvTable => _dgvTable;
@@ -22,7 +27,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.TemplateModels
 
         public void ApplyFilter(object? sender, SearchRequestEventArgs e)
         {
-            Log.Information("Applying Filter");
+            _logger.LogInformation("Applying Filter");
             string? searchTerm = e.SearchTerm;
             DataTable dataTable = e.DataTable;
             string selectedOption = e.SelectedOption;
@@ -30,13 +35,13 @@ namespace StartSmartDeliveryForm.PresentationLayer.TemplateModels
 
             if (searchTerm != null)
             {
-                Log.Warning(searchTerm);
+                _logger.LogWarning(searchTerm);
             }
 
             if (dataTable == null || string.IsNullOrEmpty(selectedOption))
             {
                 // Refresh dgv or show an error message
-                Log.Error("Invalid parameters for filtering.");
+                _logger.LogError("Invalid parameters for filtering.");
                 return;
             }
 
@@ -50,7 +55,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.TemplateModels
 
             _dgvTable = filteredData;
 
-            Log.Information($"Filtered {filteredRows.Count} rows for '{selectedOption}' with search term '{searchTerm}' (CaseSensitive: {isCaseSensitive}).");
+            _logger.LogInformation($"Filtered {filteredRows.Count} rows for '{selectedOption}' with search term '{searchTerm}' (CaseSensitive: {isCaseSensitive}).");
         }
 
         public static List<DataRow> FilterRows(DataTable DataTable, string SelectedOption, string? SearchTerm, bool IsCaseSensitive)

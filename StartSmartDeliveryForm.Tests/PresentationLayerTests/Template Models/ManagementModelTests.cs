@@ -16,15 +16,10 @@ using NSubstitute;
 
 namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.Template_Models
 {
-    public class ManagementModelTests
+    public class ManagementModelTests(ITestOutputHelper output)
     {
-        private readonly ILogger<ManagementModelTests> _testLogger;
-        private ManagementModel _managementModel;
-        public ManagementModelTests(ITestOutputHelper output)
-        {
-            _testLogger = SharedFunctions.CreateTestLogger<ManagementModelTests>(output);
-
-        }
+        private readonly ILogger<ManagementModelTests> _testLogger = SharedFunctions.CreateTestLogger<ManagementModelTests>(output);
+        private ManagementModel? _managementModel;
 
         [Theory]
         // Valid cases for filtering
