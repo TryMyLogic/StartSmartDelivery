@@ -49,7 +49,7 @@ namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
             PaginationManager paginationManager = new(TableName, _driversDAO);
 
             // Act && Assert
-            if (!ShouldThrow)
+            if (ShouldThrow)
             {
                 InvalidOperationException ex = await Assert.ThrowsAsync<InvalidOperationException>(() => paginationManager.InitializeAsync());
                 Assert.IsType<InvalidOperationException>(ex.InnerException);

@@ -23,7 +23,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.TemplateViews
         event EventHandler<int> GoToPageClicked;
         event EventHandler PrintClicked;
 
-        public void AddEditDeleteButtons();
+        void AddEditDeleteButtons(Func<string, Image>? imageLoader = null);
         void ShowMessageBox(string Text, string Caption, MessageBoxButtons Buttons, MessageBoxIcon Icon);
     }
 }

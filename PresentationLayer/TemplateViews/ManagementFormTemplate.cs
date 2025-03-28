@@ -1,6 +1,10 @@
 ﻿using System.Data;
+using System.IO.Abstractions;
 using System.Reflection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Serilog;
+using StartSmartDeliveryForm.PresentationLayer.TemplatePresenters;
 using StartSmartDeliveryForm.PresentationLayer.TemplateViews;
 using StartSmartDeliveryForm.SharedLayer;
 using StartSmartDeliveryForm.SharedLayer.EventArgs;
@@ -10,9 +14,17 @@ namespace StartSmartDeliveryForm.PresentationLayer
 {
     public partial class ManagementFormTemplate : Form, IManagementForm, ISearchableView
     {
-        public ManagementFormTemplate()
+        private readonly IFileSystem _fileSystem;
+        private readonly IMessageBox _messageBox;
+        private readonly ILogger<ManagementFormTemplate> _logger;
+
+        public ManagementFormTemplate() : this(NullLogger<ManagementFormTemplate>.Instance, new MessageBoxWrapper(), new FileSystem()) { }
+        public ManagementFormTemplate(ILogger<ManagementFormTemplate>? logger = null, IMessageBox? messageBox = null, IFileSystem? FileSystem = null)
         {
             InitializeComponent();
+            _fileSystem = FileSystem ?? new FileSystem();
+            _messageBox = messageBox ?? new MessageBoxWrapper();
+            _logger = logger ?? NullLogger<ManagementFormTemplate>.Instance;
         }
 
         private void ManagementTemplateForm_Load(object sender, EventArgs e)
@@ -47,7 +59,7 @@ namespace StartSmartDeliveryForm.PresentationLayer
             }
             else
             {
-                Log.Error("Search coloumn was not set properly");
+                _logger.LogError("Search coloumn was not set properly");
             }
         }
 
@@ -113,7 +125,7 @@ namespace StartSmartDeliveryForm.PresentationLayer
         }
 
         //DO NOT use this in the ManagementTemplateForm_Load.It interferes with children initialization, breaking the child designer. 
-        protected static void AdjustDataGridViewHeight(DataGridView DataGridView)
+        protected void AdjustDataGridViewHeight(DataGridView DataGridView)
         {
             int records = Math.Min(GlobalConstants.s_recordLimit, 30);
 
@@ -126,11 +138,11 @@ namespace StartSmartDeliveryForm.PresentationLayer
                 int formHeightWithoutDataGridView = DataGridView.Parent.Height - DataGridView.Height;
                 int newHeight = formHeightWithoutDataGridView + requiredHeight;
                 DataGridView.Parent.Height = newHeight;
-                Log.Information($"Row Height: {rowHeight}, Column Headers Height: {DataGridView.ColumnHeadersHeight}, New Height: {newHeight}");
+                _logger.LogInformation($"Row Height: {rowHeight}, Column Headers Height: {DataGridView.ColumnHeadersHeight}, New Height: {newHeight}");
             }
             else
             {
-                Log.Warning("DataGridView parent is null.");
+                _logger.LogWarning("DataGridView parent is null.");
             }
         }
 
@@ -154,36 +166,36 @@ namespace StartSmartDeliveryForm.PresentationLayer
             cboSearchOptions.SelectedIndex = 0;
         }
 
-        public void AddEditDeleteButtons()
+        public void AddEditDeleteButtons(Func<string, Image>? imageLoader = null)
         {
-            string filepath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "PresentationLayer", "Images", "EditIcon.png");
-            string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "PresentationLayer", "Images", "DeleteIcon.png");
+            imageLoader ??= Image.FromFile; 
 
-            //Resolve filepaths
-            string editIconPath = Path.GetFullPath(filepath);
-            string deleteIconPath = Path.GetFullPath(path);
+            string editIconPath = GetIconPath("EditIcon.png");
+            string deleteIconPath = GetIconPath("DeleteIcon.png");
 
-
-            DataGridViewImageColumn editButtonColumn = new()
-            {
-                Name = "Edit",
-                HeaderText = "",
-                Image = Image.FromFile(editIconPath),
-                Width = 30,
-                AutoSizeMode = DataGridViewAutoSizeColumnMode.None
-            };
-
-            DataGridViewImageColumn deleteButtonColumn = new()
-            {
-                Name = "Delete",
-                HeaderText = "",
-                Image = Image.FromFile(deleteIconPath),
-                Width = 30,
-                AutoSizeMode = DataGridViewAutoSizeColumnMode.None
-            };
+            DataGridViewImageColumn editButtonColumn = CreateImageColumn("Edit", editIconPath, imageLoader);
+            DataGridViewImageColumn deleteButtonColumn = CreateImageColumn("Delete", deleteIconPath, imageLoader);
 
             dgvMain.Columns.Add(editButtonColumn);
             dgvMain.Columns.Add(deleteButtonColumn);
+        }
+
+        private string GetIconPath(string FileName)
+        {
+            string path = _fileSystem.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "PresentationLayer", "Images", FileName);
+            return _fileSystem.Path.GetFullPath(path);
+        }
+
+        private static DataGridViewImageColumn CreateImageColumn(string name, string imagePath, Func<string, Image> imageLoader)
+        {
+            return new DataGridViewImageColumn
+            {
+                Name = name,
+                HeaderText = "",
+                Image = imageLoader(imagePath),
+                Width = 30,
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.None
+            };
         }
 
         private void dgvMain_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -228,13 +240,11 @@ namespace StartSmartDeliveryForm.PresentationLayer
         protected virtual void btnLast_Click(object sender, EventArgs e) { LastPageClicked?.Invoke(sender, e); }
         protected virtual void btnGotoPage_Click(object sender, EventArgs e) { GoToPageClicked?.Invoke(this, GoToPageValue()); }
         protected virtual int GoToPageValue() { return 1; }
-
         protected virtual void btnPrint_Click(object sender, EventArgs e) { PrintClicked?.Invoke(sender, e); }
-
         protected virtual void dgvMain_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e) { }
         public void ShowMessageBox(string Text, string Caption, MessageBoxButtons Buttons, MessageBoxIcon Icon)
         {
-            MessageBox.Show(Text, Caption, Buttons, Icon);
+            _messageBox.Show(Text, Caption, Buttons, Icon);
         }
     }
 }
