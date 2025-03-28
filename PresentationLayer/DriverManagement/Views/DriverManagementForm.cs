@@ -26,7 +26,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 
         private void DriverManagementForm_Load(object? sender, EventArgs e)
         {
-            AdjustDataGridViewHeight(dgvMain);
+            AdjustDataGridViewHeight(DgvMain);
             SetSearchOptions(typeof(DriversDTO));
             OnLoad();
         }
@@ -71,14 +71,14 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 
         public void SetDataGridViewColumns()
         {
-            DataGridViewColumn? nameCol = dgvMain.Columns[DriverColumns.Name];
-            DataGridViewColumn? surnameCol = dgvMain.Columns[DriverColumns.Surname];
-            DataGridViewColumn? employeeNoCol = dgvMain.Columns[DriverColumns.EmployeeNo];
-            DataGridViewColumn? licenseTypeCol = dgvMain.Columns[DriverColumns.LicenseType];
-            DataGridViewColumn? availabilityCol = dgvMain.Columns[DriverColumns.Availability];
-            DataGridViewColumn? editCol = dgvMain.Columns[DriverColumns.Edit];
-            DataGridViewColumn? deleteCol = dgvMain.Columns[DriverColumns.Delete];
-            DataGridViewColumn? driverIDCol = dgvMain.Columns[DriverColumns.DriverID];
+            DataGridViewColumn? nameCol = DgvMain.Columns[DriverColumns.Name];
+            DataGridViewColumn? surnameCol = DgvMain.Columns[DriverColumns.Surname];
+            DataGridViewColumn? employeeNoCol = DgvMain.Columns[DriverColumns.EmployeeNo];
+            DataGridViewColumn? licenseTypeCol = DgvMain.Columns[DriverColumns.LicenseType];
+            DataGridViewColumn? availabilityCol = DgvMain.Columns[DriverColumns.Availability];
+            DataGridViewColumn? editCol = DgvMain.Columns[DriverColumns.Edit];
+            DataGridViewColumn? deleteCol = DgvMain.Columns[DriverColumns.Delete];
+            DataGridViewColumn? driverIDCol = DgvMain.Columns[DriverColumns.DriverID];
 
             if (nameCol != null && surnameCol != null && employeeNoCol != null &&
                 licenseTypeCol != null && availabilityCol != null &&
@@ -97,11 +97,11 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 
         protected override void btnRefresh_Click(object sender, EventArgs e)
         {
-            if (dgvMain.DataSource is DataTable dataTable)
+            if (DgvMain.DataSource is DataTable dataTable)
             {
                 dataTable.DefaultView.RowFilter = string.Empty;
-                dgvMain.DataSource = null;
-                dgvMain.DataSource = dataTable;
+                DgvMain.DataSource = null;
+                DgvMain.DataSource = dataTable;
                 SetDataGridViewColumns();
                 MessageBox.Show("Successfully Refreshed", "Refresh Status");
             }
@@ -113,7 +113,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 
         protected override void dgvMain_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            if (dgvMain.Columns[e.ColumnIndex].Name == DriverColumns.LicenseType && e.Value != null)
+            if (DgvMain.Columns[e.ColumnIndex].Name == DriverColumns.LicenseType && e.Value != null)
             {
                 try
                 {

@@ -535,11 +535,11 @@
         private Button btnAdd;
         private FlowLayoutPanel flowLayoutPanel3;
         private Label label1;
-        protected TextBox txtStartPage;
-        protected Label lblEndPage;
+        internal TextBox txtStartPage;
+        internal Label lblEndPage;
         private Button btnGotoPage;
         private Panel pnlGap;
-        protected DataGridView dgvMain;
+        private DataGridView dgvMain;
         private ToolStripMenuItem changeUserToolStripMenuItem;
         private ToolStripMenuItem dashboardToolStripMenuItem;
         private ToolStripMenuItem deliveryManagementToolStripMenuItem;
