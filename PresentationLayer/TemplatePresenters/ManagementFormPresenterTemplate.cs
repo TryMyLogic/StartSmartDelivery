@@ -33,7 +33,6 @@ namespace StartSmartDeliveryForm.PresentationLayer.TemplatePresenters
             _managementForm.PrintClicked += (s, e) => HandlePrintClicked(s, e);
 
             _managementModel.DisplayErrorMessage += _managementForm.ShowMessageBox;
-
         }
 
         protected virtual void HandleFormLoadOccurred(object? sender, EventArgs e) { _logger.LogInformation("HandleFormLoadOccurred Ran"); }
