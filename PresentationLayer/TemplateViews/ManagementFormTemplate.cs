@@ -12,7 +12,7 @@ using StartSmartDeliveryForm.SharedLayer.Interfaces;
 
 namespace StartSmartDeliveryForm.PresentationLayer
 {
-    public partial class ManagementFormTemplate : Form, IManagementForm, ISearchableView
+    public partial class ManagementFormTemplate : Form, IManagementForm
     {
         private readonly IFileSystem _fileSystem;
         private readonly IMessageBox _messageBox;
@@ -124,7 +124,7 @@ namespace StartSmartDeliveryForm.PresentationLayer
             if (btnLast.Image != null) btnLast.Image = ResizeImage(btnLast.Image, 20, 20);
         }
 
-        //DO NOT use this in the ManagementTemplateForm_Load.It interferes with children initialization, breaking the child designer. 
+        //DO NOT use this in the ManagementTemplateForm_Load. It interferes with children initialization, breaking the child designer. 
         protected void AdjustDataGridViewHeight(DataGridView DataGridView)
         {
             int records = Math.Min(GlobalConstants.s_recordLimit, 30);

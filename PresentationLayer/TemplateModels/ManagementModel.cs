@@ -53,7 +53,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.TemplateModels
             Log.Information($"Filtered {filteredRows.Count} rows for '{selectedOption}' with search term '{searchTerm}' (CaseSensitive: {isCaseSensitive}).");
         }
 
-        private static List<DataRow> FilterRows(DataTable DataTable, string SelectedOption, string? SearchTerm, bool IsCaseSensitive)
+        public static List<DataRow> FilterRows(DataTable DataTable, string SelectedOption, string? SearchTerm, bool IsCaseSensitive)
         {
             // Return an empty list if the search term is null/empty or if the column does not exist
             // null is a possible value for certain database tables. IsNullOrEmpty wont filter out "null"
