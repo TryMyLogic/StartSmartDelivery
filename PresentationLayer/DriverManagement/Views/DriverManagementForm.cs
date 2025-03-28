@@ -40,10 +40,22 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             MessageBox.Show($"Retry attempt {AttemptNumber}/{MaxRetries}. Retrying in {RetryDelay.Seconds} seconds. Exception: {ExceptionMessage}");
         }
 
+        public string StartPageText
+        {
+            get => txtStartPage.Text;
+            set => txtStartPage.Text = value;
+        }
+
+        public string EndPageText
+        {
+            get => lblEndPage.Text;
+            set => lblEndPage.Text = value;
+        }
+
         public void UpdatePaginationDisplay(int CurrentPage, int TotalPages)
         {
-            txtStartPage.Text = $"{CurrentPage}";
-            lblEndPage.Text = $"/{TotalPages}";
+            StartPageText = $"{CurrentPage}";
+            EndPageText = $"/{TotalPages}";
         }
 
         protected override HashSet<string> GetExcludedColumns()

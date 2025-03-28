@@ -8,5 +8,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Views
 
         void SetDataGridViewColumns();
 
+        string StartPageText { get; set; }
+        string EndPageText { get; set; }
     }
 }

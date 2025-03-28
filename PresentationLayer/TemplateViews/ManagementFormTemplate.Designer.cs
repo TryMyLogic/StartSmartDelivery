@@ -535,8 +535,8 @@
         private Button btnAdd;
         private FlowLayoutPanel flowLayoutPanel3;
         private Label label1;
-        internal TextBox txtStartPage;
-        internal Label lblEndPage;
+        protected TextBox txtStartPage;
+        protected Label lblEndPage;
         private Button btnGotoPage;
         private Panel pnlGap;
         private DataGridView dgvMain;
