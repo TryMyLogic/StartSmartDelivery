@@ -58,6 +58,7 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
 
     public class DriversDAOTests(DatabaseFixture fixture, ITestOutputHelper output) : DriversDAOTestBase(fixture, output)
     {
+
         [SkippableFact]
         public async Task GetAllDriversAsync_ReturnsExpectedDataTable()
         {
@@ -415,7 +416,7 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
 
             // Cleanup
             DriversDTO Driver105 = new(
-            DriverID: 105, // DriverID auto-increments server-side on insert. 999 is a placeholder 
+            DriverID: 105, // DriverID auto-increments server-side on insert. 105 is a placeholder 
             Name: "Lucas",
             Surname: "Miller",
             EmployeeNo: "EMP1234",
@@ -472,12 +473,11 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
 
             // Assert
             DataTable result = await _driversDAO.GetDriverByIDAsync(DriverID);
-            Assert.NotNull(result);
             Assert.Empty(result.Rows);
 
             // Cleanup
             DriversDTO Driver105 = new(
-            DriverID: 105, // DriverID auto-increments server-side on insert. 999 is a placeholder 
+            DriverID: 105, // DriverID auto-increments server-side on insert. 105 is a placeholder 
             Name: "Lucas",
             Surname: "Miller",
             EmployeeNo: "EMP1234",

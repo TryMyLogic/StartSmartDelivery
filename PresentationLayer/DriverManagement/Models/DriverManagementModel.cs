@@ -11,7 +11,7 @@ using StartSmartDeliveryForm.SharedLayer.EventDelegates;
 
 namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models
 {
-    internal class DriverManagementModel : ManagementModel, IDriverManagementModel
+    public class DriverManagementModel : ManagementModel, IDriverManagementModel
     {
         private readonly DriversDAO _driversDAO;
         protected readonly PaginationManager _paginationManager;
@@ -90,7 +90,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models
             DataRow? rowToDelete = _dgvTable.Rows.Find(DriverID);
             if (rowToDelete == null)
             {
-                _logger.LogWarning("Driver with ID {DriverID} was not found for delete.", DriverID);
+                _logger.LogWarning("Driver with ID {DriverID} was not found for deletion.", DriverID);
                 return;
             }
 

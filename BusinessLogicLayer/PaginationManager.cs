@@ -42,7 +42,7 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException("Initialization failed", ex);
+                throw new InvalidOperationException("PaginationManager Initialization failed", ex);
             }
         }
 

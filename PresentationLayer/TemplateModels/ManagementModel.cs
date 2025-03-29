@@ -8,7 +8,7 @@ using StartSmartDeliveryForm.SharedLayer.EventDelegates;
 
 namespace StartSmartDeliveryForm.PresentationLayer.TemplateModels
 {
-    internal class ManagementModel : IManagementModel
+    public class ManagementModel : IManagementModel
     {
 
         protected DataTable _dgvTable;

@@ -4,7 +4,7 @@ using StartSmartDeliveryForm.PresentationLayer.TemplateModels;
 
 namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models
 {
-    internal interface IDriverManagementModel : IManagementModel
+    public interface IDriverManagementModel : IManagementModel
     {
         public PaginationManager PaginationManager { get; }
         public event EventHandler? PageChanged;
