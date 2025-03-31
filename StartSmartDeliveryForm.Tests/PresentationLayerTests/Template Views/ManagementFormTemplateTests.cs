@@ -4,9 +4,6 @@ using System.IO.Abstractions.TestingHelpers;
 using System.Windows.Forms;
 using Microsoft.Extensions.Logging;
 using StartSmartDeliveryForm.PresentationLayer;
-using StartSmartDeliveryForm.PresentationLayer.TemplatePresenters;
-using StartSmartDeliveryForm.PresentationLayer.TemplateViews;
-using StartSmartDeliveryForm.SharedLayer.Enums;
 using StartSmartDeliveryForm.Tests.SharedTestItems;
 using Xunit.Abstractions;
 

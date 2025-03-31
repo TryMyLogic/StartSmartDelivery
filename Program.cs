@@ -10,7 +10,6 @@ namespace StartSmartDeliveryForm
 {
     internal static class Program
     {
-        public static IServiceProvider ServiceProvider { get; private set; }
 
         [STAThread]
         static void Main()
@@ -18,7 +17,6 @@ namespace StartSmartDeliveryForm
             ApplicationConfiguration.Initialize();
 
             IServiceProvider serviceRegistry = ServiceRegistry.RegisterServices();
-            ServiceProvider = serviceRegistry;
 
             // IoC in action
             DriverManagementForm driverManagementForm = serviceRegistry.GetRequiredService<DriverManagementForm>();

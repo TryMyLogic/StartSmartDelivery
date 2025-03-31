@@ -9,7 +9,7 @@ using StartSmartDeliveryForm.SharedLayer.Enums;
 
 namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters
 {
-    internal class DriverDataFormPresenter : DataFormPresenterTemplate
+    public class DriverDataFormPresenter : DataFormPresenterTemplate
     {
         private readonly IDriverDataForm _driverDataForm;
         private readonly DriversDAO _driversDAO;

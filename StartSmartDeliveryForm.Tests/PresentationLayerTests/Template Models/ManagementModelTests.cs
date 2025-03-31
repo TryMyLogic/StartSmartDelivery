@@ -1,18 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Data;
 using Microsoft.Extensions.Logging;
-using StartSmartDeliveryForm.PresentationLayer.TemplatePresenters;
-using StartSmartDeliveryForm.PresentationLayer;
+using NSubstitute;
+using StartSmartDeliveryForm.PresentationLayer.TemplateModels;
+using StartSmartDeliveryForm.SharedLayer.Enums;
+using StartSmartDeliveryForm.SharedLayer.EventArgs;
 using StartSmartDeliveryForm.Tests.SharedTestItems;
 using Xunit.Abstractions;
-using StartSmartDeliveryForm.SharedLayer.Enums;
-using System.Data;
-using StartSmartDeliveryForm.PresentationLayer.TemplateModels;
-using StartSmartDeliveryForm.SharedLayer.EventArgs;
-using NSubstitute;
 
 namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.Template_Models
 {

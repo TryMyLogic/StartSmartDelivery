@@ -44,7 +44,15 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models
         public event EventHandler? PageChanged;
         public async Task OnPageChanged(int CurrentPage)
         {
-            _dgvTable = await _driversDAO.GetDriversAtPageAsync(CurrentPage) ?? new DataTable();
+            _logger.LogInformation("Changing page");
+            //   _logger.LogInformation($"Page changed: {CurrentPage}");
+            DataTable? result = await _driversDAO.GetDriversAtPageAsync(CurrentPage);
+            if (result == null)
+            {
+                _logger.LogWarning("No data returned for page {CurrentPage}", CurrentPage);
+            }
+            _dgvTable = result ?? new DataTable();
+
             PageChanged?.Invoke(this, new EventArgs());
         }
 

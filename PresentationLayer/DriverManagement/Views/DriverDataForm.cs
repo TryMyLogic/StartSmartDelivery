@@ -8,7 +8,7 @@ using StartSmartDeliveryForm.SharedLayer.Interfaces;
 namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 {
 
-    internal partial class DriverDataForm : DataFormTemplate, IDriverDataForm
+    public partial class DriverDataForm : DataFormTemplate, IDriverDataForm
     {
         private int _driverID;
         public DriverDataForm(ILogger<DriverDataForm>? logger = null, IMessageBox? messageBox = null) : base(logger, messageBox)

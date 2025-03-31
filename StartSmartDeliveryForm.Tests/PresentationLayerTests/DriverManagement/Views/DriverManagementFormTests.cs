@@ -1,10 +1,5 @@
-﻿using System.Windows.Forms;
-using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Client;
-using NSubstitute;
+﻿using Microsoft.Extensions.Logging;
 using StartSmartDeliveryForm.DataLayer;
-using StartSmartDeliveryForm.DataLayer.DAOs;
-using StartSmartDeliveryForm.PresentationLayer;
 using StartSmartDeliveryForm.PresentationLayer.DriverManagement;
 using StartSmartDeliveryForm.Tests.SharedTestItems;
 using Xunit.Abstractions;
@@ -14,7 +9,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DriverManagement.V
     public class DriverManagementFormTests : IClassFixture<DatabaseFixture>
     {
         private readonly ILogger<DriverManagementForm> _testLogger;
-        private  DriverManagementForm? _managementForm;
+        private DriverManagementForm? _managementForm;
 
         public DriverManagementFormTests(DatabaseFixture fixture, ITestOutputHelper output)
         {

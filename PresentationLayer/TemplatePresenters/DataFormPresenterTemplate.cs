@@ -5,7 +5,7 @@ using StartSmartDeliveryForm.SharedLayer.EventArgs;
 
 namespace StartSmartDeliveryForm.PresentationLayer.TemplatePresenters
 {
-    internal class DataFormPresenterTemplate
+    public class DataFormPresenterTemplate
     {
         protected readonly IDataForm _dataForm;
         private readonly ILogger<DataFormPresenterTemplate> _logger;

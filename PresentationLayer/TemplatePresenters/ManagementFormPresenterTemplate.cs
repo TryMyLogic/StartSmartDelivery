@@ -5,7 +5,7 @@ using StartSmartDeliveryForm.PresentationLayer.TemplateViews;
 
 namespace StartSmartDeliveryForm.PresentationLayer.TemplatePresenters
 {
-    internal class ManagementFormPresenterTemplate
+    public class ManagementFormPresenterTemplate
     {
 
         private readonly IManagementForm _managementForm;
@@ -13,8 +13,8 @@ namespace StartSmartDeliveryForm.PresentationLayer.TemplatePresenters
         private readonly ILogger<ManagementFormPresenterTemplate> _logger;
         public ManagementFormPresenterTemplate(IManagementForm managementForm, IManagementModel managementModel, ILogger<ManagementFormPresenterTemplate>? logger = null)
         {
-            _managementForm = managementForm;
-            _managementModel = managementModel;
+            _managementForm = managementForm ?? throw new ArgumentNullException(nameof(managementForm));
+            _managementModel = managementModel ?? throw new ArgumentNullException(nameof(managementModel));
             _logger = logger ?? NullLogger<ManagementFormPresenterTemplate>.Instance;
 
             _managementForm.FormLoadOccurred += (s, e) => HandleFormLoadOccurred(s, e);

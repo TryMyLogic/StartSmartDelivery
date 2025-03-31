@@ -3,7 +3,7 @@ using StartSmartDeliveryForm.SharedLayer.Interfaces;
 
 namespace StartSmartDeliveryForm.PresentationLayer.TemplateViews
 {
-    internal interface IManagementForm : ISearchableView
+    public interface IManagementForm : ISearchableView
     {
         DataGridView DgvMain { get; }
         DataTable DataSource { get; set; }

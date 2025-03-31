@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using StartSmartDeliveryForm.BusinessLogicLayer;
 using StartSmartDeliveryForm.DataLayer;
@@ -13,24 +12,29 @@ using StartSmartDeliveryForm.SharedLayer.EventArgs;
 
 namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters
 {
-    internal class DriverManagementFormPresenter : ManagementFormPresenterTemplate
+    public class DriverManagementFormPresenter : ManagementFormPresenterTemplate
     {
         private readonly IDriverManagementForm _driverManagementForm;
         private readonly IDriverManagementModel _driverManagementModel;
         private readonly DriversDAO _driversDAO;
         private readonly ILogger<DriverManagementFormPresenter> _logger;
-        private readonly ILogger<DriverDataForm> _dataFormLogger = Program.ServiceProvider.GetRequiredService<ILogger<DriverDataForm>>();
-        private readonly ILogger<DriverDataFormPresenter> _presenterLogger = Program.ServiceProvider.GetRequiredService<ILogger<DriverDataFormPresenter>>();
-        private readonly DataFormValidator _validator = Program.ServiceProvider.GetRequiredService<DataFormValidator>();
+
+        private readonly ILogger<DriverDataForm> _dataFormLogger;
+        private readonly ILogger<DriverDataFormPresenter> _dataFormPresenterLogger;
+        private readonly DataFormValidator _validator;
         private DriverDataForm? _driverDataForm;
 
-        public DriverManagementFormPresenter(IDriverManagementForm driverManagementForm, IDriverManagementModel driverManagementModel, DriversDAO driversDAO, ILogger<DriverManagementFormPresenter>? logger = null) : base(driverManagementForm, driverManagementModel)
+        public DriverManagementFormPresenter(IDriverManagementForm driverManagementForm, IDriverManagementModel driverManagementModel, DriversDAO driversDAO, ILogger<DriverManagementFormPresenter>? logger = null, ILogger<DriverDataForm>? dataFormLogger = null, ILogger<DriverDataFormPresenter>? dataFormPresenterLogger = null) : base(driverManagementForm, driverManagementModel)
         {
             _driverManagementForm = driverManagementForm;
             _driverManagementModel = driverManagementModel;
             _driversDAO = driversDAO;
             _logger = logger ?? NullLogger<DriverManagementFormPresenter>.Instance;
             Initialize();
+
+            _dataFormLogger = dataFormLogger ?? NullLogger<DriverDataForm>.Instance;
+            _dataFormPresenterLogger = dataFormPresenterLogger ?? NullLogger<DriverDataFormPresenter>.Instance;
+            _validator = new DataFormValidator();
 
             _driverManagementModel.PageChanged += HandlePageChange;
         }
@@ -71,7 +75,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters
         {
             _logger.LogInformation("Overridden OnAddClicked Ran");
             _driverDataForm = new(_dataFormLogger);
-            DriverDataFormPresenter presenter = new(_driverDataForm, _driversDAO, _validator, _presenterLogger);
+            DriverDataFormPresenter presenter = new(_driverDataForm, _driversDAO, _validator, _dataFormPresenterLogger);
             presenter.SubmissionCompleted += DriverDataForm_SubmitClicked;
             _driverDataForm.Show();
         }
@@ -93,11 +97,10 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters
             _driverDataForm = new() { Mode = FormMode.Edit };
 
             _driverDataForm.InitializeEditing(driverData);
-            DriverDataFormPresenter presenter = new(_driverDataForm, _driversDAO, _validator, _presenterLogger);
+            DriverDataFormPresenter presenter = new(_driverDataForm, _driversDAO, _validator, _dataFormPresenterLogger);
             presenter.SubmissionCompleted += DriverDataForm_SubmitClicked;
             _driverDataForm.Show();
         }
-
 
         protected override async void HandleDeleteClicked(object? sender, int RowIndex)
         {

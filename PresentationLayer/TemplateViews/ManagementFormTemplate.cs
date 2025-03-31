@@ -3,8 +3,6 @@ using System.IO.Abstractions;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using Serilog;
-using StartSmartDeliveryForm.PresentationLayer.TemplatePresenters;
 using StartSmartDeliveryForm.PresentationLayer.TemplateViews;
 using StartSmartDeliveryForm.SharedLayer;
 using StartSmartDeliveryForm.SharedLayer.EventArgs;
@@ -14,7 +12,13 @@ namespace StartSmartDeliveryForm.PresentationLayer
 {
     public partial class ManagementFormTemplate : Form, IManagementForm
     {
-        private readonly IFileSystem _fileSystem;
+        private IFileSystem _fileSystem;
+        public IFileSystem FileSystem
+        {
+            get => _fileSystem;
+            set => _fileSystem = value ?? throw new ArgumentNullException(nameof(value)); // Prevent null assignment
+        }
+
         private readonly IMessageBox _messageBox;
         private readonly ILogger<ManagementFormTemplate> _logger;
 
@@ -168,7 +172,7 @@ namespace StartSmartDeliveryForm.PresentationLayer
 
         public void AddEditDeleteButtons(Func<string, Image>? imageLoader = null)
         {
-            imageLoader ??= Image.FromFile; 
+            imageLoader ??= (path) => Image.FromStream(new MemoryStream(_fileSystem.File.ReadAllBytes(path)));
 
             string editIconPath = GetIconPath("EditIcon.png");
             string deleteIconPath = GetIconPath("DeleteIcon.png");

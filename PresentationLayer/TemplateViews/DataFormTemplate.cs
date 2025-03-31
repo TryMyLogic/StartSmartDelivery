@@ -11,7 +11,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.TemplateViews
         Add,
         Edit
     }
-    internal partial class DataFormTemplate : Form, IDataForm
+    public partial class DataFormTemplate : Form, IDataForm
     {
         public FormMode Mode { get; set; }
         public readonly ILogger<DataFormTemplate> _logger;

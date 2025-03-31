@@ -2,7 +2,7 @@
 
 namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Views
 {
-    internal interface IDriverManagementForm : IManagementForm
+    public interface IDriverManagementForm : IManagementForm
     {
         void UpdatePaginationDisplay(int CurrentPage, int TotalPages);
 
