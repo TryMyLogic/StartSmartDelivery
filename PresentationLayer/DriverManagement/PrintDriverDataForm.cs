@@ -82,7 +82,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
             }
             else
             {
-                dataTable = await _driversDAO.GetDriversAtPageAsync(_currentPage, cancellationToken);
+                dataTable = await _driversDAO.GetRecordsAtPageAsync(_currentPage, cancellationToken);
                 if (dataTable == null)
                 {
                     _logger.LogWarning("GetDriversAtPage returned null datatable");

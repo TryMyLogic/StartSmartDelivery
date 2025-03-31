@@ -46,7 +46,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models
         {
             _logger.LogInformation("Changing page");
             //   _logger.LogInformation($"Page changed: {CurrentPage}");
-            DataTable? result = await _driversDAO.GetDriversAtPageAsync(CurrentPage);
+            DataTable? result = await _driversDAO.GetRecordsAtPageAsync(CurrentPage);
             if (result == null)
             {
                 _logger.LogWarning("No data returned for page {CurrentPage}", CurrentPage);
@@ -59,7 +59,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models
         public new event MessageBoxEventDelegate? DisplayErrorMessage;
         public async Task AddDriverAsync(DriversDTO Driver)
         {
-            int newDriverId = await _driversDAO.InsertDriverAsync(Driver);
+            int newDriverId = await _driversDAO.InsertRecordAsync(Driver);
             if (newDriverId != -1) // Check for success
             {
                 DataRow newRow = _dgvTable.NewRow();
@@ -80,7 +80,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models
                 return;
             }
 
-            bool success = await _driversDAO.UpdateDriverAsync(Driver);
+            bool success = await _driversDAO.UpdateRecordAsync(Driver);
             if (success)
             {
                 PopulateDataRow(rowToUpdate, Driver);
@@ -102,7 +102,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models
                 return;
             }
 
-            bool success = await _driversDAO.DeleteDriverAsync(DriverID);
+            bool success = await _driversDAO.DeleteRecordAsync(DriverID);
             if (success)
             {
                 _dgvTable.Rows.Remove(rowToDelete);
@@ -160,7 +160,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models
 
         public async Task FetchAndBindDriversAtPage()
         {
-            _dgvTable = await _driversDAO.GetDriversAtPageAsync(PaginationManager.CurrentPage) ?? new DataTable();
+            _dgvTable = await _driversDAO.GetRecordsAtPageAsync(PaginationManager.CurrentPage) ?? new DataTable();
         }
     }
 }

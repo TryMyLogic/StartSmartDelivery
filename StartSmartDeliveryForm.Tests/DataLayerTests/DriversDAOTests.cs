@@ -68,7 +68,7 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
             _cts = new CancellationTokenSource();
 
             // Act
-            DataTable? result = await _driversDAO.GetAllDriversAsync(_cts.Token);
+            DataTable? result = await _driversDAO.GetAllRecordsAsync(_cts.Token);
 
             // Assert
             Assert.NotNull(result);
@@ -139,7 +139,7 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
             _cts = new CancellationTokenSource();
 
             // Act
-            DataTable result = await _driversDAO.GetDriverByIDAsync(DriverID);
+            DataTable result = await _driversDAO.GetRecordByPKAsync(DriverID);
 
             // Assert
             DataRow firstRow = result.Rows[0];
@@ -168,7 +168,7 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
             int nonExistentID = 9999;
 
             // Act
-            DataTable result = await _driversDAO.GetDriverByIDAsync(nonExistentID);
+            DataTable result = await _driversDAO.GetRecordByPKAsync(nonExistentID);
 
             // Assert
             Assert.NotNull(result);
@@ -200,7 +200,7 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
 
             // Act
             _testLogger.LogInformation("Getting drivers at page {PageNumber}", SetPageTo);
-            DataTable? result = await _driversDAO.GetDriversAtPageAsync(SetPageTo, _cts.Token);
+            DataTable? result = await _driversDAO.GetRecordsAtPageAsync(SetPageTo, _cts.Token);
 
             // Assert
             if (IsValid)
@@ -249,7 +249,7 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
 
             // Act
             _testLogger.LogInformation("Getting drivers at page {PageNumber}", SetPageTo);
-            DataTable? result = await _driversDAO.GetDriversAtPageAsync(SetPageTo, _cts.Token);
+            DataTable? result = await _driversDAO.GetRecordsAtPageAsync(SetPageTo, _cts.Token);
 
             // Assert
             Assert.NotNull(result);
@@ -283,13 +283,13 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
             );
 
             // Act
-            int returnedDriverID = await _driversDAO.InsertDriverAsync(mockDriver);
+            int returnedDriverID = await _driversDAO.InsertRecordAsync(mockDriver);
 
             // Assert
             Assert.Equal(106, returnedDriverID);
 
             // Clean up
-            await _driversDAO.DeleteDriverAsync(returnedDriverID);
+            await _driversDAO.DeleteRecordAsync(returnedDriverID);
             await _driversDAO.ReseedTable("Drivers", 105);
         }
 
@@ -318,12 +318,12 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
             );
 
             // Act
-            int returnedDriverID = await _driversDAO.InsertDriverAsync(mockDriver);
+            int returnedDriverID = await _driversDAO.InsertRecordAsync(mockDriver);
 
             // Assert
             Assert.True(returnedDriverID > 105, "DriverID should be greater than existing records.");
 
-            DataTable result = await _driversDAO.GetDriverByIDAsync(returnedDriverID);
+            DataTable result = await _driversDAO.GetRecordByPKAsync(returnedDriverID);
             DataRow firstRow = result.Rows[0];
             Assert.Equal(Name, firstRow["Name"]);
             Assert.Equal(Surname, firstRow["Surname"]);
@@ -332,7 +332,7 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
             Assert.Equal(Availability, firstRow["Availability"]);
 
             // Clean up
-            await _driversDAO.DeleteDriverAsync(returnedDriverID);
+            await _driversDAO.DeleteRecordAsync(returnedDriverID);
             await _driversDAO.ReseedTable("Drivers", 105);
         }
 
@@ -357,7 +357,7 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
             DriversDAO mockDAO = new(_mockPipelineProvider, _mockConfiguration, _memoryLogger, _connectionString, _mockRetryEventService);
 
             // Act
-            await mockDAO.UpdateDriverAsync(mockDriver);
+            await mockDAO.UpdateRecordAsync(mockDriver);
 
             // Assert
             if (memorySink != null)
@@ -401,10 +401,10 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
             );
 
             // Act
-            await _driversDAO.UpdateDriverAsync(mockDriver);
+            await _driversDAO.UpdateRecordAsync(mockDriver);
 
             // Assert
-            DataTable result = await _driversDAO.GetDriverByIDAsync(DriverID);
+            DataTable result = await _driversDAO.GetRecordByPKAsync(DriverID);
             DataRow firstRow = result.Rows[0];
             Assert.Equal(Name, firstRow["Name"]);
             Assert.Equal(Surname, firstRow["Surname"]);
@@ -423,7 +423,7 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
             LicenseType: LicenseType.Code8,
             Availability: false
             );
-            await _driversDAO.UpdateDriverAsync(Driver105);
+            await _driversDAO.UpdateRecordAsync(Driver105);
         }
 
         [SkippableFact]
@@ -440,7 +440,7 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
             DriversDAO mockDAO = new(_mockPipelineProvider, _mockConfiguration, _memoryLogger, _connectionString, _mockRetryEventService);
 
             // Act
-            await mockDAO.DeleteDriverAsync(DriverID);
+            await mockDAO.DeleteRecordAsync(DriverID);
 
             // Assert
             if (memorySink != null)
@@ -469,10 +469,10 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
             int DriverID = 105;
 
             // Act
-            await _driversDAO.DeleteDriverAsync(DriverID);
+            await _driversDAO.DeleteRecordAsync(DriverID);
 
             // Assert
-            DataTable result = await _driversDAO.GetDriverByIDAsync(DriverID);
+            DataTable result = await _driversDAO.GetRecordByPKAsync(DriverID);
             Assert.Empty(result.Rows);
 
             // Cleanup
@@ -485,7 +485,7 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
             Availability: false
             );
             await _driversDAO.ReseedTable("Drivers", 104);
-            await _driversDAO.InsertDriverAsync(Driver105);
+            await _driversDAO.InsertRecordAsync(Driver105);
         }
     }
 

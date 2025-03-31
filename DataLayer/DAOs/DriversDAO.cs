@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System.Configuration;
+using System.Data;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -16,15 +17,26 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
     Provides an interface to interact with the data source (such as a database).
     Decouples the data access code from the rest of the application
     */
-    public class DriversDAO(ResiliencePipelineProvider<string> pipelineProvider, IConfiguration configuration, ILogger<DriversDAO>? logger = null, string? connectionString = null, RetryEventService? retryEventService = null)
+    public class DriversDAO : IDAO<DriversDTO>
     {
+        private readonly string _connectionString;
+        private readonly ILogger<DriversDAO> _logger;
+        private readonly ResiliencePipeline _pipeline;
+        private readonly RetryEventService _retryEventService;
 
-        private readonly string _connectionString = connectionString ?? configuration["ConnectionStrings:StartSmartDB"]
-                               ?? throw new InvalidOperationException("Connection string not found.");
-        private readonly ILogger<DriversDAO> _logger = logger ?? NullLogger<DriversDAO>.Instance;
-        private readonly ResiliencePipeline _pipeline = pipelineProvider.GetPipeline("sql-retry-pipeline");
-        private readonly RetryEventService _retryEventService = retryEventService ?? new RetryEventService(); // New retry service ensures no "success" events are emitted.
-        public async Task<DataTable?> GetDriversAtPageAsync(int Page, CancellationToken cancellationToken = default)
+        public DriversDAO(ResiliencePipelineProvider<string> pipelineProvider, IConfiguration configuration, ILogger<DriversDAO>? logger = null, string? connectionString = null, RetryEventService? retryEventService = null)
+        {
+            _pipeline = pipelineProvider.GetPipeline("sql-retry-pipeline");
+
+            _logger = logger ?? NullLogger<DriversDAO>.Instance;
+            _connectionString = connectionString ?? configuration["ConnectionStrings:StartSmartDB"]
+                           ?? throw new InvalidOperationException("Connection string not found.");
+            _retryEventService = retryEventService ?? new RetryEventService(); // New retry service ensures no "success" events are emitted.
+        }
+
+        public string TableName => "Drivers";
+
+        public async Task<DataTable?> GetRecordsAtPageAsync(int Page, CancellationToken cancellationToken = default)
         {
             string Query = @"
             SELECT * FROM Drivers
@@ -69,7 +81,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             return Dt;
         }
 
-        public async Task<DataTable?> GetAllDriversAsync(CancellationToken cancellationToken = default)
+        public async Task<DataTable?> GetAllRecordsAsync(CancellationToken cancellationToken = default)
         {
             string Query = @"SELECT * FROM Drivers;";
             DataTable Dt = new();
@@ -111,7 +123,77 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             return Dt;
         }
 
-        public async Task<int> InsertDriverAsync(DriversDTO Driver, SqlConnection? Connection = null, SqlTransaction? Transaction = null, CancellationToken cancellationToken = default)
+        public async Task<int> GetRecordCountAsync(CancellationToken cancellationToken = default)
+        {
+            string Query = "SELECT COUNT(DriverID) FROM Drivers";
+            int recordsCount = 0;
+
+            try
+            {
+                await _pipeline.ExecuteAsync(async (_cancellationToken) =>
+                {
+                    using (SqlConnection Connection = new(_connectionString))
+                    {
+                        await Connection.OpenAsync(_cancellationToken);
+                        using (SqlCommand Command = new(Query, Connection))
+                        {
+                            object? result = await Command.ExecuteScalarAsync(_cancellationToken);
+                            recordsCount = result != DBNull.Value ? Convert.ToInt32(result) : 0;
+                        }
+                    }
+                    _retryEventService.OnRetrySuccessOccurred(); // Does internally check if a retry has occurred. Else its skipped
+                }, cancellationToken);
+            }
+            catch (SqlException ex)
+            {
+                _logger.LogError("An error occurred while accessing the database: {ErrorMessage}", ex.Message);
+                return recordsCount; // Return 0 pages if an error occurs
+            }
+
+            return recordsCount;
+        }
+
+        public async Task<DataTable> GetRecordByPKAsync(int PkID, SqlConnection? Connection = null, SqlTransaction? Transaction = null, CancellationToken cancellationToken = default)
+        {
+            string Query = "SELECT DriverID, Name, Surname, EmployeeNo, LicenseType, Availability FROM Drivers WHERE DriverID = @DriverID";
+            DataTable driverDataTable = new();
+
+            bool ShouldCloseCon = false;
+            if (Connection == null)
+            {
+                Connection = new SqlConnection(_connectionString);
+                ShouldCloseCon = true;
+            }
+
+            try
+            {
+                await _pipeline.ExecuteAsync(async (_cancellationToken) =>
+                {
+                    await Connection.OpenAsync(_cancellationToken);
+                    using (SqlCommand Command = Transaction != null ? new SqlCommand(Query, Connection, Transaction) : new SqlCommand(Query, Connection))
+                    {
+                        Command.Parameters.AddWithValue("@DriverID", PkID);
+
+                        using (SqlDataReader reader = await Command.ExecuteReaderAsync(_cancellationToken))
+                        {
+                            driverDataTable.Load(reader);
+                        }
+                    }
+                }, cancellationToken);
+            }
+            catch (SqlException ex)
+            {
+                _logger.LogError("An error occurred while accessing the database: {ErrorMessage}", ex.Message);
+            }
+            finally
+            {
+                if (ShouldCloseCon) await Connection.CloseAsync();
+            }
+
+            return driverDataTable;
+        }
+
+        public async Task<int> InsertRecordAsync(DriversDTO Driver, SqlConnection? Connection = null, SqlTransaction? Transaction = null, CancellationToken cancellationToken = default)
         {
             string Query = @"
             INSERT INTO Drivers (Name, Surname, EmployeeNo, LicenseType, Availability) 
@@ -122,7 +204,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             bool ShouldCloseCon = false;
             if (Connection == null)
             {
-                Connection = new SqlConnection(connectionString);
+                Connection = new SqlConnection(_connectionString);
                 ShouldCloseCon = true;
             }
 
@@ -159,14 +241,14 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
         }
 
 
-        public async Task<bool> UpdateDriverAsync(DriversDTO driver, SqlConnection? Connection = null, SqlTransaction? Transaction = null, CancellationToken cancellationToken = default)
+        public async Task<bool> UpdateRecordAsync(DriversDTO driver, SqlConnection? Connection = null, SqlTransaction? Transaction = null, CancellationToken cancellationToken = default)
         {
             string Query = "UPDATE Drivers SET Name = @Name, Surname = @Surname, EmployeeNo = @EmployeeNo, LicenseType = @LicenseType, Availability = @Availability WHERE DriverID = @DriverID;";
 
             bool ShouldCloseCon = false;
             if (Connection == null)
             {
-                Connection = new SqlConnection(connectionString);
+                Connection = new SqlConnection(_connectionString);
                 ShouldCloseCon = true;
             }
 
@@ -212,13 +294,13 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             }
         }
 
-        public async Task<bool> DeleteDriverAsync(int DriverID, SqlTransaction? Transaction = null, SqlConnection? Connection = null, CancellationToken cancellationToken = default)
+        public async Task<bool> DeleteRecordAsync(int DriverID, SqlConnection? Connection = null, SqlTransaction? Transaction = null,  CancellationToken cancellationToken = default)
         {
             string Query = "DELETE FROM Drivers WHERE DriverID = @DriverID";
             bool ShouldCloseCon = false;
             if (Connection == null)
             {
-                Connection = new SqlConnection(connectionString);
+                Connection = new SqlConnection(_connectionString);
                 ShouldCloseCon = true;
             }
 
@@ -291,75 +373,9 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             }
         }
 
-        internal async Task<int> GetRecordCountAsync(CancellationToken cancellationToken = default)
-        {
-            string Query = "SELECT COUNT(DriverID) FROM Drivers";
-            int recordsCount = 0;
+       
 
-            try
-            {
-                await _pipeline.ExecuteAsync(async (_cancellationToken) =>
-                {
-                    using (SqlConnection Connection = new(_connectionString))
-                    {
-                        await Connection.OpenAsync(_cancellationToken);
-                        using (SqlCommand Command = new(Query, Connection))
-                        {
-                            object? result = await Command.ExecuteScalarAsync(_cancellationToken);
-                            recordsCount = result != DBNull.Value ? Convert.ToInt32(result) : 0;
-                        }
-                    }
-                    _retryEventService.OnRetrySuccessOccurred(); // Does internally check if a retry has occurred. Else its skipped
-                }, cancellationToken);
-            }
-            catch (SqlException ex)
-            {
-                _logger.LogError("An error occurred while accessing the database: {ErrorMessage}", ex.Message);
-                return recordsCount; // Return 0 pages if an error occurs
-            }
-
-            return recordsCount;
-        }
-
-        public async Task<DataTable> GetDriverByIDAsync(int DriverID, SqlConnection? Connection = null, SqlTransaction? Transaction = null, CancellationToken cancellationToken = default)
-        {
-            string Query = "SELECT DriverID, Name, Surname, EmployeeNo, LicenseType, Availability FROM Drivers WHERE DriverID = @DriverID";
-            DataTable driverDataTable = new();
-
-            bool ShouldCloseCon = false;
-            if (Connection == null)
-            {
-                Connection = new SqlConnection(connectionString);
-                ShouldCloseCon = true;
-            }
-
-            try
-            {
-                await _pipeline.ExecuteAsync(async (_cancellationToken) =>
-                {
-                    await Connection.OpenAsync(_cancellationToken);
-                    using (SqlCommand Command = Transaction != null ? new SqlCommand(Query, Connection, Transaction) : new SqlCommand(Query, Connection))
-                    {
-                        Command.Parameters.AddWithValue("@DriverID", DriverID);
-
-                        using (SqlDataReader reader = await Command.ExecuteReaderAsync(_cancellationToken))
-                        {
-                            driverDataTable.Load(reader);
-                        }
-                    }
-                }, cancellationToken);
-            }
-            catch (SqlException ex)
-            {
-                _logger.LogError("An error occurred while accessing the database: {ErrorMessage}", ex.Message);
-            }
-            finally
-            {
-                if (ShouldCloseCon) await Connection.CloseAsync();
-            }
-
-            return driverDataTable;
-        }
+       
 
         // Used only for testing
 #if DEBUG

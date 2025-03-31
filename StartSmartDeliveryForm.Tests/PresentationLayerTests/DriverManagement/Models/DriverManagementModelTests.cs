@@ -252,7 +252,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DriverManagement.M
             Assert.Equal((int)LicenseType, dgvTableLastRow["LicenseType"]);
             Assert.Equal(Availability, dgvTableLastRow["Availability"]);
 
-            DataTable resultingDriver = await _driversDAO.GetDriverByIDAsync(106);
+            DataTable resultingDriver = await _driversDAO.GetRecordByPKAsync(106);
             DataRow dbFirstRow = resultingDriver.Rows[0];
             Assert.Equal(Name, dbFirstRow["Name"]);
             Assert.Equal(Surname, dbFirstRow["Surname"]);
@@ -261,7 +261,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DriverManagement.M
             Assert.Equal(Availability, dbFirstRow["Availability"]);
 
             // Clean up
-            await _driversDAO.DeleteDriverAsync(106);
+            await _driversDAO.DeleteRecordAsync(106);
             await _driversDAO.ReseedTable("Drivers", 105);
         }
 
@@ -361,7 +361,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DriverManagement.M
             Assert.Equal((int)LicenseType, dgvTableLastRow["LicenseType"]);
             Assert.Equal(Availability, dgvTableLastRow["Availability"]);
 
-            DataTable resultingDriver = await _driversDAO.GetDriverByIDAsync(105);
+            DataTable resultingDriver = await _driversDAO.GetRecordByPKAsync(105);
             DataRow dbFirstRow = resultingDriver.Rows[0];
             Assert.Equal(Name, dbFirstRow["Name"]);
             Assert.Equal(Surname, dbFirstRow["Surname"]);
@@ -378,7 +378,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DriverManagement.M
               LicenseType: LicenseType.Code8,
               Availability: false
               );
-            await _driversDAO.UpdateDriverAsync(Driver105);
+            await _driversDAO.UpdateRecordAsync(Driver105);
         }
 
         [SkippableFact]
@@ -446,7 +446,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DriverManagement.M
             .Any(row => row.Field<int>("DriverID") == 105);
             Assert.False(driverExists, "DriverID 105 should not exist in the DataTable after deletion.");
 
-            DataTable result = await _driversDAO.GetDriverByIDAsync(DriverID);
+            DataTable result = await _driversDAO.GetRecordByPKAsync(DriverID);
             Assert.NotNull(result);
             Assert.Empty(result.Rows);
 
@@ -460,7 +460,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DriverManagement.M
               Availability: false
               );
             await _driversDAO.ReseedTable("Drivers", 104);
-            await _driversDAO.InsertDriverAsync(Driver105);
+            await _driversDAO.InsertRecordAsync(Driver105);
         }
     }
 
