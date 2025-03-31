@@ -8,6 +8,7 @@ using Serilog;
 using Serilog.Events;
 using StartSmartDeliveryForm.BusinessLogicLayer;
 using StartSmartDeliveryForm.DataLayer.DAOs;
+using StartSmartDeliveryForm.DataLayer.DTOs;
 using StartSmartDeliveryForm.PresentationLayer.DriverManagement;
 using StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models;
 using StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters;
@@ -135,7 +136,9 @@ namespace StartSmartDeliveryForm.SharedLayer
                 })
 
                 .AddScoped<DriversDAO>()
-                .AddScoped<PaginationManager>()
+                .AddScoped<IDAO<DriversDTO>, DriversDAO>()
+
+                .AddScoped<PaginationManager<DriversDTO>>()
                 .AddScoped<DriverManagementForm>()
                 .AddScoped<PrintDriverDataForm>()
                 .AddTransient<DriverDataFormPresenter>()
@@ -147,27 +150,6 @@ namespace StartSmartDeliveryForm.SharedLayer
                 .AddTransient<IDriverManagementModel, DriverManagementModel>()
                 .AddTransient<DriverManagementModel>()
                 .AddTransient<DriverManagementFormPresenter>()
-                .AddScoped<PaginationManager>(serviceProvider =>
-                {
-                    // Change to IManagementModel once PaginationManager is made generic. Currently uses DriversDAO
-
-                    DriversDAO dao = serviceProvider.GetRequiredService<DriversDAO>();
-                    ILogger<PaginationManager>? logger = serviceProvider.GetService<ILogger<PaginationManager>>();
-                    return new PaginationManager("Drivers", dao, logger);
-
-                    // IDriverManagementModel model = serviceProvider.GetRequiredService<IDriverManagementModel>();
-                    //string tableName = model switch
-                    //{
-                    //    DriverManagementForm => "Driver",
-                    //    _ => throw new InvalidOperationException("Unknown form type for PaginationManager")
-                    //};
-
-                    //return new PaginationManager(
-                    //    tableName,
-                    //    serviceProvider.GetRequiredService<DriversDAO>(),
-                    //    serviceProvider.GetService<ILogger<PaginationManager>>() // Optional logger
-                    //);
-                })
                 .BuildServiceProvider();
 
             GlobalConstants.Configuration = configuration;

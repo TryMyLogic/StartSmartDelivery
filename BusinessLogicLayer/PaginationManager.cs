@@ -5,29 +5,33 @@ using StartSmartDeliveryForm.SharedLayer;
 
 namespace StartSmartDeliveryForm.BusinessLogicLayer
 {
-    public class PaginationManager
+    public class PaginationManager<T> where T : class
     {
-        private readonly DriversDAO _driversDAO;
+        private readonly IDAO<T> _dao;
         private readonly int _recordsPerPage = GlobalConstants.s_recordLimit;
-        private readonly string _tableName;
-        private readonly ILogger<PaginationManager> _logger;
+        private readonly ILogger<PaginationManager<T>> _logger;
 
         // Uses auto property:
         public int CurrentPage { get; private set; } = 1;
         public int TotalPages { get; private set; } = 1;
         public int RecordCount { get; private set; } = 0;
 
-        internal PaginationManager(string tableName, DriversDAO driversDAO, ILogger<PaginationManager>? logger = null)
+        public PaginationManager()
         {
-            _tableName = tableName;
-            _driversDAO = driversDAO;
-            _logger = logger ?? NullLogger<PaginationManager>.Instance;
+            _dao = null!;  // or set to a mock DAO or empty if needed
+            _logger = NullLogger<PaginationManager<T>>.Instance;
+        }
+
+        public PaginationManager(IDAO<T> DAO, ILogger<PaginationManager<T>>? logger = null)
+        {
+            _dao = DAO;
+            _logger = logger ?? NullLogger<PaginationManager<T>>.Instance;
         }
 
         // Async Factory Pattern
-        public static async Task<PaginationManager> CreateAsync(string tableName, DriversDAO driversDAO, ILogger<PaginationManager>? logger = null)
+        public static async Task<PaginationManager<T>> CreateAsync(IDAO<T> DAO, ILogger<PaginationManager<T>>? logger = null)
         {
-            PaginationManager paginationManager = new(tableName, driversDAO, logger);
+            PaginationManager<T> paginationManager = new(DAO, logger);
             await paginationManager.InitializeAsync();
             return paginationManager;
         }
@@ -57,15 +61,7 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
         private async Task<int> GetTotalRecordCount(CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("Record count: {RecordCount}", RecordCount);
-
-            if (_tableName == "Drivers")
-            {
-                return await _driversDAO.GetRecordCountAsync(cancellationToken);
-            }
-            else
-            {
-                throw new InvalidOperationException("Total record count not supported for this table");
-            }
+            return await _dao.GetRecordCountAsync(cancellationToken);
         }
 
         public async Task GoToFirstPage()

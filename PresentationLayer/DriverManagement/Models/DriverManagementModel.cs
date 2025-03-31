@@ -14,11 +14,11 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models
     public class DriverManagementModel : ManagementModel, IDriverManagementModel
     {
         private readonly DriversDAO _driversDAO;
-        protected readonly PaginationManager _paginationManager;
+        protected readonly PaginationManager<DriversDTO> _paginationManager;
         private readonly ILogger<DriverManagementModel> _logger;
 
-        public PaginationManager PaginationManager { get => _paginationManager; }
-        public DriverManagementModel(DriversDAO driversDAO, PaginationManager paginationManager, ILogger<DriverManagementModel>? logger = null)
+        public new PaginationManager<DriversDTO> PaginationManager { get => _paginationManager; }
+        public DriverManagementModel(DriversDAO driversDAO, PaginationManager<DriversDTO> paginationManager, ILogger<DriverManagementModel>? logger = null)
         {
             _driversDAO = driversDAO;
             _paginationManager = paginationManager;

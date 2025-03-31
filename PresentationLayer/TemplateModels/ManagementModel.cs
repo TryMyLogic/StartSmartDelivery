@@ -1,25 +1,23 @@
 ﻿using System.Data;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using StartSmartDeliveryForm.BusinessLogicLayer;
 using StartSmartDeliveryForm.SharedLayer.Enums;
 using StartSmartDeliveryForm.SharedLayer.EventArgs;
 using StartSmartDeliveryForm.SharedLayer.EventDelegates;
 
 namespace StartSmartDeliveryForm.PresentationLayer.TemplateModels
 {
-    public class ManagementModel : IManagementModel
+    public class ManagementModel(ILogger<ManagementModel>? logger = null) : IManagementModel<object>
     {
+        protected DataTable _dgvTable = new();
+        private readonly ILogger<ManagementModel> _logger = logger ?? NullLogger<ManagementModel>.Instance;
 
-        protected DataTable _dgvTable;
-        private readonly ILogger<ManagementModel> _logger;
-
-        public ManagementModel(ILogger<ManagementModel>? logger = null)
-        {
-            _dgvTable = new DataTable();
-            _logger = logger ?? NullLogger<ManagementModel>.Instance;
-        }
+        // No PaginationManager in base as it requires a table-specific DAO
+        public PaginationManager<object> PaginationManager { get; } = new PaginationManager<object>();
 
         public DataTable DgvTable => _dgvTable;
+
         public event MessageBoxEventDelegate? DisplayErrorMessage;
 
         public virtual async Task InitializeAsync() { await Task.Delay(100); }

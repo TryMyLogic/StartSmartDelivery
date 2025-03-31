@@ -23,7 +23,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DriverManagement.M
     {
         protected readonly ILogger<DriverManagementModel> _testLogger;
         protected readonly DriversDAO _driversDAO;
-        protected readonly PaginationManager _paginationManager;
+        protected readonly PaginationManager<DriversDTO> _paginationManager;
         protected DriverManagementModel? _driverManagementModel;
         protected readonly bool _shouldSkipTests;
         protected readonly string _connectionString;
@@ -50,7 +50,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DriverManagement.M
             ILogger<DriversDAO> driversDAOTestLogger = SharedFunctions.CreateTestLogger<DriversDAO>(output);
             _driversDAO = new DriversDAO(_mockPipelineProvider, _mockConfiguration, driversDAOTestLogger, _connectionString, _mockRetryEventService);
 
-            _paginationManager = new("Drivers", _driversDAO, null);
+            _paginationManager = new(_driversDAO, null);
         }
 
         public void InitializeMemorySinkLogger()
@@ -67,7 +67,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DriverManagement.M
         public async Task InitializeAsync_InitializesAndLogs()
         {
             // Arrange
-            PaginationManager paginationManager = new("Drivers", _driversDAO, null);
+            PaginationManager<DriversDTO> paginationManager = new(_driversDAO, null);
             _driverManagementModel = new(_driversDAO, paginationManager, _testLogger);
 
             // Act
@@ -87,7 +87,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DriverManagement.M
             DriversDAO mockDriversDAO = Substitute.For<DriversDAO>(mockPipelineProvider, mockConfiguration, null, "mockConnection", null);
 
             // Real PaginationManager will try to access mock function with no set behaviour, causing error
-            PaginationManager paginationManager = new("Drivers", mockDriversDAO, null);
+            PaginationManager<DriversDTO> paginationManager = new(mockDriversDAO, null);
             _driverManagementModel = new(mockDriversDAO, paginationManager, _testLogger);
 
             // Act
@@ -187,7 +187,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DriverManagement.M
         public async Task FetchAndBindDriversAtPage_FetchesAndBindsDrivers_OfTheSpecifiedPage()
         {
             // Arrange
-            PaginationManager manager = new PaginationManager("Drivers", _driversDAO, null);
+            PaginationManager<DriversDTO> manager = new PaginationManager<DriversDTO>(_driversDAO, null);
             DriverManagementModel driverManagementModel = new(_driversDAO, manager, _testLogger);
             await driverManagementModel.InitializeAsync();
             await driverManagementModel.PaginationManager.GoToLastPage();

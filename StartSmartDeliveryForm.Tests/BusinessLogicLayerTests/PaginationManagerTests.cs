@@ -3,6 +3,7 @@ using NSubstitute;
 using Serilog;
 using StartSmartDeliveryForm.BusinessLogicLayer;
 using StartSmartDeliveryForm.DataLayer.DAOs;
+using StartSmartDeliveryForm.DataLayer.DTOs;
 using Xunit.Abstractions;
 
 namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
@@ -11,7 +12,7 @@ namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
     {
         private readonly DriversDAO _driversDAO;
         private readonly ITestOutputHelper _output;
-        private readonly ILogger<PaginationManager> _testLogger;
+        private readonly ILogger<PaginationManager<DriversDTO>> _testLogger;
         private readonly bool _shouldSkipTests;
 
         public PaginationManagerTests(DatabaseFixture fixture, ITestOutputHelper output)
@@ -29,35 +30,11 @@ namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
                 builder.AddSerilog(serilogLogger);
             });
 
-            _testLogger = loggerFactory.CreateLogger<PaginationManager>();
+            _testLogger = loggerFactory.CreateLogger<PaginationManager<DriversDTO>>();
 
             if (fixture.CanConnectToDatabase == false)
             {
                 _shouldSkipTests = true;
-            }
-        }
-
-        [SkippableTheory]
-        [InlineData("Drivers", false)]
-        [InlineData("RandomTableName", true)]
-        public async Task GetTotalRecordCount_ThrowsWhenTableIsUnsupported(string TableName, bool ShouldThrow)
-        {
-            Skip.If(_shouldSkipTests, "Test Database is not available. Skipping this test");
-
-            // Arrange
-            ILogger<PaginationManager> _mockLogger = Substitute.For<ILogger<PaginationManager>>();
-            PaginationManager paginationManager = new(TableName, _driversDAO);
-
-            // Act && Assert
-            if (ShouldThrow)
-            {
-                InvalidOperationException ex = await Assert.ThrowsAsync<InvalidOperationException>(() => paginationManager.InitializeAsync());
-                Assert.IsType<InvalidOperationException>(ex.InnerException);
-                Assert.Equal("Total record count not supported for this table", ex.InnerException?.Message);
-            }
-            else
-            {
-                await paginationManager.InitializeAsync();
             }
         }
 
@@ -68,8 +45,8 @@ namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
 
             // Arrange
             int PageChangeCalled = 0;
-            ILogger<PaginationManager> _mockLogger = Substitute.For<ILogger<PaginationManager>>();
-            PaginationManager paginationManager = await PaginationManager.CreateAsync("Drivers", _driversDAO, _mockLogger);
+            ILogger<PaginationManager<DriversDTO>> _mockLogger = Substitute.For<ILogger<PaginationManager<DriversDTO>>>();
+            PaginationManager<DriversDTO> paginationManager = await PaginationManager<DriversDTO>.CreateAsync(_driversDAO, _mockLogger);
 
             paginationManager.PageChanged += async (currentPage) =>
             {
@@ -90,9 +67,9 @@ namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
             Skip.If(_shouldSkipTests, "Test Database is not available. Skipping this test");
 
             // Arrange
-            ILogger<PaginationManager> _mockLogger = Substitute.For<ILogger<PaginationManager>>();
+            ILogger<PaginationManager<DriversDTO>> _mockLogger = Substitute.For<ILogger<PaginationManager<DriversDTO>>>();
 
-            PaginationManager paginationManager = await PaginationManager.CreateAsync("Drivers", _driversDAO, _testLogger);
+            PaginationManager<DriversDTO> paginationManager = await PaginationManager<DriversDTO>.CreateAsync(_driversDAO, _testLogger);
 
             await paginationManager.GoToLastPage(); // Needs to be a page other than 1 which is default
 
@@ -109,8 +86,8 @@ namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
             Skip.If(_shouldSkipTests, "Test Database is not available. Skipping this test");
 
             // Arrange
-            ILogger<PaginationManager> _mockLogger = Substitute.For<ILogger<PaginationManager>>();
-            PaginationManager paginationManager = await PaginationManager.CreateAsync("Drivers", _driversDAO, _mockLogger);
+            ILogger<PaginationManager<DriversDTO>> _mockLogger = Substitute.For<ILogger<PaginationManager<DriversDTO>>>();
+            PaginationManager<DriversDTO> paginationManager = await PaginationManager<DriversDTO>.CreateAsync(_driversDAO, _mockLogger);
             _output.WriteLine("Total Pages: " + paginationManager.TotalPages);
 
             // Act
@@ -126,8 +103,8 @@ namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
             Skip.If(_shouldSkipTests, "Test Database is not available. Skipping this test");
 
             // Arrange
-            ILogger<PaginationManager> _mockLogger = Substitute.For<ILogger<PaginationManager>>();
-            PaginationManager paginationManager = await PaginationManager.CreateAsync("Drivers", _driversDAO, _mockLogger);
+            ILogger<PaginationManager<DriversDTO>> _mockLogger = Substitute.For<ILogger<PaginationManager<DriversDTO>>>();
+            PaginationManager<DriversDTO> paginationManager = await PaginationManager<DriversDTO>.CreateAsync(_driversDAO, _mockLogger);
             _output.WriteLine("Total Pages: " + paginationManager.TotalPages);
 
             // Act
@@ -143,8 +120,8 @@ namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
             Skip.If(_shouldSkipTests, "Test Database is not available. Skipping this test");
 
             // Arrange
-            ILogger<PaginationManager> _mockLogger = Substitute.For<ILogger<PaginationManager>>();
-            PaginationManager paginationManager = await PaginationManager.CreateAsync("Drivers", _driversDAO, _mockLogger);
+            ILogger<PaginationManager<DriversDTO>> _mockLogger = Substitute.For<ILogger<PaginationManager<DriversDTO>>>();
+            PaginationManager<DriversDTO> paginationManager = await PaginationManager<DriversDTO>.CreateAsync(_driversDAO, _mockLogger);
             await paginationManager.GoToLastPage();
             // Act
             await paginationManager.GoToPreviousPage();
@@ -160,8 +137,8 @@ namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
             Skip.If(_shouldSkipTests, "Test Database is not available. Skipping this test");
 
             // Arrange
-            ILogger<PaginationManager> _mockLogger = Substitute.For<ILogger<PaginationManager>>();
-            PaginationManager paginationManager = await PaginationManager.CreateAsync("Drivers", _driversDAO, _mockLogger);
+            ILogger<PaginationManager<DriversDTO>> _mockLogger = Substitute.For<ILogger<PaginationManager<DriversDTO>>>();
+            PaginationManager<DriversDTO> paginationManager = await PaginationManager<DriversDTO>.CreateAsync(_driversDAO, _mockLogger);
 
             // Act
             await paginationManager.GoToPage(page);
@@ -177,8 +154,8 @@ namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
 
             // Arrange
             int page = -1;
-            ILogger<PaginationManager> _mockLogger = Substitute.For<ILogger<PaginationManager>>();
-            PaginationManager paginationManager = await PaginationManager.CreateAsync("Drivers", _driversDAO, _mockLogger);
+            ILogger<PaginationManager<DriversDTO>> _mockLogger = Substitute.For<ILogger<PaginationManager<DriversDTO>>>();
+            PaginationManager<DriversDTO> paginationManager = await PaginationManager<DriversDTO>.CreateAsync(_driversDAO, _mockLogger);
 
             // Act
             await paginationManager.GoToPage(page);
@@ -193,7 +170,7 @@ namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
             Skip.If(_shouldSkipTests, "Test Database is not available. Skipping this test");
 
             // Arrange
-            PaginationManager paginationManager = new("Drivers", _driversDAO);
+            PaginationManager<DriversDTO> paginationManager = new(_driversDAO);
             int OriginalRecordCount = paginationManager.RecordCount;
 
             // Act
@@ -213,16 +190,16 @@ namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
             Skip.If(_shouldSkipTests, "Test Database is not available. Skipping this test");
 
             // Arrange
-            ILogger<PaginationManager> _mockLogger = Substitute.For<ILogger<PaginationManager>>();
-            PaginationManager paginationManager = await PaginationManager.CreateAsync("Drivers", _driversDAO, _mockLogger);
+            ILogger<PaginationManager<DriversDTO>> _mockLogger = Substitute.For<ILogger<PaginationManager<DriversDTO>>>();
+            PaginationManager<DriversDTO> paginationManager = await PaginationManager<DriversDTO>.CreateAsync(_driversDAO, _mockLogger);
 
             // Use reflection to modify private setters
-            typeof(PaginationManager)
+            typeof(PaginationManager<DriversDTO>)
                 .GetProperty("TotalPages", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)?
                 .SetValue(paginationManager, totalPages);
             _output.WriteLine("Total Pages: " + paginationManager.TotalPages);
 
-            typeof(PaginationManager)
+            typeof(PaginationManager<DriversDTO>)
                 .GetProperty("CurrentPage", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)?
                 .SetValue(paginationManager, currentPage);
             _output.WriteLine("Current Page: " + paginationManager.CurrentPage);

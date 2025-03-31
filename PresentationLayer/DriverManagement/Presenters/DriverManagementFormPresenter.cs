@@ -6,6 +6,7 @@ using StartSmartDeliveryForm.DataLayer.DAOs;
 using StartSmartDeliveryForm.DataLayer.DTOs;
 using StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models;
 using StartSmartDeliveryForm.PresentationLayer.DriverManagement.Views;
+using StartSmartDeliveryForm.PresentationLayer.TemplateModels;
 using StartSmartDeliveryForm.PresentationLayer.TemplatePresenters;
 using StartSmartDeliveryForm.PresentationLayer.TemplateViews;
 using StartSmartDeliveryForm.SharedLayer.EventArgs;
@@ -24,7 +25,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters
         private readonly DataFormValidator _validator;
         private DriverDataForm? _driverDataForm;
 
-        public DriverManagementFormPresenter(IDriverManagementForm driverManagementForm, IDriverManagementModel driverManagementModel, DriversDAO driversDAO, ILogger<DriverManagementFormPresenter>? logger = null, ILogger<DriverDataForm>? dataFormLogger = null, ILogger<DriverDataFormPresenter>? dataFormPresenterLogger = null) : base(driverManagementForm, driverManagementModel)
+        public DriverManagementFormPresenter(IDriverManagementForm driverManagementForm, IDriverManagementModel driverManagementModel, DriversDAO driversDAO, ILogger<DriverManagementFormPresenter>? logger = null, ILogger<DriverDataForm>? dataFormLogger = null, ILogger<DriverDataFormPresenter>? dataFormPresenterLogger = null) : base(driverManagementForm, (IManagementModel<object>)driverManagementModel)
         {
             _driverManagementForm = driverManagementForm;
             _driverManagementModel = driverManagementModel;

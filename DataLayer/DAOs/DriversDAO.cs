@@ -17,22 +17,13 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
     Provides an interface to interact with the data source (such as a database).
     Decouples the data access code from the rest of the application
     */
-    public class DriversDAO : IDAO<DriversDTO>
+    public class DriversDAO(ResiliencePipelineProvider<string> pipelineProvider, IConfiguration configuration, ILogger<DriversDAO>? logger = null, string? connectionString = null, RetryEventService? retryEventService = null) : IDAO<DriversDTO>
     {
-        private readonly string _connectionString;
-        private readonly ILogger<DriversDAO> _logger;
-        private readonly ResiliencePipeline _pipeline;
-        private readonly RetryEventService _retryEventService;
-
-        public DriversDAO(ResiliencePipelineProvider<string> pipelineProvider, IConfiguration configuration, ILogger<DriversDAO>? logger = null, string? connectionString = null, RetryEventService? retryEventService = null)
-        {
-            _pipeline = pipelineProvider.GetPipeline("sql-retry-pipeline");
-
-            _logger = logger ?? NullLogger<DriversDAO>.Instance;
-            _connectionString = connectionString ?? configuration["ConnectionStrings:StartSmartDB"]
+        private readonly string _connectionString = connectionString ?? configuration["ConnectionStrings:StartSmartDB"]
                            ?? throw new InvalidOperationException("Connection string not found.");
-            _retryEventService = retryEventService ?? new RetryEventService(); // New retry service ensures no "success" events are emitted.
-        }
+        private readonly ILogger<DriversDAO> _logger = logger ?? NullLogger<DriversDAO>.Instance;
+        private readonly ResiliencePipeline _pipeline = pipelineProvider.GetPipeline("sql-retry-pipeline");
+        private readonly RetryEventService _retryEventService = retryEventService ?? new RetryEventService();
 
         public string TableName => "Drivers";
 

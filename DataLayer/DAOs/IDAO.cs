@@ -9,7 +9,7 @@ using StartSmartDeliveryForm.DataLayer.DTOs;
 
 namespace StartSmartDeliveryForm.DataLayer.DAOs
 {
-    public interface IDAO<T>
+    public interface IDAO<T> where T : class
     {
         string TableName { get; }
         Task<DataTable?> GetRecordsAtPageAsync(int PageNumber, CancellationToken cancellationToken = default);

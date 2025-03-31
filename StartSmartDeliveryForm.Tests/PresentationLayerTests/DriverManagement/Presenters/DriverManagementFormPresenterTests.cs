@@ -7,6 +7,7 @@ using Polly.Registry;
 using StartSmartDeliveryForm.BusinessLogicLayer;
 using StartSmartDeliveryForm.DataLayer;
 using StartSmartDeliveryForm.DataLayer.DAOs;
+using StartSmartDeliveryForm.DataLayer.DTOs;
 using StartSmartDeliveryForm.PresentationLayer.DriverManagement;
 using StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models;
 using StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters;
@@ -24,7 +25,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DriverManagement.P
         private DriverManagementForm? _driverManagementForm;
 
         private readonly DriversDAO _driversDAO;
-        private PaginationManager? _paginationManager;
+        private PaginationManager<DriversDTO>? _paginationManager;
         private DriverManagementModel? _driverManagementModel;
         private readonly bool _shouldSkipTests;
         private readonly string _connectionString;

@@ -4,9 +4,8 @@ using StartSmartDeliveryForm.PresentationLayer.TemplateModels;
 
 namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models
 {
-    public interface IDriverManagementModel : IManagementModel
+    public interface IDriverManagementModel : IManagementModel<DriversDTO>
     {
-        public PaginationManager PaginationManager { get; }
         public event EventHandler? PageChanged;
         Task AddDriverAsync(DriversDTO Driver);
         Task UpdateDriverAsync(DriversDTO Driver);

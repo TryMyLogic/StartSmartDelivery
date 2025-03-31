@@ -9,9 +9,9 @@ namespace StartSmartDeliveryForm.PresentationLayer.TemplatePresenters
     {
 
         private readonly IManagementForm _managementForm;
-        private readonly IManagementModel _managementModel;
+        private readonly IManagementModel<object> _managementModel;
         private readonly ILogger<ManagementFormPresenterTemplate> _logger;
-        public ManagementFormPresenterTemplate(IManagementForm managementForm, IManagementModel managementModel, ILogger<ManagementFormPresenterTemplate>? logger = null)
+        public ManagementFormPresenterTemplate(IManagementForm managementForm, IManagementModel<object> managementModel, ILogger<ManagementFormPresenterTemplate>? logger = null)
         {
             _managementForm = managementForm ?? throw new ArgumentNullException(nameof(managementForm));
             _managementModel = managementModel ?? throw new ArgumentNullException(nameof(managementModel));
