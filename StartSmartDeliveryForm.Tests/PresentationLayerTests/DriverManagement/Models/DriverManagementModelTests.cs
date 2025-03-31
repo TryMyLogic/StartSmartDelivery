@@ -187,7 +187,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DriverManagement.M
         public async Task FetchAndBindDriversAtPage_FetchesAndBindsDrivers_OfTheSpecifiedPage()
         {
             // Arrange
-            PaginationManager<DriversDTO> manager = new PaginationManager<DriversDTO>(_driversDAO, null);
+            PaginationManager<DriversDTO> manager = new(_driversDAO, null);
             DriverManagementModel driverManagementModel = new(_driversDAO, manager, _testLogger);
             await driverManagementModel.InitializeAsync();
             await driverManagementModel.PaginationManager.GoToLastPage();

@@ -7,7 +7,6 @@ using StartSmartDeliveryForm.DataLayer.DAOs;
 using StartSmartDeliveryForm.DataLayer.DTOs;
 using StartSmartDeliveryForm.PresentationLayer.TemplateModels;
 using StartSmartDeliveryForm.SharedLayer.Enums;
-using StartSmartDeliveryForm.SharedLayer.EventDelegates;
 
 namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models
 {
@@ -56,7 +55,6 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models
             PageChanged?.Invoke(this, new EventArgs());
         }
 
-        public new event MessageBoxEventDelegate? DisplayErrorMessage;
         public async Task AddDriverAsync(DriversDTO Driver)
         {
             int newDriverId = await _driversDAO.InsertRecordAsync(Driver);
@@ -88,7 +86,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models
             }
             else
             {
-                DisplayErrorMessage?.Invoke("Failed to update driver in database", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                InvokeDisplayErrorMessage("Failed to update driver in database", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
         }
@@ -112,7 +110,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models
             }
             else
             {
-                DisplayErrorMessage?.Invoke("Failed to delete driver from database", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                InvokeDisplayErrorMessage("Failed to delete driver from database", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
         }

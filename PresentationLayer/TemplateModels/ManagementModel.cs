@@ -19,6 +19,10 @@ namespace StartSmartDeliveryForm.PresentationLayer.TemplateModels
         public DataTable DgvTable => _dgvTable;
 
         public event MessageBoxEventDelegate? DisplayErrorMessage;
+        protected void InvokeDisplayErrorMessage(string text, string caption, MessageBoxButtons button, MessageBoxIcon icon)
+        {
+            DisplayErrorMessage?.Invoke(text, caption, button, icon);
+        }
 
         public virtual async Task InitializeAsync() { await Task.Delay(100); }
 
@@ -32,7 +36,8 @@ namespace StartSmartDeliveryForm.PresentationLayer.TemplateModels
 
             if (searchTerm != null)
             {
-                _logger.LogWarning(searchTerm);
+                _logger.LogError("SearchTerm is null");
+                DisplayErrorMessage?.Invoke("Search Term is null", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
             if (dataTable == null || string.IsNullOrEmpty(selectedOption))
@@ -52,7 +57,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.TemplateModels
 
             _dgvTable = filteredData;
 
-            _logger.LogInformation($"Filtered {filteredRows.Count} rows for '{selectedOption}' with search term '{searchTerm}' (CaseSensitive: {isCaseSensitive}).");
+            _logger.LogInformation("Filtered {X} rows for '{Option}' with search term '{Term}' (CaseSensitive: {Sensitivity}).", filteredRows.Count, selectedOption, searchTerm, isCaseSensitive);
         }
 
         public static List<DataRow> FilterRows(DataTable DataTable, string SelectedOption, string? SearchTerm, bool IsCaseSensitive)

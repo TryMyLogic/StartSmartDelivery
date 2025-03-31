@@ -1,5 +1,4 @@
-﻿using System.Configuration;
-using System.Data;
+﻿using System.Data;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -285,7 +284,7 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             }
         }
 
-        public async Task<bool> DeleteRecordAsync(int DriverID, SqlConnection? Connection = null, SqlTransaction? Transaction = null,  CancellationToken cancellationToken = default)
+        public async Task<bool> DeleteRecordAsync(int DriverID, SqlConnection? Connection = null, SqlTransaction? Transaction = null, CancellationToken cancellationToken = default)
         {
             string Query = "DELETE FROM Drivers WHERE DriverID = @DriverID";
             bool ShouldCloseCon = false;
@@ -364,9 +363,9 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
             }
         }
 
-       
 
-       
+
+
 
         // Used only for testing
 #if DEBUG

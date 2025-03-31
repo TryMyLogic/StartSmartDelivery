@@ -28,6 +28,8 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters
 
         protected override async Task<bool> ValidFormAsync()
         {
+            _logger.LogInformation("Validating Form");
+
             if (!_dataFormValidator.IsValidString(_driverDataForm.DriverName, "Name")) return false;
             if (!_dataFormValidator.IsValidString(_driverDataForm.DriverSurname, "Surname")) return false;
             if (!_dataFormValidator.IsValidString(_driverDataForm.DriverEmployeeNo, "EmployeeNo"))

@@ -1,5 +1,4 @@
-﻿using StartSmartDeliveryForm.BusinessLogicLayer;
-using StartSmartDeliveryForm.DataLayer.DTOs;
+﻿using StartSmartDeliveryForm.DataLayer.DTOs;
 using StartSmartDeliveryForm.PresentationLayer.TemplateModels;
 
 namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models

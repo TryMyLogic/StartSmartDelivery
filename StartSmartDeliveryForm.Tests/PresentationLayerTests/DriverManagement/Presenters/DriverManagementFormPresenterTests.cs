@@ -1,17 +1,14 @@
-﻿using System.Windows.Forms;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Polly;
 using Polly.Registry;
 using StartSmartDeliveryForm.BusinessLogicLayer;
-using StartSmartDeliveryForm.DataLayer;
 using StartSmartDeliveryForm.DataLayer.DAOs;
 using StartSmartDeliveryForm.DataLayer.DTOs;
 using StartSmartDeliveryForm.PresentationLayer.DriverManagement;
 using StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models;
 using StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters;
-using StartSmartDeliveryForm.PresentationLayer.TemplateViews;
 using StartSmartDeliveryForm.SharedLayer;
 using StartSmartDeliveryForm.Tests.SharedTestItems;
 using Xunit.Abstractions;
@@ -30,9 +27,9 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DriverManagement.P
         private readonly bool _shouldSkipTests;
         private readonly string _connectionString;
 
-        private ResiliencePipelineProvider<string> _mockPipelineProvider;
-        private IConfiguration _mockConfiguration;
-        private RetryEventService _mockRetryEventService;
+        private readonly ResiliencePipelineProvider<string> _mockPipelineProvider;
+        private readonly IConfiguration _mockConfiguration;
+        private readonly RetryEventService _mockRetryEventService;
 
         private DriverManagementFormPresenter? _presenter;
         ILogger<DriverManagementModel> _modelTestLogger;

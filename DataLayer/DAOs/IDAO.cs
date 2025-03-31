@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Data;
 using Microsoft.Data.SqlClient;
-using StartSmartDeliveryForm.DataLayer.DTOs;
 
 namespace StartSmartDeliveryForm.DataLayer.DAOs
 {
@@ -20,8 +14,8 @@ namespace StartSmartDeliveryForm.DataLayer.DAOs
         Task<bool> UpdateRecordAsync(T Entity, SqlConnection? Connection = null, SqlTransaction? Transaction = null, CancellationToken cancellationToken = default);
         Task<bool> DeleteRecordAsync(int PkID, SqlConnection? Connection = null, SqlTransaction? Transaction = null, CancellationToken cancellationToken = default);
 
-        #if DEBUG
+#if DEBUG
         Task ReseedTable(string TableName, int SeedValue);
-        #endif
+#endif
     }
 }
