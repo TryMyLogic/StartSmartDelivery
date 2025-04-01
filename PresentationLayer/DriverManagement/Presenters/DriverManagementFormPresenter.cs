@@ -22,10 +22,11 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters
 
         private readonly ILogger<DriverDataForm> _dataFormLogger;
         private readonly ILogger<DriverDataFormPresenter> _dataFormPresenterLogger;
+        private readonly ILogger<PrintDriverDataForm> _printDriverDataFormLogger;
         private readonly DataFormValidator _validator;
         private DriverDataForm? _driverDataForm;
 
-        public DriverManagementFormPresenter(IDriverManagementForm driverManagementForm, IDriverManagementModel driverManagementModel, DriversDAO driversDAO, ILogger<DriverManagementFormPresenter>? logger = null, ILogger<DriverDataForm>? dataFormLogger = null, ILogger<DriverDataFormPresenter>? dataFormPresenterLogger = null) : base(driverManagementForm, (IManagementModel<object>)driverManagementModel)
+        public DriverManagementFormPresenter(IDriverManagementForm driverManagementForm, IDriverManagementModel driverManagementModel, DriversDAO driversDAO, ILogger<DriverManagementFormPresenter>? logger = null, ILogger<DriverDataForm>? dataFormLogger = null, ILogger<DriverDataFormPresenter>? dataFormPresenterLogger = null, ILogger<PrintDriverDataForm>? printDriverDataFormLogger = null) : base(driverManagementForm, (IManagementModel<object>)driverManagementModel)
         {
             _driverManagementForm = driverManagementForm;
             _driverManagementModel = driverManagementModel;
@@ -35,6 +36,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters
 
             _dataFormLogger = dataFormLogger ?? NullLogger<DriverDataForm>.Instance;
             _dataFormPresenterLogger = dataFormPresenterLogger ?? NullLogger<DriverDataFormPresenter>.Instance;
+            _printDriverDataFormLogger = printDriverDataFormLogger ?? NullLogger<PrintDriverDataForm>.Instance;
             _validator = new DataFormValidator();
 
             _driverManagementModel.PageChanged += HandlePageChange;
@@ -172,10 +174,13 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters
             }
         }
 
-        protected override void HandlePrintClicked(object? sender, EventArgs e)
+        protected override async void HandlePrintClicked(object? sender, EventArgs e)
         {
             _logger.LogInformation("Overridden OnPrintClicked Ran");
-            PrintDriverDataForm preview = new(_driverManagementForm.DgvMain, _driversDAO); // Prints only 1 page. 
+
+            PrintDriverDataForm preview = new(_printDriverDataFormLogger);
+            PrintDriverDataFormPresenter<DriversDTO> printDriverDataFormPresenter = new(preview, _driversDAO, _driverManagementModel.DgvTable);
+            await printDriverDataFormPresenter.InitializeAsync();
 
             //Unlike Show, it blocks execution on main form till complete
             preview.ShowDialog();

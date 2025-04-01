@@ -28,7 +28,6 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
             _logger = logger ?? NullLogger<PaginationManager<T>>.Instance;
         }
 
-        // Async Factory Pattern
         public static async Task<PaginationManager<T>> CreateAsync(IDAO<T> DAO, ILogger<PaginationManager<T>>? logger = null)
         {
             PaginationManager<T> paginationManager = new(DAO, logger);
@@ -36,12 +35,11 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
             return paginationManager;
         }
 
-        // Is seperate so that it can be used in constructors which cannot be made async if necessary
         public async Task InitializeAsync()
         {
             try
             {
-                RecordCount = await GetTotalRecordCount();
+                RecordCount = await GetTotalRecordCountAsync();
                 TotalPages = Math.Max(1, (int)Math.Ceiling((double)RecordCount / _recordsPerPage));
             }
             catch (Exception ex)
@@ -58,10 +56,11 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
             await (PageChanged?.Invoke(CurrentPage) ?? Task.CompletedTask);
         }
 
-        private async Task<int> GetTotalRecordCount(CancellationToken cancellationToken = default)
+        private async Task<int> GetTotalRecordCountAsync(CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("Record count: {RecordCount}", RecordCount);
-            return await _dao.GetRecordCountAsync(cancellationToken);
+            int count = await _dao.GetRecordCountAsync(cancellationToken);
+            _logger.LogInformation("Record count: {RecordCount}", count);
+            return count;
         }
 
         public async Task GoToFirstPage()

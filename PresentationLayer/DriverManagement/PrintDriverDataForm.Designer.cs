@@ -105,10 +105,6 @@
             printPreviewControl.Size = new Size(800, 415);
             printPreviewControl.TabIndex = 0;
             // 
-            // printDocument
-            // 
-            printDocument.PrintPage += printDocument_PrintPage;
-            // 
             // PrintDriverDataForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
