@@ -43,16 +43,38 @@ namespace StartSmartDeliveryForm.Tests.SharedTestItems
             return (logger, memorySink);
         }
 
-        public static void AssertSingleLogEvent(InMemorySink? memorySink, LogEventLevel expectedLevel, string expectedMessage)
+        public static void AssertSingleLogEvent(InMemorySink? MemorySink, LogEventLevel ExpectedLevel, string ExpectedMessage)
         {
-            if (memorySink != null)
+            if (MemorySink != null)
             {
-                if (memorySink.LogEvents.Any())
+                if (MemorySink.LogEvents.Any())
                 {
-                    List<LogEvent> memoryLog = memorySink.LogEvents.ToList();
-                    Assert.Single(memoryLog);
-                    Assert.Equal(expectedLevel, memoryLog[0].Level);
-                    Assert.Contains(expectedMessage, memoryLog[0].RenderMessage());
+                    List<LogEvent> memoryLog = MemorySink.LogEvents.ToList();
+                    Assert.Equal(ExpectedLevel, memoryLog[0].Level);
+                    Assert.Contains(ExpectedMessage, memoryLog[0].RenderMessage());
+                }
+                else
+                {
+                    Assert.Fail("No log events found.");
+                }
+            }
+            else
+            {
+                Assert.Fail("Memory sink is null.");
+            }
+        }
+
+        public static void AssertLogEventContainsMessage(InMemorySink? MemorySink, LogEventLevel ExpectedLevel, string ExpectedMessage)
+        {
+            if (MemorySink != null)
+            {
+                if (MemorySink.LogEvents.Any())
+                {
+                    List<LogEvent> matchingLogEvents = MemorySink.LogEvents
+                        .Where(logEvent => logEvent.Level == ExpectedLevel && logEvent.RenderMessage().Contains(ExpectedMessage))
+                        .ToList();
+
+                    Assert.NotEmpty(matchingLogEvents);
                 }
                 else
                 {

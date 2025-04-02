@@ -30,7 +30,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DriverManagement.M
 
         protected ResiliencePipelineProvider<string> _mockPipelineProvider;
         protected IConfiguration _mockConfiguration;
-        protected InMemorySink? memorySink;
+        protected InMemorySink? _memorySink;
         protected ILogger<DriverManagementModel>? _memoryLogger;
         protected RetryEventService _mockRetryEventService;
         public DriverManagementModelTestBase(DatabaseFixture fixture, ITestOutputHelper output)
@@ -57,7 +57,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DriverManagement.M
         {
             (ILogger<DriverManagementModel> MemoryLogger, InMemorySink MemorySink) = SharedFunctions.CreateMemorySinkLogger<DriverManagementModel>();
             _memoryLogger = MemoryLogger;
-            memorySink = MemorySink;
+            _memorySink = MemorySink;
         }
     }
 
@@ -291,31 +291,8 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DriverManagement.M
             await _driverManagementModel.UpdateDriverAsync(mockDriver);
 
             // Assert
-            if (memorySink != null)
-            {
-                if (memorySink.LogEvents.Any())
-                {
-                    bool messageFound = false;
 
-                    _testLogger.LogInformation("Message: {Message} ", message);
-                    foreach (LogEvent? logEvent in memorySink.LogEvents)
-                    {
-                        _testLogger.LogInformation("Iteration: {IterationMessage}", logEvent.RenderMessage());
-
-                        if (logEvent.RenderMessage().Contains(message))
-                        {
-                            messageFound = true;
-                            break;
-                        }
-                    }
-
-                    Assert.True(messageFound);
-                }
-                else
-                {
-                    Assert.Fail("No log events found.");
-                }
-            }
+           SharedFunctions.AssertLogEventContainsMessage(_memorySink, LogEventLevel.Warning, message);
         }
 
         [SkippableTheory]
@@ -400,31 +377,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DriverManagement.M
             await _driverManagementModel.DeleteDriverAsync(999);
 
             // Assert
-            if (memorySink != null)
-            {
-                if (memorySink.LogEvents.Any())
-                {
-                    bool messageFound = false;
-
-                    _testLogger.LogInformation("Message: {Message} ", message);
-                    foreach (LogEvent? logEvent in memorySink.LogEvents)
-                    {
-                        _testLogger.LogInformation("Iteration: {IterationMessage}", logEvent.RenderMessage());
-
-                        if (logEvent.RenderMessage().Contains(message))
-                        {
-                            messageFound = true;
-                            break;
-                        }
-                    }
-
-                    Assert.True(messageFound);
-                }
-                else
-                {
-                    Assert.Fail("No log events found.");
-                }
-            }
+            SharedFunctions.AssertLogEventContainsMessage(_memorySink, LogEventLevel.Warning, message);
         }
 
         [SkippableFact]
