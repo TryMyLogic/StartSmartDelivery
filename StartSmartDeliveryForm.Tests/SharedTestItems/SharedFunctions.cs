@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Core;
+using Serilog.Events;
 using Serilog.Sinks.InMemory;
 using Xunit.Abstractions;
 
@@ -40,6 +41,28 @@ namespace StartSmartDeliveryForm.Tests.SharedTestItems
             ILogger<T> logger = memoryLoggerFactory.CreateLogger<T>();
 
             return (logger, memorySink);
+        }
+
+        public static void AssertSingleLogEvent(InMemorySink? memorySink, LogEventLevel expectedLevel, string expectedMessage)
+        {
+            if (memorySink != null)
+            {
+                if (memorySink.LogEvents.Any())
+                {
+                    List<LogEvent> memoryLog = memorySink.LogEvents.ToList();
+                    Assert.Single(memoryLog);
+                    Assert.Equal(expectedLevel, memoryLog[0].Level);
+                    Assert.Contains(expectedMessage, memoryLog[0].RenderMessage());
+                }
+                else
+                {
+                    Assert.Fail("No log events found.");
+                }
+            }
+            else
+            {
+                Assert.Fail("Memory sink is null.");
+            }
         }
     }
 }

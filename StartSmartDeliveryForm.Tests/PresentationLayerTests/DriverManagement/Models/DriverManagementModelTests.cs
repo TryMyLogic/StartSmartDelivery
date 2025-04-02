@@ -53,7 +53,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DriverManagement.M
             _paginationManager = new(_driversDAO, null);
         }
 
-        public void InitializeMemorySinkLogger()
+        internal void InitializeMemorySinkLogger()
         {
             (ILogger<DriverManagementModel> MemoryLogger, InMemorySink MemorySink) = SharedFunctions.CreateMemorySinkLogger<DriverManagementModel>();
             _memoryLogger = MemoryLogger;

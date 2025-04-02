@@ -48,7 +48,7 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
             _driversDAO = new DriversDAO(_mockPipelineProvider, _mockConfiguration, _testLogger, _connectionString, _mockRetryEventService);
         }
 
-        public void InitializeMemorySinkLogger()
+        internal void InitializeMemorySinkLogger()
         {
             (ILogger<DriversDAO> MemoryLogger, InMemorySink MemorySink) = SharedFunctions.CreateMemorySinkLogger<DriversDAO>();
             _memoryLogger = MemoryLogger;
