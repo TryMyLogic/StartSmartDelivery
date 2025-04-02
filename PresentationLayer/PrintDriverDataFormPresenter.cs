@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using StartSmartDeliveryForm.DataLayer.DAOs;
 using StartSmartDeliveryForm.SharedLayer;
 
-namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
+namespace StartSmartDeliveryForm.PresentationLayer
 {
     public class PrintDriverDataFormPresenter<T> where T : class
     {
@@ -14,7 +14,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
         private readonly ILogger<PrintDriverDataFormPresenter<T>> _logger;
         private readonly PrintDocument _printDocument;
         private readonly DataTable? _dataTable;
-        private int _recordCount;
+        private readonly int _recordCount;
         private readonly int _recordsPerPage = GlobalConstants.s_recordLimit;
 
         public PrintDriverDataFormPresenter(IPrintDriverDataForm printDriverDataForm, IDAO<T> dao, DataTable? dataTable, ILogger<PrintDriverDataFormPresenter<T>>? logger = null)
@@ -129,7 +129,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
                 foreach (object? cell in row.ItemArray)
                 {
                     string cellText = cell?.ToString() ?? "";
-                    float availableWidth = columnWidth - (2 * padding);
+                    float availableWidth = columnWidth - 2 * padding;
                     SizeF cellSize = e.Graphics.MeasureString(cellText, font, (int)availableWidth);
                     maxRowHeight = Math.Max(maxRowHeight, cellSize.Height);
                 }
@@ -139,7 +139,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
                 foreach (object? cell in row.ItemArray)
                 {
                     string cellText = cell?.ToString() ?? "";
-                    float availableWidth = columnWidth - (2 * padding); // width for wrapping text without padding
+                    float availableWidth = columnWidth - 2 * padding; // width for wrapping text without padding
 
                     // Wraps text if needed
                     StringFormat stringFormat = new()

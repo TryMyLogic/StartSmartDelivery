@@ -1,6 +1,6 @@
 ﻿using System.Drawing.Printing;
 
-namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
+namespace StartSmartDeliveryForm.PresentationLayer
 {
     public interface IPrintDriverDataForm
     {

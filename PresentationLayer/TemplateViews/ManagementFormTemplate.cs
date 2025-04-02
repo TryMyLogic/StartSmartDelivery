@@ -142,7 +142,7 @@ namespace StartSmartDeliveryForm.PresentationLayer
                 int formHeightWithoutDataGridView = DataGridView.Parent.Height - DataGridView.Height;
                 int newHeight = formHeightWithoutDataGridView + requiredHeight;
                 DataGridView.Parent.Height = newHeight;
-                _logger.LogInformation($"Row Height: {rowHeight}, Column Headers Height: {DataGridView.ColumnHeadersHeight}, New Height: {newHeight}");
+                _logger.LogInformation("Row Height: {RowHeight}, Column Headers Height: {ColumnHeadersHeight}, New Height: {NewHeight}", rowHeight,DataGridView.ColumnHeadersHeight, newHeight);
             }
             else
             {
