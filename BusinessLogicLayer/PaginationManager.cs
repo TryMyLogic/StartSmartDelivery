@@ -18,7 +18,7 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
 
         public PaginationManager()
         {
-            _dao = null!;  // or set to a mock DAO or empty if needed
+            _dao = null!; 
             _logger = NullLogger<PaginationManager<T>>.Instance;
         }
 

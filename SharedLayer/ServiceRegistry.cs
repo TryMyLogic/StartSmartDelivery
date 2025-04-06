@@ -9,11 +9,14 @@ using Serilog.Events;
 using StartSmartDeliveryForm.BusinessLogicLayer;
 using StartSmartDeliveryForm.DataLayer.DAOs;
 using StartSmartDeliveryForm.DataLayer.DTOs;
+using StartSmartDeliveryForm.Generics;
+using StartSmartDeliveryForm.PresentationLayer;
 using StartSmartDeliveryForm.PresentationLayer.DriverManagement;
 using StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models;
 using StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters;
 using StartSmartDeliveryForm.PresentationLayer.TemplatePresenters;
 using StartSmartDeliveryForm.PresentationLayer.TemplateViews;
+using static StartSmartDeliveryForm.Generics.TableDefinition;
 
 
 namespace StartSmartDeliveryForm.SharedLayer
@@ -138,6 +141,10 @@ namespace StartSmartDeliveryForm.SharedLayer
                 .AddScoped<DriversDAO>()
                 .AddScoped<IDAO<DriversDTO>, DriversDAO>()
 
+                .AddScoped<TableConfig>(_ => TableConfigs.Drivers)
+                .AddScoped<GenericManagementForm>()
+                .AddScoped<IRepository<DriversDTO>, GenericRepository<DriversDTO>>()
+
                 .AddScoped<PaginationManager<DriversDTO>>()
                 .AddScoped<DriverManagementForm>()
                 .AddScoped<PrintDriverDataForm>()
@@ -150,6 +157,7 @@ namespace StartSmartDeliveryForm.SharedLayer
                 .AddTransient<IDriverManagementModel, DriverManagementModel>()
                 .AddTransient<DriverManagementModel>()
                 .AddTransient<DriverManagementFormPresenter>()
+       
                 .BuildServiceProvider();
 
             GlobalConstants.Configuration = configuration;
