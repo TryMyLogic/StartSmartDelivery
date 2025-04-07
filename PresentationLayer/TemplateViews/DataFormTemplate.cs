@@ -1,16 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using StartSmartDeliveryForm.SharedLayer;
+using StartSmartDeliveryForm.SharedLayer.Enums;
 using StartSmartDeliveryForm.SharedLayer.EventArgs;
 using StartSmartDeliveryForm.SharedLayer.Interfaces;
 
 namespace StartSmartDeliveryForm.PresentationLayer.TemplateViews
 {
-    public enum FormMode
-    {
-        Add,
-        Edit
-    }
     public partial class DataFormTemplate : Form, IDataForm
     {
         public FormMode Mode { get; set; }

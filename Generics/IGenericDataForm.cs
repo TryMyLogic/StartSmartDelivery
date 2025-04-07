@@ -1,9 +1,9 @@
 ﻿using StartSmartDeliveryForm.SharedLayer.Enums;
 using StartSmartDeliveryForm.SharedLayer.EventArgs;
 
-namespace StartSmartDeliveryForm.PresentationLayer.TemplateViews
+namespace StartSmartDeliveryForm.Generics
 {
-    public interface IDataForm
+    public interface IGenericDataForm
     {
         public FormMode Mode { get; set; }
         public event EventHandler<SubmissionCompletedEventArgs>? SubmitClicked;

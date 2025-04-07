@@ -3,6 +3,7 @@ using System.IO.Abstractions;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using StartSmartDeliveryForm.DataLayer.DTOs;
 using StartSmartDeliveryForm.Generics;
 using StartSmartDeliveryForm.PresentationLayer.TemplateViews;
 using StartSmartDeliveryForm.SharedLayer;

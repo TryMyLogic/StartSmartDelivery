@@ -67,6 +67,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Generics\DataFormTemplate.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="Generics\ManagementFormTemplate.cs">
       <SubType>Form</SubType>
     </Compile>

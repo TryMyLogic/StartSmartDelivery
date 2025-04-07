@@ -26,7 +26,10 @@ namespace StartSmartDeliveryForm.Generics
             public Action<object, SqlCommand> MapUpdateParameters { get; set; } = (_, _) => throw new InvalidOperationException("Update mapping not defined for this table.");
             public Action<DataRow, object> MapToRow { get; set; } = (_, _) => throw new NotImplementedException("MapToRow must be implemented.");
             public Func<DataGridViewRow, object> CreateFromRow { get; set; } = _ => throw new NotImplementedException("CreateFromRow must be implemented.");
-
+            public Action<object, Dictionary<string, Control>> MapToForm { get; set; } = (_, _) => throw new NotImplementedException("MapToForm must be implemented.");
+            public Func<Dictionary<string, Control>, object> CreateFromForm { get; set; } = _ => throw new NotImplementedException("CreateFromForm must be implemented.");
+            public Func<ColumnConfig, object?> GetDefaultValue { get; set; } = column => column.SqlType == SqlDbType.Bit ? true : null;
+          
             public TableConfig AddColumn(string name, SqlDbType sqlType, bool isIdentity = false, bool isUnique = false, int? size = null)
             {
                 Columns.Add(new ColumnConfig(name, sqlType, isIdentity, isUnique, size));
@@ -85,7 +88,44 @@ namespace StartSmartDeliveryForm.Generics
                     EmployeeNo: row.Cells["EmployeeNo"].Value.ToString()!,
                     LicenseType: (LicenseType)row.Cells["LicenseType"].Value,
                     Availability: (bool)row.Cells["Availability"].Value
-                )
+                ),
+                MapToForm = (entity, controls) =>
+                {
+                    DriversDTO driver = (DriversDTO)entity;
+                    if (controls.TryGetValue("DriverID", out Control? driverIdControl) && driverIdControl is TextBox driverIdTextBox)
+                        driverIdTextBox.Text = driver.DriverID.ToString();
+                    if (controls.TryGetValue("Name", out Control? nameControl) && nameControl is TextBox nameTextBox)
+                        nameTextBox.Text = driver.Name;
+                    if (controls.TryGetValue("Surname", out Control? surnameControl) && surnameControl is TextBox surnameTextBox)
+                        surnameTextBox.Text = driver.Surname;
+                    if (controls.TryGetValue("EmployeeNo", out Control? empNoControl) && empNoControl is TextBox empNoTextBox)
+                        empNoTextBox.Text = driver.EmployeeNo;
+                    if (controls.TryGetValue("LicenseType", out Control? licenseControl) && licenseControl is ComboBox licenseComboBox)
+                        licenseComboBox.SelectedItem = driver.LicenseType.ToString();
+                    if (controls.TryGetValue("Availability", out Control? availControl) && availControl is ComboBox availComboBox)
+                        availComboBox.SelectedItem = driver.Availability.ToString();
+                },
+                CreateFromForm = (controls) =>
+                {
+                    int DriverID = controls.TryGetValue("DriverID", out Control? driverIdControl) && driverIdControl is TextBox driverIdTextBox && int.TryParse(driverIdTextBox.Text, out int id) ? id : 0;
+                    string name = controls.TryGetValue("Name", out Control? nameControl) && nameControl is TextBox nameTextBox ? nameTextBox.Text : string.Empty;
+                    string surname = controls.TryGetValue("Surname", out Control? surnameControl) && surnameControl is TextBox surnameTextBox ? surnameTextBox.Text : string.Empty;
+                    string employeeNo = controls.TryGetValue("EmployeeNo", out Control? empNoControl) && empNoControl is TextBox empNoTextBox ? empNoTextBox.Text : string.Empty;
+                    LicenseType licenseType = controls.TryGetValue("LicenseType", out Control? licenseControl) && licenseControl is ComboBox licenseComboBox && licenseComboBox.SelectedItem != null
+                        ? (LicenseType)Enum.Parse(typeof(LicenseType), licenseComboBox.SelectedItem.ToString()!)
+                        : LicenseType.Code8; // Default value
+                    bool availability = controls.TryGetValue("Availability", out Control? availControl)
+                    && availControl is ComboBox availComboBox && availComboBox.SelectedItem != null
+                    && bool.Parse(availComboBox.SelectedItem.ToString()!); // Default value
+
+                    return new DriversDTO(DriverID, name, surname, employeeNo, licenseType, availability);
+                }, 
+                GetDefaultValue = column => column.Name switch
+                {
+                    "Availability" => true, // Overriding default bool being false
+                    _ => column.SqlType == SqlDbType.Bit ? false : null 
+                }
+
             };
         }
     }
