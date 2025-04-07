@@ -81,14 +81,14 @@ namespace StartSmartDeliveryForm.Tests.GenericTests
             string deletePath = mockFileSystem.Path.GetFullPath(
                 mockFileSystem.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "PresentationLayer", "Images", "DeleteIcon.png"));
 
-            byte[] pngBytes = {
+            byte[] pngBytes = [
             0x89, // Non-ASCII byte prevents misinterpretation as a text file
             0x50, 0x4E, 0x47, // "P,N,G" in ASCII
             0x0D,
             0x0A,
             0x1A,
             0x0A
-        };
+            ];
 
             mockFileSystem.AddFile(editPath, new MockFileData(pngBytes));
             mockFileSystem.AddFile(deletePath, new MockFileData(pngBytes));

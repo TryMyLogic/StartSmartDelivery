@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace StartSmartDeliveryForm.Generics
 {
-    public class GenericDataFormValidator()
+    public class GenericDataFormValidator() 
     {
         public delegate void MessageBoxEventDelegate(string text, string caption, MessageBoxButtons buttons, MessageBoxIcon icon);
         public event MessageBoxEventDelegate? RequestMessageBox;
@@ -28,7 +28,7 @@ namespace StartSmartDeliveryForm.Generics
                 RequestMessageBox?.Invoke($"{enumType.Name} is not an enum type.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
-            if (string.IsNullOrEmpty(input) || !Enum.TryParse(enumType, input, out var value) || !Enum.IsDefined(enumType, value))
+            if (string.IsNullOrEmpty(input) || !Enum.TryParse(enumType, input, out object? value) || !Enum.IsDefined(enumType, value))
             {
                 RequestMessageBox?.Invoke($"'{input ?? "null"}' is not a valid {enumType.Name} value.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;

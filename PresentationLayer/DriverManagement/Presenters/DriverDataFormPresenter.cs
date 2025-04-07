@@ -4,7 +4,6 @@ using StartSmartDeliveryForm.BusinessLogicLayer;
 using StartSmartDeliveryForm.DataLayer.DAOs;
 using StartSmartDeliveryForm.PresentationLayer.DriverManagement.Views;
 using StartSmartDeliveryForm.PresentationLayer.TemplatePresenters;
-using StartSmartDeliveryForm.PresentationLayer.TemplateViews;
 using StartSmartDeliveryForm.SharedLayer.Enums;
 
 namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters

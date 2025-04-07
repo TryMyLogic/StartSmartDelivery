@@ -198,6 +198,9 @@ namespace StartSmartDeliveryForm.PresentationLayer.TemplateViews
             Size = new Size(requiredWidth, requiredHeight); // Initial size matches content
         }
 
-
+        public Dictionary<string, Control> GetControls()
+        {
+            return _dynamicControls;
+        }
     }
 }
