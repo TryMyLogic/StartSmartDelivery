@@ -64,10 +64,22 @@ namespace StartSmartDeliveryForm.Tests.SharedTestItems
             }
         }
 
-        public static void AssertLogEventContainsMessage(InMemorySink? MemorySink, LogEventLevel ExpectedLevel, string ExpectedMessage)
+        public static void AssertLogEventContainsMessage(InMemorySink? MemorySink, LogEventLevel ExpectedLevel, string ExpectedMessage, Microsoft.Extensions.Logging.ILogger? testLogger = null)
         {
+    
+
             if (MemorySink != null)
             {
+                if (testLogger != null)
+                {
+                    testLogger.LogInformation("Logging test information");
+                    foreach (LogEvent? logEvent in MemorySink.LogEvents)
+                    {
+                        
+                        testLogger.LogInformation("[Captured:{Level}] {Message}", logEvent.Level, logEvent.RenderMessage());
+                    }
+                }
+
                 if (MemorySink.LogEvents.Any())
                 {
                     List<LogEvent> matchingLogEvents = MemorySink.LogEvents
@@ -86,5 +98,6 @@ namespace StartSmartDeliveryForm.Tests.SharedTestItems
                 Assert.Fail("Memory sink is null.");
             }
         }
+
     }
 }

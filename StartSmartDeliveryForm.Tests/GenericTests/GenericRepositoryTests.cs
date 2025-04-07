@@ -115,20 +115,6 @@ namespace StartSmartDeliveryForm.Tests.GenericTests
             }
         }
 
-        [SkippableFact]
-        public async Task GetRecordCountAsync_GetsCorrectRecordCount()
-        {
-            Skip.If(_shouldSkipTests, "Test Database is not available. Skipping this test");
-
-            // Arrange
-
-            // Act
-            int recordCount = await _repository.GetRecordCountAsync();
-
-            // Assert
-            Assert.Equal(105, recordCount);
-        }
-
         [SkippableTheory]
         [InlineData(1, "Sarah", "Johnson", "EMP1230", 1, true)]
         [InlineData(2, "Emily", "Jones", "EMP7380", 1, false)]
@@ -182,6 +168,21 @@ namespace StartSmartDeliveryForm.Tests.GenericTests
     public class SequentialGenericRepositoryTests(DatabaseFixture fixture, ITestOutputHelper output)
     : GenericRepositoryTestBase(fixture, output)
     {
+
+        [SkippableFact]
+        public async Task GetRecordCountAsync_GetsCorrectRecordCount()
+        {
+            Skip.If(_shouldSkipTests, "Test Database is not available. Skipping this test");
+
+            // Arrange
+
+            // Act
+            int recordCount = await _repository.GetRecordCountAsync();
+
+            // Assert
+            Assert.Equal(105, recordCount);
+        }
+
         [SkippableTheory]
         [InlineData(-1, false)] // Cannot have negative page
 

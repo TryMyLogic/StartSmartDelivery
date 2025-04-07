@@ -35,7 +35,7 @@ namespace StartSmartDeliveryForm.Generics
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException("DynamicPaginationManager Initialization failed", ex);
+                throw new InvalidOperationException("GenericPaginationManager Initialization failed", ex);
             }
         }
 
