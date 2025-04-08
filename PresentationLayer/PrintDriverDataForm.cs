@@ -4,20 +4,20 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 {
-    public partial class PrintDriverDataForm : Form, IPrintDriverDataForm
+    public partial class GenericPrintDataForm : Form, IGenericPrintDataForm
     {
         private readonly ILogger _logger;
         public int CurrentPage { get; set; } = 1;
         public int TotalPages { get; set; } = 1;
 
-        public PrintDriverDataForm(ILogger<PrintDriverDataForm>? logger = null)
+        public GenericPrintDataForm(ILogger<GenericPrintDataForm>? logger = null)
         {
             InitializeComponent();
             printPreviewControl.Document = printDocument;
-            _logger = logger ?? NullLogger<PrintDriverDataForm>.Instance;
+            _logger = logger ?? NullLogger<GenericPrintDataForm>.Instance;
         }
 
-        private void PrintDriverDataForm_Load(object sender, EventArgs e) { }
+        private void GenericPrintDataForm_Load(object sender, EventArgs e) { }
 
         public void SetPrintDocument(PrintDocument document)
         {
@@ -59,5 +59,6 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
         {
             Close();
         }
+
     }
 }

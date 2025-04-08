@@ -66,7 +66,7 @@ namespace StartSmartDeliveryForm.Tests.SharedTestItems
 
         public static void AssertLogEventContainsMessage(InMemorySink? MemorySink, LogEventLevel ExpectedLevel, string ExpectedMessage, Microsoft.Extensions.Logging.ILogger? testLogger = null)
         {
-    
+
 
             if (MemorySink != null)
             {
@@ -75,7 +75,7 @@ namespace StartSmartDeliveryForm.Tests.SharedTestItems
                     testLogger.LogInformation("Logging test information");
                     foreach (LogEvent? logEvent in MemorySink.LogEvents)
                     {
-                        
+
                         testLogger.LogInformation("[Captured:{Level}] {Message}", logEvent.Level, logEvent.RenderMessage());
                     }
                 }

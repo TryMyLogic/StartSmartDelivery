@@ -1,5 +1,4 @@
-﻿using StartSmartDeliveryForm.PresentationLayer.TemplateViews;
-using StartSmartDeliveryForm.SharedLayer.Enums;
+﻿using StartSmartDeliveryForm.SharedLayer.Enums;
 
 namespace StartSmartDeliveryForm.SharedLayer.EventArgs
 {

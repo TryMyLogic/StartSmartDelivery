@@ -1,6 +1,6 @@
 ﻿namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
 {
-    partial class PrintDriverDataForm
+    partial class GenericPrintDataForm
     {
         /// <summary>
         /// Required designer variable.
@@ -105,16 +105,16 @@
             printPreviewControl.Size = new Size(800, 415);
             printPreviewControl.TabIndex = 0;
             // 
-            // PrintDriverDataForm
+            // GenericPrintDataForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
             Controls.Add(printPreviewControl);
             Controls.Add(tableLayoutPanel1);
-            Name = "PrintDriverDataForm";
+            Name = "GenericPrintDataForm";
             Text = "PrintDriverDataForm";
-            Load += PrintDriverDataForm_Load;
+            Load += GenericPrintDataForm_Load;
             tableLayoutPanel1.ResumeLayout(false);
             tableLayoutPanel1.PerformLayout();
             flowLayoutPanel1.ResumeLayout(false);

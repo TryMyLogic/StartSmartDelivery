@@ -4,12 +4,9 @@ using StartSmartDeliveryForm.DataLayer.DAOs;
 using StartSmartDeliveryForm.DataLayer.DTOs;
 using StartSmartDeliveryForm.Generics;
 using StartSmartDeliveryForm.PresentationLayer;
-using StartSmartDeliveryForm.PresentationLayer.DriverManagement;
-using StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models;
-using StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters;
 using StartSmartDeliveryForm.PresentationLayer.TemplateViews;
 using StartSmartDeliveryForm.SharedLayer;
-using static StartSmartDeliveryForm.Generics.TableDefinition;
+using static StartSmartDeliveryForm.SharedLayer.TableDefinition;
 
 namespace StartSmartDeliveryForm
 {
