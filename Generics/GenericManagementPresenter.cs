@@ -9,6 +9,9 @@ using StartSmartDeliveryForm.SharedLayer.Enums;
 using StartSmartDeliveryForm.SharedLayer.EventArgs;
 using static StartSmartDeliveryForm.Generics.TableDefinition;
 using StartSmartDeliveryForm.PresentationLayer.TemplateViews;
+using StartSmartDeliveryForm.DataLayer.DTOs;
+using StartSmartDeliveryForm.PresentationLayer.DriverManagement;
+using StartSmartDeliveryForm.PresentationLayer;
 
 namespace StartSmartDeliveryForm.Generics
 {
@@ -19,9 +22,11 @@ namespace StartSmartDeliveryForm.Generics
         private readonly ILogger<GenericManagementPresenter<T>> _logger;
         private readonly ILogger<GenericDataFormTemplate> _dataFormLogger;
 
+        private readonly ILogger<GenericPrintDataForm> _printDataFormLogger;
         private readonly GenericDataFormValidator _validator;
         private GenericDataFormTemplate? _dataForm;
         private readonly ILogger<GenericDataFormPresenter<T>> _dataFormPresenterLogger;
+        ILogger<GenericPrintDataPresenter<T>> _printDataPresenterLogger;
 
         private readonly TableConfig _tableConfig;
         private readonly IRepository<T> _repository;
@@ -33,7 +38,9 @@ namespace StartSmartDeliveryForm.Generics
         IRepository<T> repository,
         ILogger<GenericManagementPresenter<T>>? logger = null,
         ILogger<GenericDataFormTemplate>? dataFormLogger = null,
-        ILogger<GenericDataFormPresenter<T>>? dataFormPresenterLogger = null
+        ILogger<GenericDataFormPresenter<T>>? dataFormPresenterLogger = null,
+        ILogger<GenericPrintDataForm>? printDataFormLogger = null,
+        ILogger<GenericPrintDataPresenter<T>>? printDataPresenterLogger = null
         )
         {
             _managementForm = managementForm ?? throw new ArgumentNullException(nameof(managementForm));
@@ -44,6 +51,8 @@ namespace StartSmartDeliveryForm.Generics
             _dataFormPresenterLogger = dataFormPresenterLogger ?? NullLogger<GenericDataFormPresenter<T>>.Instance;
             _validator = new GenericDataFormValidator();
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _printDataFormLogger = printDataFormLogger ?? NullLogger<GenericPrintDataForm>.Instance;
+            _printDataPresenterLogger = printDataPresenterLogger ?? NullLogger<GenericPrintDataPresenter<T>>.Instance;
 
             WireUpEvents();
         }
@@ -120,7 +129,6 @@ namespace StartSmartDeliveryForm.Generics
             DataGridViewRow selectedRow = _managementForm.DgvMain.Rows[rowIndex];
             T entity = _managementModel.GetEntityFromRow(selectedRow);
 
-            // Check if entity is valid (adjust condition based on your needs)
             object? primaryKeyValue = selectedRow.Cells[_tableConfig.PrimaryKey].Value;
             if (primaryKeyValue == null || (int.TryParse(primaryKeyValue.ToString(), out int id) && id == 0))
             {
@@ -154,13 +162,13 @@ namespace StartSmartDeliveryForm.Generics
         private async Task HandleDelete(int RowIndex)
         {
             DataGridViewRow selectedRow = _managementForm.DgvMain.Rows[RowIndex];
-            object? DriverID = selectedRow.Cells[_tableConfig.PrimaryKey].Value;
+            object? PkValue = selectedRow.Cells[_tableConfig.PrimaryKey].Value;
 
             DialogResult result = MessageBox.Show("Are you sure?", "Delete Row", MessageBoxButtons.YesNo);
-            if (result == DialogResult.Yes && int.TryParse(DriverID?.ToString(), out int driverID))
+            if (result == DialogResult.Yes && int.TryParse(PkValue?.ToString(), out int id))
             {
-                _logger.LogInformation("Deleting Driver with DriverID: {DriverID}", driverID);
-                await _managementModel.DeleteRecordAsync(driverID);
+                _logger.LogInformation("Deleting record from {TableName} with ID: {ID}", _tableConfig.TableName, id);
+                await _managementModel.DeleteRecordAsync(id);
             }
         }
 
@@ -218,9 +226,15 @@ namespace StartSmartDeliveryForm.Generics
             await _managementModel.PaginationManager.GoToPageAsync(pageNumber);
         }
 
-        private void HandlePrintClicked(object? sender, EventArgs e)
+        private async void HandlePrintClicked(object? sender, EventArgs e)
         {
             _logger.LogInformation("Print Clicked");
+
+            GenericPrintDataForm preview = new(_printDataFormLogger);
+            _ = await GenericPrintDataPresenter<T>.CreateAsync(preview, _repository, _managementModel.DgvTable, _printDataPresenterLogger);
+
+            //Unlike Show, it blocks execution on main form till complete
+            preview.ShowDialog();
         }
 
         // DataForm submit button event handlers
