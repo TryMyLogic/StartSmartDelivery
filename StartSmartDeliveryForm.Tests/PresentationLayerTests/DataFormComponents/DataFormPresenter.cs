@@ -2,21 +2,20 @@
 using StartSmartDeliveryForm.BusinessLogicLayer;
 using StartSmartDeliveryForm.DataLayer.DAOs;
 using StartSmartDeliveryForm.DataLayer.DTOs;
-using StartSmartDeliveryForm.PresentationLayer;
-using StartSmartDeliveryForm.PresentationLayer.TemplateViews;
+using StartSmartDeliveryForm.PresentationLayer.DataFormComponents;
 using StartSmartDeliveryForm.SharedLayer.Enums;
 using StartSmartDeliveryForm.Tests.SharedTestItems;
 using Xunit.Abstractions;
 using static StartSmartDeliveryForm.SharedLayer.TableDefinition;
 
-namespace StartSmartDeliveryForm.Tests.PresentationLayerTests
+namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DataFormComponents
 {
-    public class GenericDataFormPresenterTests(DatabaseFixture fixture, ITestOutputHelper output) : IClassFixture<DatabaseFixture>
+    public class DataFormPresenterTests(DatabaseFixture fixture, ITestOutputHelper output) : IClassFixture<DatabaseFixture>
     {
-        private readonly ILogger<GenericDataFormPresenter<DriversDTO>> _testLogger = SharedFunctions.CreateTestLogger<GenericDataFormPresenter<DriversDTO>>(output);
+        private readonly ILogger<DataFormPresenter<DriversDTO>> _testLogger = SharedFunctions.CreateTestLogger<DataFormPresenter<DriversDTO>>(output);
         private readonly IRepository<DriversDTO> _repository = fixture.DriversRepository;
-        private readonly GenericDataFormValidator _genericDataFormValidator = new();
-        private GenericDataFormTemplate? _genericDataForm;
+        private readonly DataFormValidator _genericDataFormValidator = new();
+        private DataForm? _genericDataForm;
 
         [Theory]
         [InlineData(1, "John", "Doe", "EMP001", LicenseType.Code8, false, true)]
@@ -39,7 +38,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests
             _genericDataForm = new(typeof(DriversDTO), TableConfigs.Drivers, null, new NoMessageBox());
             DriversDTO Driver = new(DriverID, Name, Surname, EmployeeNo, LicenseType, Availability);
             _genericDataForm.InitializeEditing(Driver);
-            GenericDataFormPresenter<DriversDTO> presenter = new(_genericDataForm, _repository, TableConfigs.Drivers, _genericDataFormValidator);
+            DataFormPresenter<DriversDTO> presenter = new(_genericDataForm, _repository, TableConfigs.Drivers, _genericDataFormValidator);
 
             // Act
             bool result = await presenter.ValidFormAsync();

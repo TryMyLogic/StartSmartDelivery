@@ -4,22 +4,21 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using StartSmartDeliveryForm.BusinessLogicLayer;
 using StartSmartDeliveryForm.DataLayer.DAOs;
-using StartSmartDeliveryForm.Generics;
 using StartSmartDeliveryForm.SharedLayer.Enums;
 using StartSmartDeliveryForm.SharedLayer.EventArgs;
 using StartSmartDeliveryForm.SharedLayer.EventDelegates;
 using static StartSmartDeliveryForm.SharedLayer.TableDefinition;
 
-namespace StartSmartDeliveryForm.PresentationLayer
+namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 {
-    public class GenericManagementModel<T> : IGenericManagementModel<T> where T : class
+    public class ManagementModel<T> : IManagementModel<T> where T : class
     {
-        private readonly ILogger<GenericManagementModel<T>> _logger;
+        private readonly ILogger<ManagementModel<T>> _logger;
         private readonly IRepository<T> _repository;
         private readonly TableConfig _tableConfig;
 
         public DataTable DgvTable { get; private set; }
-        public GenericPaginationManager<T> PaginationManager { get; }
+        public PaginationManager<T> PaginationManager { get; }
 
         public event MessageBoxEventDelegate? DisplayErrorMessage;
         protected void InvokeDisplayErrorMessage(string text, string caption, MessageBoxButtons button, MessageBoxIcon icon)
@@ -27,17 +26,17 @@ namespace StartSmartDeliveryForm.PresentationLayer
             DisplayErrorMessage?.Invoke(text, caption, button, icon);
         }
 
-        public GenericManagementModel(
+        public ManagementModel(
             IRepository<T> repository,
             TableConfig tableConfig,
-            GenericPaginationManager<T> paginationManager,
-            ILogger<GenericManagementModel<T>>? logger = null,
-            ILogger<GenericPaginationManager<T>>? paginationLogger = null)
+            PaginationManager<T> paginationManager,
+            ILogger<ManagementModel<T>>? logger = null,
+            ILogger<PaginationManager<T>>? paginationLogger = null)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _tableConfig = tableConfig ?? throw new ArgumentNullException(nameof(tableConfig));
             DgvTable = new DataTable();
-            _logger = logger ?? NullLogger<GenericManagementModel<T>>.Instance;
+            _logger = logger ?? NullLogger<ManagementModel<T>>.Instance;
 
             PaginationManager = paginationManager;
             PaginationManager.PageChanged += OnPageChanged;

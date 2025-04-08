@@ -10,7 +10,8 @@ using Serilog.Sinks.InMemory;
 using StartSmartDeliveryForm.BusinessLogicLayer;
 using StartSmartDeliveryForm.DataLayer.DAOs;
 using StartSmartDeliveryForm.DataLayer.DTOs;
-using StartSmartDeliveryForm.PresentationLayer;
+using StartSmartDeliveryForm.DataLayer.Repositories;
+using StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents;
 using StartSmartDeliveryForm.SharedLayer;
 using StartSmartDeliveryForm.SharedLayer.Enums;
 using StartSmartDeliveryForm.SharedLayer.EventArgs;
@@ -18,26 +19,26 @@ using StartSmartDeliveryForm.Tests.SharedTestItems;
 using Xunit.Abstractions;
 using static StartSmartDeliveryForm.SharedLayer.TableDefinition;
 
-namespace StartSmartDeliveryForm.Tests.GenericTests
+namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.ManagementFormComponents
 {
-    public abstract class GenericManagementModelTestsBase : IClassFixture<DatabaseFixture>
+    public abstract class ManagementModelTestsBase : IClassFixture<DatabaseFixture>
     {
-        protected readonly ILogger<GenericManagementModel<DriversDTO>> _testLogger;
-        protected readonly GenericRepository<DriversDTO> _repository;
-        protected readonly GenericPaginationManager<DriversDTO> _paginationManager;
-        protected GenericManagementModel<DriversDTO>? _managementModel;
+        protected readonly ILogger<ManagementModel<DriversDTO>> _testLogger;
+        protected readonly Repository<DriversDTO> _repository;
+        protected readonly PaginationManager<DriversDTO> _paginationManager;
+        protected ManagementModel<DriversDTO>? _managementModel;
         protected readonly bool _shouldSkipTests;
         protected readonly string _connectionString;
 
         protected ResiliencePipelineProvider<string> _mockPipelineProvider;
         protected IConfiguration _mockConfiguration;
         protected InMemorySink? _memorySink;
-        protected ILogger<GenericManagementModel<DriversDTO>>? _memoryLogger;
+        protected ILogger<ManagementModel<DriversDTO>>? _memoryLogger;
         protected RetryEventService _mockRetryEventService;
 
-        protected GenericManagementModelTestsBase(DatabaseFixture fixture, ITestOutputHelper output)
+        protected ManagementModelTestsBase(DatabaseFixture fixture, ITestOutputHelper output)
         {
-            _testLogger = SharedFunctions.CreateTestLogger<GenericManagementModel<DriversDTO>>(output);
+            _testLogger = SharedFunctions.CreateTestLogger<ManagementModel<DriversDTO>>(output);
             _connectionString = fixture.ConnectionString;
             _shouldSkipTests = !fixture.CanConnectToDatabase;
 
@@ -46,21 +47,21 @@ namespace StartSmartDeliveryForm.Tests.GenericTests
             _mockConfiguration = Substitute.For<IConfiguration>();
             _mockRetryEventService = Substitute.For<RetryEventService>();
 
-            ILogger<GenericRepository<DriversDTO>> repositoryLogger = SharedFunctions.CreateTestLogger<GenericRepository<DriversDTO>>(output);
-            _repository = new GenericRepository<DriversDTO>(_mockPipelineProvider, _mockConfiguration, TableConfigs.Drivers, repositoryLogger, _connectionString, _mockRetryEventService);
+            ILogger<Repository<DriversDTO>> repositoryLogger = SharedFunctions.CreateTestLogger<Repository<DriversDTO>>(output);
+            _repository = new Repository<DriversDTO>(_mockPipelineProvider, _mockConfiguration, TableConfigs.Drivers, repositoryLogger, _connectionString, _mockRetryEventService);
 
             _paginationManager = new(_repository, null);
         }
 
         protected void InitializeMemorySinkLogger()
         {
-            (ILogger<GenericManagementModel<DriversDTO>> MemoryLogger, InMemorySink MemorySink) = SharedFunctions.CreateMemorySinkLogger<GenericManagementModel<DriversDTO>>();
+            (ILogger<ManagementModel<DriversDTO>> MemoryLogger, InMemorySink MemorySink) = SharedFunctions.CreateMemorySinkLogger<ManagementModel<DriversDTO>>();
             _memoryLogger = MemoryLogger;
             _memorySink = MemorySink;
         }
     }
 
-    public class GenericManagementModelTests(DatabaseFixture fixture, ITestOutputHelper output) : GenericManagementModelTestsBase(fixture, output)
+    public class ManagementModelTests(DatabaseFixture fixture, ITestOutputHelper output) : ManagementModelTestsBase(fixture, output)
     {
         [Theory]
         // Valid cases for filtering
@@ -317,7 +318,7 @@ namespace StartSmartDeliveryForm.Tests.GenericTests
         public async Task InitializeAsync_InitializesAndLogs()
         {
             // Arrange
-            GenericPaginationManager<DriversDTO> paginationManager = new(_repository, null);
+            PaginationManager<DriversDTO> paginationManager = new(_repository, null);
             _managementModel = new(_repository, TableConfigs.Drivers, paginationManager, _testLogger);
 
             // Act
@@ -337,7 +338,7 @@ namespace StartSmartDeliveryForm.Tests.GenericTests
             .Returns(Task.FromException<int>(new InvalidOperationException("PaginationManager Initialization failed")));
 
             // Real PaginationManager will try to access mock function with no set behaviour, causing error
-            GenericPaginationManager<DriversDTO> paginationManager = new(_repositoryMock);
+            PaginationManager<DriversDTO> paginationManager = new(_repositoryMock);
             _managementModel = new(_repository, TableConfigs.Drivers, paginationManager, _testLogger);
 
             // Act
@@ -346,7 +347,7 @@ namespace StartSmartDeliveryForm.Tests.GenericTests
             // Assert
             Assert.Equal("Fatal error during initialization. Pagination will not function.", exception.Message);
             Assert.IsType<InvalidOperationException>(exception.InnerException);
-            Assert.Equal("GenericPaginationManager Initialization failed", exception.InnerException.Message);
+            Assert.Equal("PaginationManager Initialization failed", exception.InnerException.Message);
         }
 
         [Fact]
@@ -429,12 +430,16 @@ namespace StartSmartDeliveryForm.Tests.GenericTests
             Assert.Equal(LicenseType.Code10, selectedDriver.LicenseType);
             Assert.False(selectedDriver.Availability);
         }
+    }
 
+    [Collection("Sequential")]
+    public class SequentialManagementModelTests(DatabaseFixture fixture, ITestOutputHelper output) : ManagementModelTestsBase(fixture, output)
+    {
         [Fact]
         public async Task FetchAndBindRecordsAtPageAsync_FetchesAndBindsDrivers_OfTheSpecifiedPage()
         {
             // Arrange
-            GenericPaginationManager<DriversDTO> paginationManager = new(_repository);
+            PaginationManager<DriversDTO> paginationManager = new(_repository);
             _managementModel = new(_repository, TableConfigs.Drivers, paginationManager, _testLogger);
             await _managementModel.InitializeAsync();
             await _managementModel.PaginationManager.GoToLastPageAsync();
@@ -454,11 +459,7 @@ namespace StartSmartDeliveryForm.Tests.GenericTests
             Assert.Equal((int)LicenseType.Code8, lastRow["LicenseType"]);
             Assert.Equal(false, lastRow["Availability"]);
         }
-    }
 
-    [Collection("Sequential")]
-    public class SequentialGenericManagementModelTests(DatabaseFixture fixture, ITestOutputHelper output) : GenericManagementModelTestsBase(fixture, output)
-    {
         [SkippableTheory]
         [InlineData("Olivia", "Clark", "EMP106", LicenseType.Code8, true)]
         public async Task AddRecordAsync_AddsDriverToDgvTableAndDatabase(string Name, string Surname, string EmployeeNo, LicenseType LicenseType, bool Availability)

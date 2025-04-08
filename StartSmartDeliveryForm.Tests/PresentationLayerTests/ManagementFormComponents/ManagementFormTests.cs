@@ -3,23 +3,23 @@ using System.Drawing;
 using System.IO.Abstractions.TestingHelpers;
 using System.Windows.Forms;
 using Microsoft.Extensions.Logging;
-using StartSmartDeliveryForm.PresentationLayer;
+using StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents;
 using StartSmartDeliveryForm.Tests.SharedTestItems;
 using Xunit.Abstractions;
 using static StartSmartDeliveryForm.SharedLayer.TableDefinition;
 
-namespace StartSmartDeliveryForm.Tests.PresentationLayerTests
+namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.ManagementFormComponents
 {
-    public class GenericManagementFormTests
+    public class ManagementFormTests
     {
-        private readonly ILogger<GenericManagementForm> _testLogger;
-        private readonly GenericManagementForm _noMsgBoxGenericManagementForm;
-        private GenericManagementForm? _testMsgBoxGenericManagementForm;
+        private readonly ILogger<ManagementForm> _testLogger;
+        private readonly ManagementForm _noMsgBoxManagementForm;
+        private ManagementForm? _testMsgBoxManagementForm;
 
-        public GenericManagementFormTests(ITestOutputHelper output)
+        public ManagementFormTests(ITestOutputHelper output)
         {
-            _testLogger = SharedFunctions.CreateTestLogger<GenericManagementForm>(output);
-            _noMsgBoxGenericManagementForm = new GenericManagementForm(
+            _testLogger = SharedFunctions.CreateTestLogger<ManagementForm>(output);
+            _noMsgBoxManagementForm = new ManagementForm(
                 config: TableConfigs.Drivers, // Use Drivers config for consistency
                 logger: _testLogger,
                 messageBox: new NoMessageBox()
@@ -33,10 +33,10 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests
             DataTable expectedDT = new();
             expectedDT.Columns.Add("TestCol", typeof(string));
             expectedDT.Rows.Add("TestValue");
-            _noMsgBoxGenericManagementForm.DgvMain.DataSource = expectedDT;
+            _noMsgBoxManagementForm.DgvMain.DataSource = expectedDT;
 
             // Act
-            DataTable result = _noMsgBoxGenericManagementForm.DataSource;
+            DataTable result = _noMsgBoxManagementForm.DataSource;
 
             // Assert
             Assert.Equal(expectedDT, result);
@@ -46,10 +46,10 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests
         public void DataSource_Get_ThrowsInvalidOperationException_WhenNotDataTable()
         {
             // Arrange
-            _noMsgBoxGenericManagementForm.DgvMain.DataSource = new object();
+            _noMsgBoxManagementForm.DgvMain.DataSource = new object();
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => _noMsgBoxGenericManagementForm.DataSource);
+            Assert.Throws<InvalidOperationException>(() => _noMsgBoxManagementForm.DataSource);
         }
 
         [Fact]
@@ -59,10 +59,10 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests
             DataTable dataTable = new();
 
             // Act
-            _noMsgBoxGenericManagementForm.DataSource = dataTable;
+            _noMsgBoxManagementForm.DataSource = dataTable;
 
             // Assert
-            Assert.Equal(dataTable, _noMsgBoxGenericManagementForm.DgvMain.DataSource);
+            Assert.Equal(dataTable, _noMsgBoxManagementForm.DgvMain.DataSource);
         }
 
         [Fact]
@@ -87,7 +87,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests
             mockFileSystem.AddFile(editPath, new MockFileData(pngBytes));
             mockFileSystem.AddFile(deletePath, new MockFileData(pngBytes));
 
-            GenericManagementForm form = new(
+            ManagementForm form = new(
                 config: TableConfigs.Drivers,
                 logger: _testLogger,
                 messageBox: new NoMessageBox(),
@@ -128,14 +128,14 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests
         {
             // Arrange
             TestMessageBox testMsgBox = new();
-            _testMsgBoxGenericManagementForm = new GenericManagementForm(
+            _testMsgBoxManagementForm = new ManagementForm(
                 config: TableConfigs.Drivers,
                 logger: _testLogger,
                 messageBox: testMsgBox
             );
 
             // Act
-            _testMsgBoxGenericManagementForm.ShowMessageBox(text, caption, button, icon);
+            _testMsgBoxManagementForm.ShowMessageBox(text, caption, button, icon);
 
             // Assert
             Assert.True(testMsgBox.WasShowCalled, "Message box was not shown");
@@ -151,11 +151,11 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests
             // Arrange
 
             // Act
-            _noMsgBoxGenericManagementForm.UpdatePaginationDisplay(5, 10);
+            _noMsgBoxManagementForm.UpdatePaginationDisplay(5, 10);
 
             // Assert
-            Assert.Equal($"{5}", _noMsgBoxGenericManagementForm.StartPageText);
-            Assert.Equal($"/{10}", _noMsgBoxGenericManagementForm.EndPageText);
+            Assert.Equal($"{5}", _noMsgBoxManagementForm.StartPageText);
+            Assert.Equal($"/{10}", _noMsgBoxManagementForm.EndPageText);
         }
 
         [Fact]
@@ -164,10 +164,10 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests
             // Arrange
 
             // Act
-            _noMsgBoxGenericManagementForm.ConfigureDataGridViewColumns();
+            _noMsgBoxManagementForm.ConfigureDataGridViewColumns();
 
             // Assert
-            DataGridViewColumnCollection columns = _noMsgBoxGenericManagementForm.DgvMain.Columns;
+            DataGridViewColumnCollection columns = _noMsgBoxManagementForm.DgvMain.Columns;
             Assert.Equal(TableConfigs.Drivers.Columns.Count, columns.Count);
 
             foreach (ColumnConfig columnConfig in TableConfigs.Drivers.Columns)
@@ -185,7 +185,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests
         public void HideExcludedColumns_HidesPrimaryKeyColumn()
         {
             // Arrange
-            GenericManagementForm form = new(TableConfigs.Drivers, _testLogger);
+            ManagementForm form = new(TableConfigs.Drivers, _testLogger);
             form.ConfigureDataGridViewColumns();
 
             // Act

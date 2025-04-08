@@ -5,27 +5,27 @@ using Microsoft.Extensions.Logging.Abstractions;
 using StartSmartDeliveryForm.DataLayer.DAOs;
 using StartSmartDeliveryForm.SharedLayer;
 
-namespace StartSmartDeliveryForm.PresentationLayer
+namespace StartSmartDeliveryForm.PresentationLayer.PrintDataFormComponents
 {
-    public class GenericPrintDataPresenter<T> where T : class
+    public class PrintDataPresenter<T> where T : class
     {
-        private readonly IGenericPrintDataForm _printDataForm;
+        private readonly IPrintDataForm _printDataForm;
         private readonly IRepository<T> _repository;
-        private readonly ILogger<GenericPrintDataPresenter<T>> _logger;
+        private readonly ILogger<PrintDataPresenter<T>> _logger;
         private readonly PrintDocument _printDocument;
         private readonly DataTable? _dataTable;
         private int _recordCount; // Made mutable since initialized in InitializeAsync
         private readonly int _recordsPerPage = GlobalConstants.s_recordLimit;
 
-        private GenericPrintDataPresenter(
-            IGenericPrintDataForm printDataForm,
+        private PrintDataPresenter(
+            IPrintDataForm printDataForm,
             IRepository<T> repository,
             DataTable? dataTable,
-            ILogger<GenericPrintDataPresenter<T>>? logger = null)
+            ILogger<PrintDataPresenter<T>>? logger = null)
         {
             _printDataForm = printDataForm ?? throw new ArgumentNullException(nameof(printDataForm));
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
-            _logger = logger ?? NullLogger<GenericPrintDataPresenter<T>>.Instance;
+            _logger = logger ?? NullLogger<PrintDataPresenter<T>>.Instance;
             _dataTable = dataTable;
 
             _printDocument = new PrintDocument();
@@ -33,13 +33,13 @@ namespace StartSmartDeliveryForm.PresentationLayer
             printDataForm.SetPrintDocument(_printDocument);
         }
 
-        public static async Task<GenericPrintDataPresenter<T>> CreateAsync(
-            IGenericPrintDataForm printDataForm,
+        public static async Task<PrintDataPresenter<T>> CreateAsync(
+            IPrintDataForm printDataForm,
             IRepository<T> repository,
             DataTable? dataTable,
-            ILogger<GenericPrintDataPresenter<T>>? logger = null)
+            ILogger<PrintDataPresenter<T>>? logger = null)
         {
-            var presenter = new GenericPrintDataPresenter<T>(printDataForm, repository, dataTable, logger);
+            var presenter = new PrintDataPresenter<T>(printDataForm, repository, dataTable, logger);
             await presenter.InitializeAsync();
             return presenter;
         }
@@ -62,8 +62,8 @@ namespace StartSmartDeliveryForm.PresentationLayer
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "GenericPrintDataPresenter initialization failed.");
-                throw new InvalidOperationException("GenericPrintDataPresenter initialization failed", ex);
+                _logger.LogError(ex, "PrintDataPresenter initialization failed.");
+                throw new InvalidOperationException("PrintDataPresenter initialization failed", ex);
             }
         }
 

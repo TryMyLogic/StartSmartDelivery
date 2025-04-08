@@ -2,22 +2,22 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
+namespace StartSmartDeliveryForm.PresentationLayer.PrintDataFormComponents
 {
-    public partial class GenericPrintDataForm : Form, IGenericPrintDataForm
+    public partial class PrintDataForm : Form, IPrintDataForm
     {
         private readonly ILogger _logger;
         public int CurrentPage { get; set; } = 1;
         public int TotalPages { get; set; } = 1;
 
-        public GenericPrintDataForm(ILogger<GenericPrintDataForm>? logger = null)
+        public PrintDataForm(ILogger<PrintDataForm>? logger = null)
         {
             InitializeComponent();
             printPreviewControl.Document = printDocument;
-            _logger = logger ?? NullLogger<GenericPrintDataForm>.Instance;
+            _logger = logger ?? NullLogger<PrintDataForm>.Instance;
         }
 
-        private void GenericPrintDataForm_Load(object sender, EventArgs e) { }
+        private void PrintDataForm_Load(object sender, EventArgs e) { }
 
         public void SetPrintDocument(PrintDocument document)
         {
@@ -59,6 +59,5 @@ namespace StartSmartDeliveryForm.PresentationLayer.DriverManagement
         {
             Close();
         }
-
     }
 }

@@ -4,15 +4,15 @@ using StartSmartDeliveryForm.SharedLayer.Enums;
 
 namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
 {
-    public class GenericDataFormValidatorTests
+    public class DataFormValidatorTests
     {
-        private readonly GenericDataFormValidator _dataFormValidator = new();
+        private readonly DataFormValidator _dataFormValidator = new();
         private string _providedText = "";
         private string _providedCaption = "";
         private MessageBoxButtons _providedButton = MessageBoxButtons.OK;
         private MessageBoxIcon _providedIcon = MessageBoxIcon.None;
 
-        public GenericDataFormValidatorTests()
+        public DataFormValidatorTests()
         {
             _dataFormValidator.RequestMessageBox += RequestMessageBox_EventHandler;
         }

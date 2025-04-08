@@ -1,9 +1,9 @@
 ﻿using System.Data;
 using StartSmartDeliveryForm.SharedLayer.Interfaces;
 
-namespace StartSmartDeliveryForm.PresentationLayer
+namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 {
-    public interface IGenericManagementForm : ISearchableView
+    public interface IManagementForm : ISearchableView
     {
         DataGridView DgvMain { get; }
         DataTable DataSource { get; set; }
@@ -12,7 +12,6 @@ namespace StartSmartDeliveryForm.PresentationLayer
         event EventHandler AddClicked;
         event EventHandler<int> EditClicked;
         event EventHandler<int> DeleteClicked;
-        event EventHandler RefreshClicked;
         event EventHandler ReloadClicked;
         event EventHandler RollbackClicked;
         event EventHandler PrintAllPagesByRowCountClicked;

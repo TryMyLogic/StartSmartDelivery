@@ -5,19 +5,19 @@ using StartSmartDeliveryForm.SharedLayer;
 
 namespace StartSmartDeliveryForm.BusinessLogicLayer
 {
-    public class GenericPaginationManager<T>(IRepository<T> repository, ILogger<GenericPaginationManager<T>>? logger = null) where T : class
+    public class PaginationManager<T>(IRepository<T> repository, ILogger<PaginationManager<T>>? logger = null) where T : class
     {
         private readonly IRepository<T> _repository = repository;
         private readonly int _recordsPerPage = GlobalConstants.s_recordLimit;
-        private readonly ILogger<GenericPaginationManager<T>> _logger = logger ?? NullLogger<GenericPaginationManager<T>>.Instance;
+        private readonly ILogger<PaginationManager<T>> _logger = logger ?? NullLogger<PaginationManager<T>>.Instance;
 
         public int CurrentPage { get; private set; } = 1;
         public int TotalPages { get; private set; } = 1;
         public int RecordCount { get; private set; } = 0;
 
-        public static async Task<GenericPaginationManager<T>> CreateAsync(IRepository<T> repository, ILogger<GenericPaginationManager<T>>? logger = null)
+        public static async Task<PaginationManager<T>> CreateAsync(IRepository<T> repository, ILogger<PaginationManager<T>>? logger = null)
         {
-            GenericPaginationManager<T> paginationManager = new(repository, logger);
+            PaginationManager<T> paginationManager = new(repository, logger);
             await paginationManager.InitializeAsync();
             return paginationManager;
         }
@@ -31,7 +31,7 @@ namespace StartSmartDeliveryForm.BusinessLogicLayer
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException("GenericPaginationManager Initialization failed", ex);
+                throw new InvalidOperationException("PaginationManager Initialization failed", ex);
             }
         }
 

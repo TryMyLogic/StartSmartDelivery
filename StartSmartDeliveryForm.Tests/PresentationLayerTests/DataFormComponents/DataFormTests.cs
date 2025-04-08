@@ -1,24 +1,24 @@
 ﻿using System.Windows.Forms;
 using Microsoft.Extensions.Logging;
 using StartSmartDeliveryForm.DataLayer.DTOs;
-using StartSmartDeliveryForm.PresentationLayer.TemplateViews;
+using StartSmartDeliveryForm.PresentationLayer.DataFormComponents;
 using StartSmartDeliveryForm.SharedLayer.Enums;
 using StartSmartDeliveryForm.SharedLayer.EventArgs;
 using StartSmartDeliveryForm.Tests.SharedTestItems;
 using Xunit.Abstractions;
 using static StartSmartDeliveryForm.SharedLayer.TableDefinition;
 
-namespace StartSmartDeliveryForm.Tests.PresentationLayerTests
+namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DataFormComponents
 {
-    public class GenericDataFormTests
+    public class DataFormTests
     {
-        private readonly ILogger<GenericDataFormTemplate> _testLogger;
-        private readonly GenericDataFormTemplate _noMsgBoxDataForm;
-        private GenericDataFormTemplate? _testMsgDataForm;
+        private readonly ILogger<DataForm> _testLogger;
+        private readonly DataForm _noMsgBoxDataForm;
+        private DataForm? _testMsgDataForm;
 
-        public GenericDataFormTests(ITestOutputHelper output)
+        public DataFormTests(ITestOutputHelper output)
         {
-            _testLogger = SharedFunctions.CreateTestLogger<GenericDataFormTemplate>(output);
+            _testLogger = SharedFunctions.CreateTestLogger<DataForm>(output);
             _noMsgBoxDataForm = new(typeof(DriversDTO), TableConfigs.Drivers, _testLogger, new NoMessageBox());
         }
 

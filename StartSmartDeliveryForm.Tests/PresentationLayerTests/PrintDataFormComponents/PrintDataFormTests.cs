@@ -4,28 +4,28 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Serilog.Events;
 using Serilog.Sinks.InMemory;
-using StartSmartDeliveryForm.PresentationLayer.DriverManagement;
+using StartSmartDeliveryForm.PresentationLayer.PrintDataFormComponents;
 using StartSmartDeliveryForm.Tests.SharedTestItems;
 using Xunit.Abstractions;
 
-namespace StartSmartDeliveryForm.Tests.PresentationLayerTests
+namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.PrintDataFormComponents
 {
-    public class GenericPrintDataFormTests : IClassFixture<DatabaseFixture>
+    public class PrintDataFormTests : IClassFixture<DatabaseFixture>
     {
-        private readonly ILogger<GenericPrintDataForm> _logger;
-        private readonly GenericPrintDataForm _printDataForm;
+        private readonly ILogger<PrintDataForm> _logger;
+        private readonly PrintDataForm _printDataForm;
         private InMemorySink? _memorySink;
-        private ILogger<GenericPrintDataForm>? _memoryLogger;
+        private ILogger<PrintDataForm>? _memoryLogger;
 
-        public GenericPrintDataFormTests(DatabaseFixture fixture, ITestOutputHelper output)
+        public PrintDataFormTests(DatabaseFixture fixture, ITestOutputHelper output)
         {
-            _logger = SharedFunctions.CreateTestLogger<GenericPrintDataForm>(output);
-            _printDataForm = new GenericPrintDataForm(_logger);
+            _logger = SharedFunctions.CreateTestLogger<PrintDataForm>(output);
+            _printDataForm = new PrintDataForm(_logger);
         }
 
         internal void InitializeMemorySinkLogger()
         {
-            (ILogger<GenericPrintDataForm> MemoryLogger, InMemorySink MemorySink) = SharedFunctions.CreateMemorySinkLogger<GenericPrintDataForm>();
+            (ILogger<PrintDataForm> MemoryLogger, InMemorySink MemorySink) = SharedFunctions.CreateMemorySinkLogger<PrintDataForm>();
             _memoryLogger = MemoryLogger;
             _memorySink = MemorySink;
         }
@@ -55,7 +55,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests
             // Arrange
             string message = $"HideNavigationButtons was ran";
             InitializeMemorySinkLogger();
-            GenericPrintDataForm printDataForm = new(_memoryLogger);
+            PrintDataForm printDataForm = new(_memoryLogger);
 
             // Act
             printDataForm.HideNavigationButtons();

@@ -6,8 +6,8 @@ using Polly;
 using Polly.Registry;
 using Serilog.Events;
 using Serilog.Sinks.InMemory;
-using StartSmartDeliveryForm.DataLayer.DAOs;
 using StartSmartDeliveryForm.DataLayer.DTOs;
+using StartSmartDeliveryForm.DataLayer.Repositories;
 using StartSmartDeliveryForm.SharedLayer;
 using StartSmartDeliveryForm.SharedLayer.Enums;
 using StartSmartDeliveryForm.Tests.SharedTestItems;
@@ -16,21 +16,21 @@ using static StartSmartDeliveryForm.SharedLayer.TableDefinition;
 
 namespace StartSmartDeliveryForm.Tests.DataLayerTests
 {
-    public class GenericRepositoryTestBase : IClassFixture<DatabaseFixture>
+    public class RepositoryTestBase : IClassFixture<DatabaseFixture>
     {
-        protected readonly GenericRepository<DriversDTO> _repository;
+        protected readonly Repository<DriversDTO> _repository;
         protected readonly string _connectionString;
         protected CancellationTokenSource? _cts;
         protected readonly bool _shouldSkipTests;
-        protected readonly ILogger<GenericRepository<DriversDTO>> _testLogger;
+        protected readonly ILogger<Repository<DriversDTO>> _testLogger;
 
         protected ResiliencePipelineProvider<string> _mockPipelineProvider;
         protected IConfiguration _mockConfiguration;
         protected InMemorySink? memorySink;
-        protected ILogger<GenericRepository<DriversDTO>>? _memoryLogger;
+        protected ILogger<Repository<DriversDTO>>? _memoryLogger;
         protected RetryEventService _mockRetryEventService;
 
-        public GenericRepositoryTestBase(DatabaseFixture fixture, ITestOutputHelper output)
+        public RepositoryTestBase(DatabaseFixture fixture, ITestOutputHelper output)
         {
             // Will not use fixture DriversDAO so as to have control over parameters
             _connectionString = fixture.ConnectionString;
@@ -38,14 +38,14 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
             {
                 _shouldSkipTests = true;
             }
-            _testLogger = SharedFunctions.CreateTestLogger<GenericRepository<DriversDTO>>(output);
+            _testLogger = SharedFunctions.CreateTestLogger<Repository<DriversDTO>>(output);
 
             _mockPipelineProvider = Substitute.For<ResiliencePipelineProvider<string>>();
             _mockPipelineProvider.GetPipeline("sql-retry-pipeline").Returns(ResiliencePipeline.Empty);
             _mockConfiguration = Substitute.For<IConfiguration>();
             _mockRetryEventService = Substitute.For<RetryEventService>();
 
-            _repository = new GenericRepository<DriversDTO>(
+            _repository = new Repository<DriversDTO>(
                 _mockPipelineProvider,
                 _mockConfiguration,
                 TableConfigs.Drivers,
@@ -57,15 +57,15 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
 
         internal void InitializeMemorySinkLogger()
         {
-            (ILogger<GenericRepository<DriversDTO>> MemoryLogger, InMemorySink MemorySink) =
-                SharedFunctions.CreateMemorySinkLogger<GenericRepository<DriversDTO>>();
+            (ILogger<Repository<DriversDTO>> MemoryLogger, InMemorySink MemorySink) =
+                SharedFunctions.CreateMemorySinkLogger<Repository<DriversDTO>>();
             _memoryLogger = MemoryLogger;
             memorySink = MemorySink;
         }
     }
 
-    public class GenericRepositoryTests(DatabaseFixture fixture, ITestOutputHelper output)
-    : GenericRepositoryTestBase(fixture, output)
+    public class RepositoryTests(DatabaseFixture fixture, ITestOutputHelper output)
+    : RepositoryTestBase(fixture, output)
     {
         [SkippableTheory]
         [InlineData("EMP1234", false)]  // Non-unique
@@ -140,8 +140,8 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
     }
 
     [Collection("Sequential")]
-    public class SequentialGenericRepositoryTests(DatabaseFixture fixture, ITestOutputHelper output)
-    : GenericRepositoryTestBase(fixture, output)
+    public class SequentialRepositoryTests(DatabaseFixture fixture, ITestOutputHelper output)
+    : RepositoryTestBase(fixture, output)
     {
         [SkippableFact]
         public async Task GetAllRecordsAsync_ReturnsExpectedDataTable()
@@ -350,7 +350,7 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
 
             string message = $"No record was found with ID: {mockDriver.DriverID}";
             InitializeMemorySinkLogger();
-            var mockRepository = new GenericRepository<DriversDTO>(
+            var mockRepository = new Repository<DriversDTO>(
                 _mockPipelineProvider,
                 _mockConfiguration,
                 TableConfigs.Drivers,
@@ -439,7 +439,7 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
 
             string message = $"No record found with ID: {DriverID}";
             InitializeMemorySinkLogger();
-            var mockRepository = new GenericRepository<DriversDTO>(
+            var mockRepository = new Repository<DriversDTO>(
                 _mockPipelineProvider,
                 _mockConfiguration,
                 TableConfigs.Drivers,

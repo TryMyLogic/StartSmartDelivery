@@ -3,14 +3,14 @@ using StartSmartDeliveryForm.BusinessLogicLayer;
 using StartSmartDeliveryForm.SharedLayer.EventArgs;
 using StartSmartDeliveryForm.SharedLayer.EventDelegates;
 
-namespace StartSmartDeliveryForm.Generics
+namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 {
-    public interface IGenericManagementModel<T> where T : class
+    public interface IManagementModel<T> where T : class
     {
 
         public event EventHandler? PageChanged;
         DataTable DgvTable { get; }
-        GenericPaginationManager<T> PaginationManager { get; }
+        PaginationManager<T> PaginationManager { get; }
         Task InitializeAsync();
         void ApplyFilter(object? sender, SearchRequestEventArgs e);
         Task AddRecordAsync(T entity);

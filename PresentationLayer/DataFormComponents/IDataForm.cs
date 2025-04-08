@@ -1,9 +1,9 @@
 ﻿using StartSmartDeliveryForm.SharedLayer.Enums;
 using StartSmartDeliveryForm.SharedLayer.EventArgs;
 
-namespace StartSmartDeliveryForm.PresentationLayer
+namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
 {
-    public interface IGenericDataForm
+    public interface IDataForm
     {
         Dictionary<string, Control> GetControls();
         public FormMode Mode { get; set; }

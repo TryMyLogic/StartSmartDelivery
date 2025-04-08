@@ -1,6 +1,6 @@
-﻿namespace StartSmartDeliveryForm.PresentationLayer.TemplateViews
+﻿namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
 {
-    partial class GenericDataFormTemplate
+    partial class DataForm
     {
         /// <summary>
         /// Required designer variable.
@@ -76,16 +76,16 @@
             tlpDynamicFields.Size = new Size(800, 423);
             tlpDynamicFields.TabIndex = 1;
             // 
-            // GenericDataFormTemplate
+            // DataForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
             Controls.Add(tlpDynamicFields);
             Controls.Add(tableLayoutPanel1);
-            Name = "GenericDataFormTemplate";
-            Text = "DataFormTemplate";
-            Load += GenericDataForm_Load;
+            Name = "DataForm";
+            Text = "DataForm";
+            Load += DataForm_Load;
             tableLayoutPanel1.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();

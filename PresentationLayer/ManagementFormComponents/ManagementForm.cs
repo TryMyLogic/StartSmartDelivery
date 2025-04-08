@@ -8,10 +8,9 @@ using StartSmartDeliveryForm.SharedLayer.EventArgs;
 using StartSmartDeliveryForm.SharedLayer.Interfaces;
 using static StartSmartDeliveryForm.SharedLayer.TableDefinition;
 
-namespace StartSmartDeliveryForm.PresentationLayer
+namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 {
-    // Will rename containing file once original ManagementFormTemplate is deleted.
-    public partial class GenericManagementForm : Form, IGenericManagementForm
+    public partial class ManagementForm : Form, IManagementForm
     {
         private IFileSystem _fileSystem;
         public IFileSystem FileSystem
@@ -21,20 +20,20 @@ namespace StartSmartDeliveryForm.PresentationLayer
         }
 
         private readonly IMessageBox _messageBox;
-        private readonly ILogger<GenericManagementForm> _logger;
+        private readonly ILogger<ManagementForm> _logger;
         private readonly TableConfig _tableConfig;
 
-        public GenericManagementForm() : this(TableConfigs.Empty, NullLogger<GenericManagementForm>.Instance, new MessageBoxWrapper(), new FileSystem()) { }
-        public GenericManagementForm(TableConfig config, ILogger<GenericManagementForm>? logger = null, IMessageBox? messageBox = null, IFileSystem? fileSystem = null)
+        public ManagementForm() : this(TableConfigs.Empty, NullLogger<ManagementForm>.Instance, new MessageBoxWrapper(), new FileSystem()) { }
+        public ManagementForm(TableConfig config, ILogger<ManagementForm>? logger = null, IMessageBox? messageBox = null, IFileSystem? fileSystem = null)
         {
             InitializeComponent();
             _fileSystem = FileSystem ?? new FileSystem();
             _messageBox = messageBox ?? new MessageBoxWrapper();
-            _logger = logger ?? NullLogger<GenericManagementForm>.Instance;
+            _logger = logger ?? NullLogger<ManagementForm>.Instance;
             _tableConfig = config;
         }
 
-        private void GenericManagementForm_Load(object sender, EventArgs e)
+        private void ManagementForm_Load(object sender, EventArgs e)
         {
             SetTheme();
             dgvMain.RowHeadersVisible = false; // Hides Row Number Column
@@ -243,7 +242,6 @@ namespace StartSmartDeliveryForm.PresentationLayer
         public event EventHandler? AddClicked;
         public event EventHandler<int>? EditClicked;
         public event EventHandler<int>? DeleteClicked;
-        public event EventHandler? RefreshClicked;
         public event EventHandler? ReloadClicked;
         public event EventHandler? RollbackClicked;
         public event EventHandler? PrintAllPagesByRowCountClicked;
@@ -342,5 +340,7 @@ namespace StartSmartDeliveryForm.PresentationLayer
                 dgvMain.Columns.Add(dgvColumn);
             }
         }
+
+
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace StartSmartDeliveryForm.BusinessLogicLayer
 {
-    public class GenericDataFormValidator()
+    public class DataFormValidator()
     {
         public delegate void MessageBoxEventDelegate(string text, string caption, MessageBoxButtons buttons, MessageBoxIcon icon);
         public event MessageBoxEventDelegate? RequestMessageBox;

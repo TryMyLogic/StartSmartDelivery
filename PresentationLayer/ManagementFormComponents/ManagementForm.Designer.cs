@@ -1,6 +1,6 @@
-﻿namespace StartSmartDeliveryForm.PresentationLayer
+﻿namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 {
-    partial class GenericManagementForm
+    partial class ManagementForm
     {
         /// <summary>
         /// Required designer variable.
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GenericManagementForm));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ManagementForm));
             menuStrip1 = new MenuStrip();
             fileToolStripMenuItem = new ToolStripMenuItem();
             changeUserToolStripMenuItem = new ToolStripMenuItem();
@@ -489,7 +489,7 @@
             dgvMain.TabIndex = 7;
             dgvMain.CellContentClick += dgvMain_CellContentClick;
             // 
-            // GenericManagementForm
+            // ManagementForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
@@ -503,9 +503,9 @@
             MainMenuStrip = menuStrip1;
             Margin = new Padding(3, 2, 3, 2);
             MinimumSize = new Size(684, 381);
-            Name = "GenericManagementForm";
-            Text = "ManagementTemplateForm";
-            Load += GenericManagementForm_Load;
+            Name = "ManagementForm";
+            Text = "ManagementForm";
+            Load += ManagementForm_Load;
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
             tsSearchbar.ResumeLayout(false);

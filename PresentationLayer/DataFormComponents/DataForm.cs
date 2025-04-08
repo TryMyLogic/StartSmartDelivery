@@ -7,29 +7,29 @@ using StartSmartDeliveryForm.SharedLayer.EventArgs;
 using StartSmartDeliveryForm.SharedLayer.Interfaces;
 using static StartSmartDeliveryForm.SharedLayer.TableDefinition;
 
-namespace StartSmartDeliveryForm.PresentationLayer.TemplateViews
+namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
 {
-    public partial class GenericDataFormTemplate : Form, IGenericDataForm
+    public partial class DataForm : Form, IDataForm
     {
         public FormMode Mode { get; set; }
-        public readonly ILogger<GenericDataFormTemplate> _logger;
+        public readonly ILogger<DataForm> _logger;
         private readonly IMessageBox _messageBox;
         private readonly Type _entityType;
         private readonly TableConfig _tableConfig;
         private readonly Dictionary<string, Control> _dynamicControls = [];
 
-        public GenericDataFormTemplate() : this(typeof(object), TableConfigs.Empty, NullLogger<GenericDataFormTemplate>.Instance, new MessageBoxWrapper()) { }
-        public GenericDataFormTemplate(Type entityType, TableConfig tableConfig, ILogger<GenericDataFormTemplate>? logger = null, IMessageBox? messageBox = null)
+        public DataForm() : this(typeof(object), TableConfigs.Empty, NullLogger<DataForm>.Instance, new MessageBoxWrapper()) { }
+        public DataForm(Type entityType, TableConfig tableConfig, ILogger<DataForm>? logger = null, IMessageBox? messageBox = null)
         {
             InitializeComponent();
-            _logger = logger ?? NullLogger<GenericDataFormTemplate>.Instance;
+            _logger = logger ?? NullLogger<DataForm>.Instance;
             _messageBox = messageBox ?? new MessageBoxWrapper();
             _entityType = entityType ?? throw new ArgumentNullException(nameof(entityType));
             _tableConfig = tableConfig ?? throw new ArgumentNullException(nameof(tableConfig));
             GenerateDynamicFields();
         }
 
-        private void GenericDataForm_Load(object sender, EventArgs e)
+        private void DataForm_Load(object sender, EventArgs e)
         {
             btnSubmit.BackColor = GlobalConstants.SoftBeige;
             btnSubmit.FlatAppearance.BorderSize = 0;

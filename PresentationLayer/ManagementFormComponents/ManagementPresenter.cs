@@ -2,53 +2,52 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using StartSmartDeliveryForm.BusinessLogicLayer;
 using StartSmartDeliveryForm.DataLayer.DAOs;
-using StartSmartDeliveryForm.PresentationLayer;
-using StartSmartDeliveryForm.PresentationLayer.DriverManagement;
-using StartSmartDeliveryForm.PresentationLayer.TemplateViews;
+using StartSmartDeliveryForm.PresentationLayer.DataFormComponents;
+using StartSmartDeliveryForm.PresentationLayer.PrintDataFormComponents;
 using StartSmartDeliveryForm.SharedLayer.Enums;
 using StartSmartDeliveryForm.SharedLayer.EventArgs;
 using static StartSmartDeliveryForm.SharedLayer.TableDefinition;
 
-namespace StartSmartDeliveryForm.Generics
+namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 {
-    public class GenericManagementPresenter<T> where T : class, new()
+    public class ManagementPresenter<T> where T : class, new()
     {
-        private readonly IGenericManagementForm _managementForm;
-        private readonly IGenericManagementModel<T> _managementModel;
-        private readonly ILogger<GenericManagementPresenter<T>> _logger;
-        private readonly ILogger<GenericDataFormTemplate> _dataFormLogger;
+        private readonly IManagementForm _managementForm;
+        private readonly IManagementModel<T> _managementModel;
+        private readonly ILogger<ManagementPresenter<T>> _logger;
+        private readonly ILogger<DataForm> _dataFormLogger;
 
-        private readonly ILogger<GenericPrintDataForm> _printDataFormLogger;
-        private readonly GenericDataFormValidator _validator;
-        private GenericDataFormTemplate? _dataForm;
-        private readonly ILogger<GenericDataFormPresenter<T>> _dataFormPresenterLogger;
-        ILogger<GenericPrintDataPresenter<T>> _printDataPresenterLogger;
+        private readonly ILogger<PrintDataForm> _printDataFormLogger;
+        private readonly DataFormValidator _validator;
+        private DataForm? _dataForm;
+        private readonly ILogger<DataFormPresenter<T>> _dataFormPresenterLogger;
+        private readonly ILogger<PrintDataPresenter<T>> _printDataPresenterLogger;
 
         private readonly TableConfig _tableConfig;
         private readonly IRepository<T> _repository;
 
-        public GenericManagementPresenter(
-        IGenericManagementForm managementForm,
-        IGenericManagementModel<T> managementModel,
+        public ManagementPresenter(
+        IManagementForm managementForm,
+        IManagementModel<T> managementModel,
         TableConfig tableConfig,
         IRepository<T> repository,
-        ILogger<GenericManagementPresenter<T>>? logger = null,
-        ILogger<GenericDataFormTemplate>? dataFormLogger = null,
-        ILogger<GenericDataFormPresenter<T>>? dataFormPresenterLogger = null,
-        ILogger<GenericPrintDataForm>? printDataFormLogger = null,
-        ILogger<GenericPrintDataPresenter<T>>? printDataPresenterLogger = null
+        ILogger<ManagementPresenter<T>>? logger = null,
+        ILogger<DataForm>? dataFormLogger = null,
+        ILogger<DataFormPresenter<T>>? dataFormPresenterLogger = null,
+        ILogger<PrintDataForm>? printDataFormLogger = null,
+        ILogger<PrintDataPresenter<T>>? printDataPresenterLogger = null
         )
         {
             _managementForm = managementForm ?? throw new ArgumentNullException(nameof(managementForm));
             _managementModel = managementModel ?? throw new ArgumentNullException(nameof(managementModel));
             _tableConfig = tableConfig ?? throw new ArgumentNullException(nameof(tableConfig));
-            _logger = logger ?? NullLogger<GenericManagementPresenter<T>>.Instance;
-            _dataFormLogger = dataFormLogger ?? NullLogger<GenericDataFormTemplate>.Instance;
-            _dataFormPresenterLogger = dataFormPresenterLogger ?? NullLogger<GenericDataFormPresenter<T>>.Instance;
-            _validator = new GenericDataFormValidator();
+            _logger = logger ?? NullLogger<ManagementPresenter<T>>.Instance;
+            _dataFormLogger = dataFormLogger ?? NullLogger<DataForm>.Instance;
+            _dataFormPresenterLogger = dataFormPresenterLogger ?? NullLogger<DataFormPresenter<T>>.Instance;
+            _validator = new DataFormValidator();
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
-            _printDataFormLogger = printDataFormLogger ?? NullLogger<GenericPrintDataForm>.Instance;
-            _printDataPresenterLogger = printDataPresenterLogger ?? NullLogger<GenericPrintDataPresenter<T>>.Instance;
+            _printDataFormLogger = printDataFormLogger ?? NullLogger<PrintDataForm>.Instance;
+            _printDataPresenterLogger = printDataPresenterLogger ?? NullLogger<PrintDataPresenter<T>>.Instance;
 
             WireUpEvents();
         }
@@ -112,7 +111,7 @@ namespace StartSmartDeliveryForm.Generics
         {
             _logger.LogInformation("Add Clicked");
             _dataForm = new(typeof(T), _tableConfig, _dataFormLogger);
-            GenericDataFormPresenter<T> presenter = new(_dataForm, _repository, _tableConfig, _validator, _dataFormPresenterLogger);
+            DataFormPresenter<T> presenter = new(_dataForm, _repository, _tableConfig, _validator, _dataFormPresenterLogger);
             presenter.SubmissionCompleted += DataForm_SubmitClicked;
 
             _dataForm.Show();
@@ -126,16 +125,16 @@ namespace StartSmartDeliveryForm.Generics
             T entity = _managementModel.GetEntityFromRow(selectedRow);
 
             object? primaryKeyValue = selectedRow.Cells[_tableConfig.PrimaryKey].Value;
-            if (primaryKeyValue == null || (int.TryParse(primaryKeyValue.ToString(), out int id) && id == 0))
+            if (primaryKeyValue == null || int.TryParse(primaryKeyValue.ToString(), out int id) && id == 0)
             {
                 _logger.LogError("Selected row returned no valid entity data");
                 _managementForm.ShowMessageBox("Cannot open edit form", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
-            _dataForm = new GenericDataFormTemplate(typeof(T), _tableConfig, _dataFormLogger) { Mode = FormMode.Edit };
+            _dataForm = new DataForm(typeof(T), _tableConfig, _dataFormLogger) { Mode = FormMode.Edit };
             _dataForm.InitializeEditing(entity);
-            var presenter = new GenericDataFormPresenter<T>(_dataForm, _repository, _tableConfig, _validator, _dataFormPresenterLogger);
+            var presenter = new DataFormPresenter<T>(_dataForm, _repository, _tableConfig, _validator, _dataFormPresenterLogger);
             presenter.SubmissionCompleted += DataForm_SubmitClicked;
             _dataForm.Show();
         }
@@ -226,8 +225,8 @@ namespace StartSmartDeliveryForm.Generics
         {
             _logger.LogInformation("Print Clicked");
 
-            GenericPrintDataForm preview = new(_printDataFormLogger);
-            _ = await GenericPrintDataPresenter<T>.CreateAsync(preview, _repository, _managementModel.DgvTable, _printDataPresenterLogger);
+            PrintDataForm preview = new(_printDataFormLogger);
+            _ = await PrintDataPresenter<T>.CreateAsync(preview, _repository, _managementModel.DgvTable, _printDataPresenterLogger);
 
             //Unlike Show, it blocks execution on main form till complete
             preview.ShowDialog();

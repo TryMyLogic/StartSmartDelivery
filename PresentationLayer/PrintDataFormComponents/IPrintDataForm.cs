@@ -1,8 +1,8 @@
 ﻿using System.Drawing.Printing;
 
-namespace StartSmartDeliveryForm.PresentationLayer
+namespace StartSmartDeliveryForm.PresentationLayer.PrintDataFormComponents
 {
-    public interface IGenericPrintDataForm
+    public interface IPrintDataForm
     {
         int CurrentPage { get; set; }
         int TotalPages { get; set; }

@@ -1,6 +1,6 @@
-﻿namespace StartSmartDeliveryForm.Tests.PresentationLayerTests
+﻿namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.ManagementFormComponents
 {
-    public class GenericManagementFormPresenter
+    public class ManagementPresenter
     {
         // No existing tests to convert.
 

@@ -7,27 +7,27 @@ using StartSmartDeliveryForm.SharedLayer.Enums;
 using StartSmartDeliveryForm.SharedLayer.EventArgs;
 using static StartSmartDeliveryForm.SharedLayer.TableDefinition;
 
-namespace StartSmartDeliveryForm.PresentationLayer
+namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
 {
-    public class GenericDataFormPresenter<T> where T : class, new()
+    public class DataFormPresenter<T> where T : class, new()
     {
-        private readonly IGenericDataForm _dataForm;
+        private readonly IDataForm _dataForm;
         private readonly IRepository<T> _repository;
-        private readonly GenericDataFormValidator _dataFormValidator;
-        private readonly ILogger<GenericDataFormPresenter<T>> _logger;
+        private readonly DataFormValidator _dataFormValidator;
+        private readonly ILogger<DataFormPresenter<T>> _logger;
         private readonly TableConfig _tableConfig;
 
-        public GenericDataFormPresenter(
-            IGenericDataForm dataForm,
+        public DataFormPresenter(
+            IDataForm dataForm,
             IRepository<T> repository,
             TableConfig tableConfig,
-            GenericDataFormValidator? dataFormValidator = null,
-            ILogger<GenericDataFormPresenter<T>>? logger = null)
+            DataFormValidator? dataFormValidator = null,
+            ILogger<DataFormPresenter<T>>? logger = null)
         {
             _dataForm = dataForm ?? throw new ArgumentNullException(nameof(dataForm));
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
-            _dataFormValidator = dataFormValidator ?? new GenericDataFormValidator();
-            _logger = logger ?? NullLogger<GenericDataFormPresenter<T>>.Instance;
+            _dataFormValidator = dataFormValidator ?? new DataFormValidator();
+            _logger = logger ?? NullLogger<DataFormPresenter<T>>.Instance;
             _tableConfig = tableConfig;
 
             _dataForm.SubmitClicked += HandleSubmit_Clicked;

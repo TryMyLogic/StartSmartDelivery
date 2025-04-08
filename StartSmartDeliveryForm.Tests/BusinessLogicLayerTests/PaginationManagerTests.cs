@@ -8,9 +8,9 @@ using Xunit.Abstractions;
 
 namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
 {
-    public class GenericPaginationManagerTests(DatabaseFixture fixture, ITestOutputHelper output) : IClassFixture<DatabaseFixture>
+    public class PaginationManagerTests(DatabaseFixture fixture, ITestOutputHelper output) : IClassFixture<DatabaseFixture>
     {
-        private readonly ILogger<GenericPaginationManager<DriversDTO>> _testLogger = SharedFunctions.CreateTestLogger<GenericPaginationManager<DriversDTO>>(output);
+        private readonly ILogger<PaginationManager<DriversDTO>> _testLogger = SharedFunctions.CreateTestLogger<PaginationManager<DriversDTO>>(output);
         private readonly bool _shouldSkipTests = !fixture.CanConnectToDatabase;
         private readonly IRepository<DriversDTO> _driversRepository = fixture.DriversRepository;
 
@@ -21,7 +21,7 @@ namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
 
             // Arrange
             int pageChangeCalled = 0;
-            GenericPaginationManager<DriversDTO> paginationManager = await GenericPaginationManager<DriversDTO>.CreateAsync(_driversRepository, _testLogger);
+            PaginationManager<DriversDTO> paginationManager = await PaginationManager<DriversDTO>.CreateAsync(_driversRepository, _testLogger);
             paginationManager.PageChanged += async (currentPage) =>
             {
                 pageChangeCalled++;
@@ -41,7 +41,7 @@ namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
             Skip.If(_shouldSkipTests, "Test Database is not available. Skipping this test");
 
             // Arrange
-            GenericPaginationManager<DriversDTO> paginationManager = await GenericPaginationManager<DriversDTO>.CreateAsync(_driversRepository, _testLogger);
+            PaginationManager<DriversDTO> paginationManager = await PaginationManager<DriversDTO>.CreateAsync(_driversRepository, _testLogger);
             await paginationManager.GoToLastPageAsync(); // Needs to be a page other than 1 which is default
 
             // Act
@@ -57,7 +57,7 @@ namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
             Skip.If(_shouldSkipTests, "Test Database is not available. Skipping this test");
 
             // Arrange
-            GenericPaginationManager<DriversDTO> paginationManager = await GenericPaginationManager<DriversDTO>.CreateAsync(_driversRepository, _testLogger);
+            PaginationManager<DriversDTO> paginationManager = await PaginationManager<DriversDTO>.CreateAsync(_driversRepository, _testLogger);
 
             // Act
             await paginationManager.GoToLastPageAsync();
@@ -72,7 +72,7 @@ namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
             Skip.If(_shouldSkipTests, "Test Database is not available. Skipping this test");
 
             // Arrange
-            GenericPaginationManager<DriversDTO> paginationManager = await GenericPaginationManager<DriversDTO>.CreateAsync(_driversRepository, _testLogger);
+            PaginationManager<DriversDTO> paginationManager = await PaginationManager<DriversDTO>.CreateAsync(_driversRepository, _testLogger);
 
             // Act
             await paginationManager.GoToNextPageAsync();
@@ -87,7 +87,7 @@ namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
             Skip.If(_shouldSkipTests, "Test Database is not available. Skipping this test");
 
             // Arrange
-            GenericPaginationManager<DriversDTO> paginationManager = await GenericPaginationManager<DriversDTO>.CreateAsync(_driversRepository, _testLogger);
+            PaginationManager<DriversDTO> paginationManager = await PaginationManager<DriversDTO>.CreateAsync(_driversRepository, _testLogger);
             await paginationManager.GoToLastPageAsync();
 
             // Act
@@ -105,7 +105,7 @@ namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
             Skip.If(_shouldSkipTests, "Test Database is not available. Skipping this test");
 
             // Arrange
-            GenericPaginationManager<DriversDTO> paginationManager = await GenericPaginationManager<DriversDTO>.CreateAsync(_driversRepository, _testLogger);
+            PaginationManager<DriversDTO> paginationManager = await PaginationManager<DriversDTO>.CreateAsync(_driversRepository, _testLogger);
 
             // Act
             await paginationManager.GoToPageAsync(page);
@@ -121,7 +121,7 @@ namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
 
             // Arrange
             int page = -1;
-            GenericPaginationManager<DriversDTO> paginationManager = await GenericPaginationManager<DriversDTO>.CreateAsync(_driversRepository, _testLogger);
+            PaginationManager<DriversDTO> paginationManager = await PaginationManager<DriversDTO>.CreateAsync(_driversRepository, _testLogger);
 
             // Act
             await paginationManager.GoToPageAsync(page);
@@ -136,7 +136,7 @@ namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
             Skip.If(_shouldSkipTests, "Test Database is not available. Skipping this test");
 
             // Arrange
-            GenericPaginationManager<DriversDTO> paginationManager = new(_driversRepository, _testLogger);
+            PaginationManager<DriversDTO> paginationManager = new(_driversRepository, _testLogger);
             int OriginalRecordCount = paginationManager.RecordCount;
 
             // Act
@@ -156,11 +156,11 @@ namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
             Skip.If(_shouldSkipTests, "Test Database is not available. Skipping this test");
 
             // Arrange
-            GenericPaginationManager<DriversDTO> paginationManager = await GenericPaginationManager<DriversDTO>.CreateAsync(_driversRepository, _testLogger);
+            PaginationManager<DriversDTO> paginationManager = await PaginationManager<DriversDTO>.CreateAsync(_driversRepository, _testLogger);
             paginationManager.UpdateRecordCountAsync(totalPages * GlobalConstants.s_recordLimit);
 
             // Uses reflection to modify private setter
-            typeof(GenericPaginationManager<DriversDTO>)
+            typeof(PaginationManager<DriversDTO>)
                 .GetProperty("CurrentPage", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)?
                 .SetValue(paginationManager, currentPage);
             _testLogger.LogInformation("Current Page: {CurrentPage}, Total Pages: {TotalPages}",
