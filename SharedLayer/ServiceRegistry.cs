@@ -144,6 +144,11 @@ namespace StartSmartDeliveryForm.SharedLayer
                 .AddScoped<TableConfig>(_ => TableConfigs.Drivers)
                 .AddScoped<GenericManagementForm>()
                 .AddScoped<IRepository<DriversDTO>, GenericRepository<DriversDTO>>()
+                .AddScoped<GenericPaginationManager<DriversDTO>>()
+                .AddScoped<IGenericManagementModel<DriversDTO>, GenericManagementModel<DriversDTO>>()
+                .AddScoped<GenericManagementModel<DriversDTO>>()
+                .AddTransient<GenericManagementPresenter<DriversDTO>>()
+                .AddScoped<IRepository<DriversDTO>, GenericRepository<DriversDTO>>()
 
                 .AddScoped<PaginationManager<DriversDTO>>()
                 .AddScoped<DriverManagementForm>()

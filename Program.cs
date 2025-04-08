@@ -1,10 +1,15 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using StartSmartDeliveryForm.DataLayer.DAOs;
+using StartSmartDeliveryForm.DataLayer.DTOs;
+using StartSmartDeliveryForm.Generics;
+using StartSmartDeliveryForm.PresentationLayer;
 using StartSmartDeliveryForm.PresentationLayer.DriverManagement;
 using StartSmartDeliveryForm.PresentationLayer.DriverManagement.Models;
 using StartSmartDeliveryForm.PresentationLayer.DriverManagement.Presenters;
+using StartSmartDeliveryForm.PresentationLayer.TemplateViews;
 using StartSmartDeliveryForm.SharedLayer;
+using static StartSmartDeliveryForm.Generics.TableDefinition;
 
 namespace StartSmartDeliveryForm
 {
@@ -19,13 +24,16 @@ namespace StartSmartDeliveryForm
             IServiceProvider serviceRegistry = ServiceRegistry.RegisterServices();
 
             // IoC in action
-            DriverManagementForm driverManagementForm = serviceRegistry.GetRequiredService<DriverManagementForm>();
-            ILogger<DriverManagementFormPresenter> logger = serviceRegistry.GetRequiredService<ILogger<DriverManagementFormPresenter>>();
-            DriverManagementModel model = serviceRegistry.GetRequiredService<DriverManagementModel>();
-            DriversDAO dao = serviceRegistry.GetRequiredService<DriversDAO>();
-            DriverManagementFormPresenter presenter = new(driverManagementForm, model, dao, logger);
+            GenericManagementForm managementForm = serviceRegistry.GetRequiredService<GenericManagementForm>();
+            ILogger<GenericManagementPresenter<DriversDTO>> logger = serviceRegistry.GetRequiredService<ILogger<GenericManagementPresenter<DriversDTO>>>();
+            ILogger<GenericDataFormTemplate> dataFormLogger = serviceRegistry.GetRequiredService<ILogger<GenericDataFormTemplate>>();
+            ILogger<GenericDataFormPresenter<DriversDTO>> dataFormPresenterLogger = serviceRegistry.GetRequiredService<ILogger<GenericDataFormPresenter<DriversDTO>>>();
+            GenericManagementModel<DriversDTO> model = serviceRegistry.GetRequiredService<GenericManagementModel<DriversDTO>>();
+            TableConfig tableConfig = serviceRegistry.GetRequiredService<TableConfig>();
+            IRepository<DriversDTO> repository = serviceRegistry.GetRequiredService<IRepository<DriversDTO>>();
+            _ = new GenericManagementPresenter<DriversDTO>(managementForm, model, tableConfig, repository, logger, dataFormLogger, dataFormPresenterLogger);
 
-            Application.Run(driverManagementForm);
+            Application.Run(managementForm);
         }
     }
 }
