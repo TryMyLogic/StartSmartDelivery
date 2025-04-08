@@ -20,7 +20,6 @@ namespace StartSmartDeliveryForm.DataLayer.DTOs
     )
     {
         public DriversDTO() : this(0, string.Empty, string.Empty, string.Empty, default, false) { }
-        public static readonly DriversDTO Empty = new(0, string.Empty, string.Empty, string.Empty, default, false);
     }
 
 }

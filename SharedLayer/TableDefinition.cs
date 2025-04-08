@@ -16,118 +16,159 @@ namespace StartSmartDeliveryForm.SharedLayer
             public int? Size { get; } = size;
         }
 
-        public class TableConfig(string tableName, string primaryKey)
+        public class TableConfig
         {
-            public string TableName { get; set; } = tableName;
-            public string PrimaryKey { get; set; } = primaryKey;
+            public string TableName { get; set; }
+            public string PrimaryKey { get; set; }
+            public Type EntityType { get; }
             public List<ColumnConfig> Columns { get; set; } = [];
 
-            public Action<object, SqlCommand> MapInsertParameters { get; set; } = (_, _) => throw new InvalidOperationException("Insert mapping not defined for this table.");
-            public Action<object, SqlCommand> MapUpdateParameters { get; set; } = (_, _) => throw new InvalidOperationException("Update mapping not defined for this table.");
-            public Action<DataRow, object> MapToRow { get; set; } = (_, _) => throw new NotImplementedException("MapToRow must be implemented.");
-            public Func<DataGridViewRow, object> CreateFromRow { get; set; } = _ => throw new NotImplementedException("CreateFromRow must be implemented.");
-            public Action<object, Dictionary<string, Control>> MapToForm { get; set; } = (_, _) => throw new NotImplementedException("MapToForm must be implemented.");
-            public Func<Dictionary<string, Control>, object> CreateFromForm { get; set; } = _ => throw new NotImplementedException("CreateFromForm must be implemented.");
-            public Func<ColumnConfig, object?> GetDefaultValue { get; set; } = column => column.SqlType == SqlDbType.Bit ? true : null;
+            public Action<object, SqlCommand> MapInsertParameters { get; set; }
+            public Action<object, SqlCommand> MapUpdateParameters { get; set; }
+            public Action<DataRow, object> MapToRow { get; set; }
+            public Func<DataGridViewRow, object> CreateFromRow { get; set; }
+            public Action<object, Dictionary<string, Control>> MapToForm { get; set; }
+            public Func<Dictionary<string, Control>, object> CreateFromForm { get; set; }
+            public Func<ColumnConfig, object?> GetDefaultValue { get; set; }
 
+            public TableConfig(string tableName, string primaryKey, Type entityType)
+            {
+                TableName = tableName;
+                PrimaryKey = primaryKey;
+                EntityType = entityType;
+                Columns = [];
+
+                MapInsertParameters = (entity, cmd) =>
+                {
+                    foreach (ColumnConfig? col in Columns.Where(c => !c.IsIdentity))
+                    {
+                        System.Reflection.PropertyInfo? prop = entity.GetType().GetProperty(col.Name);
+                        object? value = prop?.GetValue(entity);
+                        if (prop?.PropertyType.IsEnum == true) value = (int)value!;
+                        cmd.Parameters.Add(new SqlParameter($"@{col.Name}", col.SqlType, col.Size ?? 0) { Value = value ?? DBNull.Value });
+                    }
+                };
+
+                MapUpdateParameters = (entity, cmd) =>
+                {
+                    foreach (ColumnConfig col in Columns)
+                    {
+                        System.Reflection.PropertyInfo? prop = entity.GetType().GetProperty(col.Name);
+                        object? value = prop?.GetValue(entity);
+                        if (prop?.PropertyType.IsEnum == true) value = (int)value!;
+                        cmd.Parameters.Add(new SqlParameter($"@{col.Name}", col.SqlType, col.Size ?? 0) { Value = value ?? DBNull.Value });
+                    }
+                };
+
+                MapToRow = (row, entity) =>
+                {
+                    foreach (ColumnConfig col in Columns.Where(c => !c.IsIdentity))
+                    {
+                        System.Reflection.PropertyInfo? prop = entity.GetType().GetProperty(col.Name);
+                        object? value = prop?.GetValue(entity);
+                        if (prop?.PropertyType.IsEnum == true) value = (int)value!;
+                        row[col.Name] = value ?? DBNull.Value;
+                    }
+                };
+
+                CreateFromRow = row =>
+                {
+                    object entity = Activator.CreateInstance(entityType)!; // Ensure DTO has empty constructor
+                    foreach (ColumnConfig col in Columns)
+                    {
+                        System.Reflection.PropertyInfo? prop = entityType.GetProperty(col.Name);
+                        if (prop != null && row.Cells[col.Name].Value != null)
+                        {
+                            object value = row.Cells[col.Name].Value;
+                            if (prop.PropertyType.IsEnum) value = Enum.ToObject(prop.PropertyType, value);
+                            else value = Convert.ChangeType(value, prop.PropertyType);
+                            prop.SetValue(entity, value);
+                        }
+                    }
+                    return entity!;
+                };
+
+                MapToForm = (entity, controls) =>
+                {
+                    foreach (ColumnConfig col in Columns)
+                    {
+                        if (controls.TryGetValue(col.Name, out Control? control))
+                        {
+                            System.Reflection.PropertyInfo? prop = entity.GetType().GetProperty(col.Name);
+                            object? value = prop?.GetValue(entity);
+                            if (control is TextBox textBox) textBox.Text = value?.ToString() ?? "";
+                            else if (control is ComboBox comboBox)
+                            {
+                                if (prop?.PropertyType.IsEnum == true)
+                                {
+                                    comboBox.SelectedItem = Enum.GetName(prop.PropertyType, value!) ?? Enum.GetNames(prop.PropertyType)[0];
+                                }
+                                else comboBox.SelectedItem = value?.ToString();
+                            }
+                        }
+                    }
+                };
+
+                CreateFromForm = controls =>
+                {
+                    object? entity = Activator.CreateInstance(entityType, [0, "", "", "", default(LicenseType), false]);
+                    foreach (ColumnConfig col in Columns)
+                    {
+                        if (controls.TryGetValue(col.Name, out Control? control))
+                        {
+                            System.Reflection.PropertyInfo? prop = entityType.GetProperty(col.Name);
+                            if (prop != null)
+                            {
+                                object? value = control switch
+                                {
+                                    TextBox textBox => string.IsNullOrEmpty(textBox.Text) ? "" : Convert.ChangeType(textBox.Text, prop.PropertyType),
+                                    ComboBox comboBox when col.SqlType == SqlDbType.Bit => bool.Parse(comboBox.SelectedItem?.ToString() ?? "False"),
+                                    ComboBox comboBox when prop.PropertyType.IsEnum => Enum.Parse(prop.PropertyType, comboBox.SelectedItem?.ToString() ?? Enum.GetNames(prop.PropertyType)[0]),
+                                    _ => null
+                                };
+                                if (value != null) prop.SetValue(entity, value);
+                            }
+                        }
+                    }
+                    return entity!;
+                };
+
+                GetDefaultValue = col => col.SqlType == SqlDbType.Bit ? false : null;
+            }
+
+            // Fluent API
             public TableConfig AddColumn(string name, SqlDbType sqlType, bool isIdentity = false, bool isUnique = false, int? size = null)
             {
                 Columns.Add(new ColumnConfig(name, sqlType, isIdentity, isUnique, size));
-                return this; // Fluent API for chaining
+                return this;
+            }
+
+            public TableConfig WithDefaults(Func<ColumnConfig, object?> getDefaultValue)
+            {
+                GetDefaultValue = getDefaultValue;
+                return this;
             }
         }
 
         public static class TableConfigs
         {
-            public static readonly TableConfig Empty = new TableConfig("EmptyTable", "Id")
-            .AddColumn("Id", SqlDbType.Int, isIdentity: true);
+            public static readonly TableConfig Empty = new TableConfig("EmptyTable", "Id", typeof(object))
+                .AddColumn("Id", SqlDbType.Int, isIdentity: true);
 
-            public static readonly TableConfig Drivers = new("Drivers", "DriverID")
-            {
-                Columns =
-            [
-                new("DriverID", SqlDbType.Int, isIdentity: true),
-                new("Name", SqlDbType.NVarChar, size: 100),
-                new("Surname", SqlDbType.NVarChar, size: 100),
-                new("EmployeeNo", SqlDbType.NVarChar, isUnique: true, size: 50),
-                new("LicenseType", SqlDbType.Int),
-                new("Availability", SqlDbType.Bit)
-            ],
-                MapInsertParameters = (entity, cmd) =>
+            public static readonly TableConfig Drivers = new TableConfig("Drivers", "DriverID", typeof(DriversDTO))
+                .AddColumn("DriverID", SqlDbType.Int, isIdentity: true)
+                .AddColumn("Name", SqlDbType.NVarChar, size: 100)
+                .AddColumn("Surname", SqlDbType.NVarChar, size: 100)
+                .AddColumn("EmployeeNo", SqlDbType.NVarChar, isUnique: true, size: 50)
+                .AddColumn("LicenseType", SqlDbType.Int)
+                .AddColumn("Availability", SqlDbType.Bit)
+                .WithDefaults(col => col.Name switch
                 {
-                    DriversDTO driver = (DriversDTO)entity;
-                    cmd.Parameters.Add(new SqlParameter("@Name", SqlDbType.NVarChar, 100) { Value = driver.Name });
-                    cmd.Parameters.Add(new SqlParameter("@Surname", SqlDbType.NVarChar, 100) { Value = driver.Surname });
-                    cmd.Parameters.Add(new SqlParameter("@EmployeeNo", SqlDbType.NVarChar, 50) { Value = driver.EmployeeNo });
-                    cmd.Parameters.Add(new SqlParameter("@LicenseType", SqlDbType.Int) { Value = (int)driver.LicenseType });
-                    cmd.Parameters.Add(new SqlParameter("@Availability", SqlDbType.Bit) { Value = driver.Availability });
-                },
-                MapUpdateParameters = (entity, cmd) =>
-                {
-                    DriversDTO driver = (DriversDTO)entity;
-                    cmd.Parameters.Add(new SqlParameter("@DriverID", SqlDbType.Int) { Value = driver.DriverID });
-                    cmd.Parameters.Add(new SqlParameter("@Name", SqlDbType.NVarChar, 100) { Value = driver.Name });
-                    cmd.Parameters.Add(new SqlParameter("@Surname", SqlDbType.NVarChar, 100) { Value = driver.Surname });
-                    cmd.Parameters.Add(new SqlParameter("@EmployeeNo", SqlDbType.NVarChar, 50) { Value = driver.EmployeeNo });
-                    cmd.Parameters.Add(new SqlParameter("@LicenseType", SqlDbType.Int) { Value = (int)driver.LicenseType });
-                    cmd.Parameters.Add(new SqlParameter("@Availability", SqlDbType.Bit) { Value = driver.Availability });
-                },
-                MapToRow = (row, entity) =>
-                {
-                    DriversDTO driver = (DriversDTO)entity;
-                    row["Name"] = driver.Name;
-                    row["Surname"] = driver.Surname;
-                    row["EmployeeNo"] = driver.EmployeeNo;
-                    row["LicenseType"] = (int)driver.LicenseType;
-                    row["Availability"] = driver.Availability;
-                },
-                CreateFromRow = (row) => new DriversDTO(
-                    DriverID: (int)row.Cells["DriverID"].Value,
-                    Name: row.Cells["Name"].Value.ToString()!,
-                    Surname: row.Cells["Surname"].Value.ToString()!,
-                    EmployeeNo: row.Cells["EmployeeNo"].Value.ToString()!,
-                    LicenseType: (LicenseType)row.Cells["LicenseType"].Value,
-                    Availability: (bool)row.Cells["Availability"].Value
-                ),
-                MapToForm = (entity, controls) =>
-                {
-                    DriversDTO driver = (DriversDTO)entity;
-                    if (controls.TryGetValue("DriverID", out Control? driverIdControl) && driverIdControl is TextBox driverIdTextBox)
-                        driverIdTextBox.Text = driver.DriverID.ToString();
-                    if (controls.TryGetValue("Name", out Control? nameControl) && nameControl is TextBox nameTextBox)
-                        nameTextBox.Text = driver.Name;
-                    if (controls.TryGetValue("Surname", out Control? surnameControl) && surnameControl is TextBox surnameTextBox)
-                        surnameTextBox.Text = driver.Surname;
-                    if (controls.TryGetValue("EmployeeNo", out Control? empNoControl) && empNoControl is TextBox empNoTextBox)
-                        empNoTextBox.Text = driver.EmployeeNo;
-                    if (controls.TryGetValue("LicenseType", out Control? licenseControl) && licenseControl is ComboBox licenseComboBox)
-                        licenseComboBox.SelectedItem = driver.LicenseType.ToString();
-                    if (controls.TryGetValue("Availability", out Control? availControl) && availControl is ComboBox availComboBox)
-                        availComboBox.SelectedItem = driver.Availability.ToString();
-                },
-                CreateFromForm = (controls) =>
-                {
-                    int DriverID = controls.TryGetValue("DriverID", out Control? driverIdControl) && driverIdControl is TextBox driverIdTextBox && int.TryParse(driverIdTextBox.Text, out int id) ? id : 0;
-                    string name = controls.TryGetValue("Name", out Control? nameControl) && nameControl is TextBox nameTextBox ? nameTextBox.Text : string.Empty;
-                    string surname = controls.TryGetValue("Surname", out Control? surnameControl) && surnameControl is TextBox surnameTextBox ? surnameTextBox.Text : string.Empty;
-                    string employeeNo = controls.TryGetValue("EmployeeNo", out Control? empNoControl) && empNoControl is TextBox empNoTextBox ? empNoTextBox.Text : string.Empty;
-                    LicenseType licenseType = controls.TryGetValue("LicenseType", out Control? licenseControl) && licenseControl is ComboBox licenseComboBox && licenseComboBox.SelectedItem != null
-                        ? (LicenseType)Enum.Parse(typeof(LicenseType), licenseComboBox.SelectedItem.ToString()!)
-                        : LicenseType.Code8; // Default value
-                    bool availability = controls.TryGetValue("Availability", out Control? availControl)
-                    && availControl is ComboBox availComboBox && availComboBox.SelectedItem != null
-                    && bool.Parse(availComboBox.SelectedItem.ToString()!); // Default value
-
-                    return new DriversDTO(DriverID, name, surname, employeeNo, licenseType, availability);
-                },
-                GetDefaultValue = column => column.Name switch
-                {
-                    "Availability" => true, // Overriding default bool being false
-                    _ => column.SqlType == SqlDbType.Bit ? false : null
-                }
-
-            };
+                    "Availability" => true,
+                    _ => col.SqlType == SqlDbType.Bit ? false : null
+                });
         }
     }
-
 }
+
+
