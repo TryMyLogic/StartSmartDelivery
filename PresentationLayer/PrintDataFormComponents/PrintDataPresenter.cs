@@ -2,7 +2,7 @@
 using System.Drawing.Printing;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using StartSmartDeliveryForm.DataLayer.DAOs;
+using StartSmartDeliveryForm.DataLayer.Repositories;
 using StartSmartDeliveryForm.SharedLayer;
 
 namespace StartSmartDeliveryForm.PresentationLayer.PrintDataFormComponents

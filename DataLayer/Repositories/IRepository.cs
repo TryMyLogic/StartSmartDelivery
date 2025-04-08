@@ -1,7 +1,7 @@
 ﻿using System.Data;
 using Microsoft.Data.SqlClient;
 
-namespace StartSmartDeliveryForm.DataLayer.DAOs
+namespace StartSmartDeliveryForm.DataLayer.Repositories
 {
     public interface IRepository
     {

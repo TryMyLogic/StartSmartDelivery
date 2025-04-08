@@ -1,10 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
 using StartSmartDeliveryForm.BusinessLogicLayer;
-using StartSmartDeliveryForm.DataLayer.DAOs;
 using StartSmartDeliveryForm.DataLayer.DTOs;
 using StartSmartDeliveryForm.SharedLayer;
 using StartSmartDeliveryForm.Tests.SharedTestItems;
 using Xunit.Abstractions;
+using StartSmartDeliveryForm.DataLayer.Repositories;
 
 namespace StartSmartDeliveryForm.Tests.BusinessLogicLayerTests
 {

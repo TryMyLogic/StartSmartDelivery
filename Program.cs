@@ -1,11 +1,11 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using StartSmartDeliveryForm.DataLayer.DAOs;
 using StartSmartDeliveryForm.DataLayer.DTOs;
 using StartSmartDeliveryForm.PresentationLayer.DataFormComponents;
 using StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents;
 using StartSmartDeliveryForm.SharedLayer;
 using static StartSmartDeliveryForm.SharedLayer.TableDefinition;
+using StartSmartDeliveryForm.DataLayer.Repositories;
 
 namespace StartSmartDeliveryForm
 {
@@ -13,7 +13,7 @@ namespace StartSmartDeliveryForm
     {
 
         [STAThread]
-        static void Main()
+        private static void Main()
         {
             ApplicationConfiguration.Initialize();
 

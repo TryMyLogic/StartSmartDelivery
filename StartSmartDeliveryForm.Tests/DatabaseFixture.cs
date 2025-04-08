@@ -1,8 +1,8 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
-using StartSmartDeliveryForm.DataLayer.DAOs;
 using StartSmartDeliveryForm.DataLayer.DTOs;
 using StartSmartDeliveryForm.SharedLayer;
+using StartSmartDeliveryForm.DataLayer.Repositories;
 
 namespace StartSmartDeliveryForm.Tests
 {

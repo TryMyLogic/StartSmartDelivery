@@ -8,7 +8,6 @@ using Polly.Registry;
 using Serilog.Events;
 using Serilog.Sinks.InMemory;
 using StartSmartDeliveryForm.BusinessLogicLayer;
-using StartSmartDeliveryForm.DataLayer.DAOs;
 using StartSmartDeliveryForm.DataLayer.DTOs;
 using StartSmartDeliveryForm.DataLayer.Repositories;
 using StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents;

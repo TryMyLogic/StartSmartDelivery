@@ -1,12 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
 using StartSmartDeliveryForm.BusinessLogicLayer;
-using StartSmartDeliveryForm.DataLayer.DAOs;
 using StartSmartDeliveryForm.DataLayer.DTOs;
 using StartSmartDeliveryForm.PresentationLayer.DataFormComponents;
 using StartSmartDeliveryForm.SharedLayer.Enums;
 using StartSmartDeliveryForm.Tests.SharedTestItems;
 using Xunit.Abstractions;
 using static StartSmartDeliveryForm.SharedLayer.TableDefinition;
+using StartSmartDeliveryForm.DataLayer.Repositories;
 
 namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DataFormComponents
 {
