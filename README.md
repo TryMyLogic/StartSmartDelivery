@@ -40,10 +40,10 @@ TODO (When version 1 is released)
 StartSmartDeliever was originally conceived by Tiago Luiz and developed as a university project of the same name. This repository refines and expands the concept into one that can be applied in the real world. The original university project can be found [here](https://github.com/zannlin/StartSmartDelivery).
 
 ## Contributing
-Tiago Luiz - https://www.linkedin.com/in/tiago-luiz-8192a8358/
-Zander Lindeque - https://www.linkedin.com/in/zander-lindeque-b2aa42268/
-Tyler Geuens - https://www.linkedin.com/in/tyler-geuens-512566273/
-Reghard Du Plessis - https://www.linkedin.com/in/reghard-du-plessis-a63753285/
+* Tiago Luiz - https://www.linkedin.com/in/tiago-luiz-8192a8358/
+* Zander Lindeque - https://www.linkedin.com/in/zander-lindeque-b2aa42268/
+* Tyler Geuens - https://www.linkedin.com/in/tyler-geuens-512566273/
+* Reghard Du Plessis - https://www.linkedin.com/in/reghard-du-plessis-a63753285/
 
 ## Planned Features
 # For V2:
