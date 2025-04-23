@@ -28,13 +28,12 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 
         public ManagementModel(
             IRepository<T> repository,
-            TableConfig tableConfig,
             PaginationManager<T> paginationManager,
             ILogger<ManagementModel<T>>? logger = null,
             ILogger<PaginationManager<T>>? paginationLogger = null)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
-            _tableConfig = tableConfig ?? throw new ArgumentNullException(nameof(tableConfig));
+            _tableConfig = TableConfigResolver.Resolve<T>();
             DgvTable = new DataTable();
             _logger = logger ?? NullLogger<ManagementModel<T>>.Instance;
 

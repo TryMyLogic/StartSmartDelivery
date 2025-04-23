@@ -167,6 +167,36 @@ namespace StartSmartDeliveryForm.SharedLayer
                     "Availability" => true,
                     _ => col.SqlType == SqlDbType.Bit ? false : null
                 });
+
+            public static readonly TableConfig Vehicles = new TableConfig("Vehicles", "VehicleID", typeof(VehiclesDTO))
+                .AddColumn("VehicleID", SqlDbType.Int, isIdentity: true)
+                .AddColumn("Make", SqlDbType.NVarChar, size: 50)
+                .AddColumn("Model", SqlDbType.NVarChar, size: 50)
+                .AddColumn("Year", SqlDbType.Int)
+                .AddColumn("NumberPlate", SqlDbType.NVarChar, size: 20)
+                .AddColumn("Availability", SqlDbType.Int)
+                .WithDefaults(col => col.Name switch
+                {
+                    "Availability" => true,
+                    _ => col.SqlType == SqlDbType.Bit ? false : null
+                });
+        }
+
+        public class TableConfigResolver
+        {
+            public static TableConfig Resolve<T>()
+            {
+                if (typeof(T) == typeof(DriversDTO))
+                {
+                    return TableConfigs.Drivers;
+                }
+                else if (typeof(T) == typeof(VehiclesDTO))
+                {
+                    return TableConfigs.Vehicles;
+                }
+                // Add more conditions as needed for other DTOs
+                throw new InvalidOperationException($"No TableConfig found for type {typeof(T).Name}");
+            }
         }
     }
 }

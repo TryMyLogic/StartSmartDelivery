@@ -39,7 +39,6 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
             dgvMain.RowHeadersVisible = false; // Hides Row Number Column
             AdjustDataGridViewHeight();
             ConfigureDataGridViewColumns();
-            AddEditDeleteButtons();
             SetSearchOptions();
             FormLoadOccurred?.Invoke(this, e);
         }

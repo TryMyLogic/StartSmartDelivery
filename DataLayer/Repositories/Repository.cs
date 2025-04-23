@@ -14,7 +14,6 @@ namespace StartSmartDeliveryForm.DataLayer.Repositories
     public class Repository<T>(
            ResiliencePipelineProvider<string> pipelineProvider,
            IConfiguration configuration,
-           TableConfig tableConfig,
            ILogger<Repository<T>>? logger = null,
            string? connectionString = null,
            RetryEventService? retryEventService = null) : IRepository<T> where T : class
@@ -24,7 +23,7 @@ namespace StartSmartDeliveryForm.DataLayer.Repositories
         private readonly ILogger<Repository<T>> _logger = logger ?? NullLogger<Repository<T>>.Instance;
         private readonly ResiliencePipeline _pipeline = pipelineProvider.GetPipeline("sql-retry-pipeline");
         private readonly RetryEventService _retryEventService = retryEventService ?? new RetryEventService();
-        private readonly TableConfig _tableConfig = tableConfig ?? throw new ArgumentNullException(nameof(tableConfig));
+        private readonly TableConfig _tableConfig = TableConfigResolver.Resolve<T>();
 
         public string TableName => _tableConfig.TableName;
 

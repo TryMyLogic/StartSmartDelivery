@@ -26,11 +26,13 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
         private readonly TableConfig _tableConfig;
         private readonly IRepository<T> _repository;
 
+        private readonly FormFactory _formFactory;
+
         public ManagementPresenter(
         IManagementForm managementForm,
         IManagementModel<T> managementModel,
-        TableConfig tableConfig,
         IRepository<T> repository,
+        FormFactory formFactory,
         ILogger<ManagementPresenter<T>>? logger = null,
         ILogger<DataForm>? dataFormLogger = null,
         ILogger<DataFormPresenter<T>>? dataFormPresenterLogger = null,
@@ -40,7 +42,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
         {
             _managementForm = managementForm ?? throw new ArgumentNullException(nameof(managementForm));
             _managementModel = managementModel ?? throw new ArgumentNullException(nameof(managementModel));
-            _tableConfig = tableConfig ?? throw new ArgumentNullException(nameof(tableConfig));
+            _tableConfig = TableConfigResolver.Resolve<T>();
             _logger = logger ?? NullLogger<ManagementPresenter<T>>.Instance;
             _dataFormLogger = dataFormLogger ?? NullLogger<DataForm>.Instance;
             _dataFormPresenterLogger = dataFormPresenterLogger ?? NullLogger<DataFormPresenter<T>>.Instance;
@@ -48,6 +50,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _printDataFormLogger = printDataFormLogger ?? NullLogger<PrintDataForm>.Instance;
             _printDataPresenterLogger = printDataPresenterLogger ?? NullLogger<PrintDataPresenter<T>>.Instance;
+            _formFactory = formFactory;
 
             WireUpEvents();
         }
@@ -92,6 +95,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
                 await _managementModel.InitializeAsync();
                 _managementForm.DataSource = _managementModel.DgvTable;
                 _managementForm.UpdatePaginationDisplay(_managementModel.PaginationManager.CurrentPage, _managementModel.PaginationManager.TotalPages);
+                _managementForm.AddEditDeleteButtons();
                 _managementForm.HideExcludedColumns();
             }
             catch (InvalidOperationException ex)
@@ -280,9 +284,8 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
                 _dataForm.ClearData();
             }
         }
-    }
 
-     private void HandleDashboardFormFormRequested(object? sender, EventArgs e)
+        private void HandleDashboardFormFormRequested(object? sender, EventArgs e)
         {
             try
             {

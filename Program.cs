@@ -6,6 +6,7 @@ using StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents;
 using StartSmartDeliveryForm.SharedLayer;
 using static StartSmartDeliveryForm.SharedLayer.TableDefinition;
 using StartSmartDeliveryForm.DataLayer.Repositories;
+using StartSmartDeliveryForm.PresentationLayer;
 
 namespace StartSmartDeliveryForm
 {
@@ -20,14 +21,9 @@ namespace StartSmartDeliveryForm
             IServiceProvider serviceRegistry = ServiceRegistry.RegisterServices();
 
             // IoC in action
-            ManagementForm managementForm = serviceRegistry.GetRequiredService<ManagementForm>();
-            ILogger<ManagementPresenter<DriversDTO>> logger = serviceRegistry.GetRequiredService<ILogger<ManagementPresenter<DriversDTO>>>();
-            ILogger<DataForm> dataFormLogger = serviceRegistry.GetRequiredService<ILogger<DataForm>>();
-            ILogger<DataFormPresenter<DriversDTO>> dataFormPresenterLogger = serviceRegistry.GetRequiredService<ILogger<DataFormPresenter<DriversDTO>>>();
-            ManagementModel<DriversDTO> model = serviceRegistry.GetRequiredService<ManagementModel<DriversDTO>>();
-            TableConfig tableConfig = serviceRegistry.GetRequiredService<TableConfig>();
-            IRepository<DriversDTO> repository = serviceRegistry.GetRequiredService<IRepository<DriversDTO>>();
-            _ = new ManagementPresenter<DriversDTO>(managementForm, model, tableConfig, repository, logger, dataFormLogger, dataFormPresenterLogger);
+            FormFactory formFactory = serviceRegistry.GetRequiredService<FormFactory>();
+
+            Form managementForm = formFactory.CreateForm("ManagementForm", "DriverManagementForm");
 
             Application.Run(managementForm);
         }

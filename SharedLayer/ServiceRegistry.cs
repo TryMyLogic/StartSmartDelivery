@@ -9,6 +9,7 @@ using Serilog.Events;
 using StartSmartDeliveryForm.BusinessLogicLayer;
 using StartSmartDeliveryForm.DataLayer.DTOs;
 using StartSmartDeliveryForm.DataLayer.Repositories;
+using StartSmartDeliveryForm.PresentationLayer;
 using StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents;
 using static StartSmartDeliveryForm.SharedLayer.TableDefinition;
 
@@ -132,14 +133,27 @@ namespace StartSmartDeliveryForm.SharedLayer
 
                 })
 
-                .AddScoped<TableConfig>(_ => TableConfigs.Drivers)
+                .AddSingleton<FormFactory>()
+                .AddSingleton<TableConfigResolver>()
+                .AddTransient(typeof(ManagementPresenter<>))
+
+
                 .AddScoped<ManagementForm>()
+
+                // DriverManagementForm
                 .AddScoped<IRepository<DriversDTO>, Repository<DriversDTO>>()
                 .AddScoped<PaginationManager<DriversDTO>>()
                 .AddScoped<IManagementModel<DriversDTO>, ManagementModel<DriversDTO>>()
                 .AddScoped<ManagementModel<DriversDTO>>()
                 .AddTransient<ManagementPresenter<DriversDTO>>()
                 .AddScoped<IRepository<DriversDTO>, Repository<DriversDTO>>()
+
+                .AddScoped<IRepository<VehiclesDTO>, Repository<VehiclesDTO>>()
+                .AddScoped<PaginationManager<VehiclesDTO>>()
+                .AddScoped<IManagementModel<VehiclesDTO>, ManagementModel<VehiclesDTO>>()
+                .AddScoped<ManagementModel<VehiclesDTO>>()
+                .AddTransient<ManagementPresenter<VehiclesDTO>>()
+                .AddScoped<IRepository<VehiclesDTO>, Repository<VehiclesDTO>>()
 
                 .BuildServiceProvider();
 
