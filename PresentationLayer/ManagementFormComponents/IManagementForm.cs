@@ -22,6 +22,11 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
         event EventHandler<int> GoToPageClicked;
         event EventHandler PrintClicked;
 
+        event EventHandler DashboardFormFormRequested;
+        event EventHandler DeliveryManagementFormFormRequested;
+        event EventHandler VehicleManagementFormFormRequested;
+        event EventHandler DriverManagementFormFormRequested;
+
         void AddEditDeleteButtons(Func<string, Image>? imageLoader = null);
         void ShowMessageBox(string Text, string Caption, MessageBoxButtons Buttons, MessageBoxIcon Icon);
         void UpdatePaginationDisplay(int CurrentPage, int TotalPages);

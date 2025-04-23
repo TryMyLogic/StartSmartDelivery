@@ -341,6 +341,33 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
             }
         }
 
+        public event EventHandler? DashboardFormFormRequested;
+        public event EventHandler? DeliveryManagementFormFormRequested;
+        public event EventHandler? VehicleManagementFormFormRequested;
+        public event EventHandler? DriverManagementFormFormRequested;
+
+        private void dashboardToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DashboardFormFormRequested?.Invoke(sender, e);
+        }
+
+        private void deliveryManagementToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DeliveryManagementFormFormRequested?.Invoke(sender, e);
+        }
+
+        public void vehicleManagementToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            VehicleManagementFormFormRequested?.Invoke(sender, e);
+        }
+
+        private void driverManagementToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DriverManagementFormFormRequested?.Invoke(sender, e);
+        }
+
+     
+
 
     }
 }

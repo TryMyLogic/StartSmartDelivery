@@ -113,24 +113,28 @@
             dashboardToolStripMenuItem.Name = "dashboardToolStripMenuItem";
             dashboardToolStripMenuItem.Size = new Size(190, 22);
             dashboardToolStripMenuItem.Text = "Dashboard";
+            dashboardToolStripMenuItem.Click += dashboardToolStripMenuItem_Click;
             // 
             // deliveryManagementToolStripMenuItem
             // 
             deliveryManagementToolStripMenuItem.Name = "deliveryManagementToolStripMenuItem";
             deliveryManagementToolStripMenuItem.Size = new Size(190, 22);
             deliveryManagementToolStripMenuItem.Text = "Delivery Management";
+            deliveryManagementToolStripMenuItem.Click += deliveryManagementToolStripMenuItem_Click;
             // 
             // vehicleManagementToolStripMenuItem
             // 
             vehicleManagementToolStripMenuItem.Name = "vehicleManagementToolStripMenuItem";
             vehicleManagementToolStripMenuItem.Size = new Size(190, 22);
             vehicleManagementToolStripMenuItem.Text = "Vehicle Management";
+            vehicleManagementToolStripMenuItem.Click += vehicleManagementToolStripMenuItem_Click;
             // 
             // driverManagementToolStripMenuItem
             // 
             driverManagementToolStripMenuItem.Name = "driverManagementToolStripMenuItem";
             driverManagementToolStripMenuItem.Size = new Size(190, 22);
             driverManagementToolStripMenuItem.Text = "Driver Management";
+            driverManagementToolStripMenuItem.Click += driverManagementToolStripMenuItem_Click;
             // 
             // dataManagementToolStripMenuItem
             // 

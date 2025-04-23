@@ -69,6 +69,11 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
             _managementForm.GoToPageClicked += HandleGoToPageClicked;
             _managementForm.PrintClicked += HandlePrintClicked;
 
+            _managementForm.DashboardFormFormRequested += HandleDashboardFormFormRequested;
+            _managementForm.DeliveryManagementFormFormRequested += HandleDeliveryManagementFormFormRequested;
+            _managementForm.VehicleManagementFormFormRequested += HandleVehicleManagementFormFormRequested;
+            _managementForm.DriverManagementFormFormRequested += HandleDriverManagementFormFormRequested;
+
             _managementModel.DisplayErrorMessage += _managementForm.ShowMessageBox;
             _managementModel.PageChanged += HandlePageChange;
         }
@@ -277,4 +282,65 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
         }
     }
 
+     private void HandleDashboardFormFormRequested(object? sender, EventArgs e)
+        {
+            try
+            {
+                // Create Form
+                // Show Form
+                _logger.LogInformation("Successfully opened DashboardForm");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to open DashboardForm");
+                _managementForm.ShowMessageBox("Error opening Dashboard Form: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void HandleDeliveryManagementFormFormRequested(object? sender, EventArgs e)
+        {
+            try
+            {
+                // Create Form
+                // Show Form
+                _logger.LogInformation("Successfully opened DeliveryManagementForm");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to open DeliveryManagementForm");
+                _managementForm.ShowMessageBox("Error opening Delivery Management Form: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+
+        private void HandleVehicleManagementFormFormRequested(object? sender, EventArgs e)
+        {
+            try
+            {
+                // Create Form
+                // Show Form
+                _logger.LogInformation("Successfully opened VehicleManagementForm");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to open VehicleManagementForm");
+                _managementForm.ShowMessageBox("Error opening Vehicle Management Form: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void HandleDriverManagementFormFormRequested(object? sender, EventArgs e)
+        {
+            try
+            {
+                // Create Form
+                // Show Form
+                _logger.LogInformation("Successfully opened DriverManagementForm");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to open DriverManagementForm");
+                _managementForm.ShowMessageBox("Error opening Driver Management Form: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+    }
 }
