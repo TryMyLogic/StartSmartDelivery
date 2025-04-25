@@ -38,6 +38,12 @@ namespace StartSmartDeliveryForm.PresentationLayer
             _logger.LogInformation("Switching to management type: {DTOType}", typeof(T).Name);
             try
             {
+                if (_currentPresenter != null && _currentPresenter.GetType() == typeof(ManagementPresenter<T>))
+                {
+                    _logger.LogInformation("Management type switch was attempted but current form is already of the target type");
+                    return;
+                }
+
                 _currentPresenter = _formFactory.CreatePresenter<T>(_managementForm);
 
                 if (_managementForm.FirstLoad == true)
