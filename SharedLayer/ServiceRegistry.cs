@@ -133,6 +133,7 @@ namespace StartSmartDeliveryForm.SharedLayer
 
                 })
 
+                .AddSingleton<ApplicationCoordinator>()
                 .AddSingleton<FormFactory>()
                 .AddSingleton<TableConfigResolver>()
                 .AddTransient(typeof(ManagementPresenter<>))
@@ -148,6 +149,7 @@ namespace StartSmartDeliveryForm.SharedLayer
                 .AddTransient<ManagementPresenter<DriversDTO>>()
                 .AddScoped<IRepository<DriversDTO>, Repository<DriversDTO>>()
 
+                // VehicleManagementForm
                 .AddScoped<IRepository<VehiclesDTO>, Repository<VehiclesDTO>>()
                 .AddScoped<PaginationManager<VehiclesDTO>>()
                 .AddScoped<IManagementModel<VehiclesDTO>, ManagementModel<VehiclesDTO>>()

@@ -17,15 +17,9 @@ namespace StartSmartDeliveryForm
         private static void Main()
         {
             ApplicationConfiguration.Initialize();
-
             IServiceProvider serviceRegistry = ServiceRegistry.RegisterServices();
-
-            // IoC in action
-            FormFactory formFactory = serviceRegistry.GetRequiredService<FormFactory>();
-
-            Form managementForm = formFactory.CreateForm("ManagementForm", "DriverManagementForm");
-
-            Application.Run(managementForm);
+            ApplicationCoordinator applicationCoordinator = serviceRegistry.GetRequiredService<ApplicationCoordinator>();
+            applicationCoordinator.Start();
         }
     }
 }

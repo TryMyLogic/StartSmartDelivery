@@ -8,6 +8,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
     {
         DataGridView DgvMain { get; }
         DataTable DataSource { get; set; }
+        bool FirstLoad { get; set; }
 
         event EventHandler FormLoadOccurred;
         event EventHandler AddClicked;
@@ -40,5 +41,6 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 
         void SetTableConfig(TableConfig config);
         void SetSearchOptions();
+        void InvokeFormLoadOccurred(object? sender, EventArgs e);
     }
 }

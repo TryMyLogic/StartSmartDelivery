@@ -10,6 +10,7 @@ using StartSmartDeliveryForm.DataLayer.DTOs;
 using StartSmartDeliveryForm.DataLayer.Repositories;
 using StartSmartDeliveryForm.PresentationLayer.DataFormComponents;
 using StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents;
+using StartSmartDeliveryForm.PresentationLayer.PrintDataFormComponents;
 
 namespace StartSmartDeliveryForm.PresentationLayer
 {
@@ -24,7 +25,7 @@ namespace StartSmartDeliveryForm.PresentationLayer
 
             return formType switch
             {
-                "ManagementForm" => CreateManagementForm(subType),
+                "ManagementForm" => CreateManagementForm(),
                 // "DashboardForm" => CreateDashboardForm(),
                 _ => throw new ArgumentException($"Unknown form type: {formType}", nameof(formType))
             };
@@ -47,50 +48,44 @@ namespace StartSmartDeliveryForm.PresentationLayer
         //    }
         //}
 
-        private ManagementForm CreateManagementForm(string? subType)
+        private ManagementForm CreateManagementForm()
         {
-            if (string.IsNullOrEmpty(subType))
-            {
-                _logger.LogError("A SubType is required for ManagementForm creation.");
-                throw new ArgumentException("A SubType is required for ManagementForm.", nameof(subType));
-            }
-
-            _logger.LogDebug("Creating ManagementForm with subType {SubType}", subType);
-
-            return subType switch
-            {
-                "DriverManagementForm" => CreateManagementForm<DriversDTO>(),
-                "VehicleManagementForm" => CreateManagementForm<VehiclesDTO>(),
-                //   "DeliveryManagementForm" => CreateManagementForm<DeliveriesDTO>(),
-                _ => throw new ArgumentException($"Unknown ManagementForm SubType: {subType}", nameof(subType))
-            };
+            ManagementForm form = _serviceProvider.GetRequiredService<ManagementForm>();
+            _logger.LogInformation("Successfully created ManagementForm");
+            return form;
         }
 
-        private ManagementForm CreateManagementForm<T>() where T : class, new()
+        public ManagementPresenter<T> CreatePresenter<T>(IManagementForm form) where T : class, new()
         {
             try
             {
-                ManagementForm form = _serviceProvider.GetRequiredService<ManagementForm>();
-                ManagementModel<T> model = _serviceProvider.GetRequiredService<ManagementModel<T>>();
+                IManagementModel<T> model = _serviceProvider.GetRequiredService<IManagementModel<T>>();
                 IRepository<T> repository = _serviceProvider.GetRequiredService<IRepository<T>>();
                 ILogger<ManagementPresenter<T>> logger = _serviceProvider.GetRequiredService<ILogger<ManagementPresenter<T>>>();
                 ILogger<DataForm> dataFormLogger = _serviceProvider.GetRequiredService<ILogger<DataForm>>();
                 ILogger<DataFormPresenter<T>> dataFormPresenterLogger = _serviceProvider.GetRequiredService<ILogger<DataFormPresenter<T>>>();
+                ILogger<PrintDataForm> printDataFormLogger = _serviceProvider.GetRequiredService<ILogger<PrintDataForm>>();
+                ILogger<PrintDataPresenter<T>> printDataPresenterLogger = _serviceProvider.GetRequiredService<ILogger<PrintDataPresenter<T>>>();
 
-                _ = new ManagementPresenter<T>(
-                    form, model, repository, this, logger, dataFormLogger, dataFormPresenterLogger
+                ManagementPresenter<T> presenter = new(
+                    form,
+                    model,
+                    repository,
+                    logger,
+                    dataFormLogger,
+                    dataFormPresenterLogger,
+                    printDataFormLogger,
+                    printDataPresenterLogger
                 );
 
-                _logger.LogInformation("Successfully created ManagementForm for {DTOType}", typeof(T).Name);
-                return form;
+                _logger.LogInformation("Successfully created ManagementPresenter for {DTOType}", typeof(T).Name);
+                return presenter;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to create ManagementForm for {DTOType}", typeof(T).Name);
+                _logger.LogError(ex, "Failed to create ManagementPresenter for {DTOType}", typeof(T).Name);
                 throw;
             }
         }
-
-
     }
 }

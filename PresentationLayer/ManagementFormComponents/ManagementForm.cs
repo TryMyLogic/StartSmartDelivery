@@ -22,7 +22,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 
         private readonly IMessageBox _messageBox;
         private readonly ILogger<ManagementForm> _logger;
-        private TableConfig? _tableConfig;
+        private TableConfig _tableConfig;
 
         public ManagementForm() : this(NullLogger<ManagementForm>.Instance, new MessageBoxWrapper(), new FileSystem())
         {
@@ -34,16 +34,22 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
             _fileSystem = FileSystem ?? new FileSystem();
             _messageBox = messageBox ?? new MessageBoxWrapper();
             _logger = logger ?? NullLogger<ManagementForm>.Instance;
+            _tableConfig = TableConfigs.Empty;
         }
 
+        public bool FirstLoad {  get; set; }
         private void ManagementForm_Load(object sender, EventArgs e)
         {
-            if (_tableConfig == null) { _logger.LogWarning("TableConfig has not been set"); }
             _logger.LogInformation("ManagementForm Loaded");
             SetTheme();
             dgvMain.RowHeadersVisible = false; // Hides Row Number Column
             AdjustDataGridViewHeight();
-            FormLoadOccurred?.Invoke(this, e);
+
+            if (FirstLoad == false)
+            {
+                FormLoadOccurred?.Invoke(this, e);
+                FirstLoad = true;
+            }
         }
 
         public event EventHandler<SearchRequestEventArgs>? SearchClicked;
@@ -298,7 +304,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
         private void btnPrint_Click(object sender, EventArgs e) { PrintClicked?.Invoke(sender, e); }
         private void dgvMain_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            if (_tableConfig != null && _tableConfig.TableName == "Drivers" && dgvMain.Columns[e.ColumnIndex].Name == "LicenseType" && e.Value != null)
+            if (_tableConfig.TableName == "Drivers" && dgvMain.Columns[e.ColumnIndex].Name == "LicenseType" && e.Value != null)
             {
                 try
                 {
@@ -337,9 +343,6 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 
         public void ConfigureDataGridViewColumns()
         {
-            if (_tableConfig == null)
-                throw new InvalidOperationException("Attempted to use ConfigureDataGridViewColumns without first setting the TableConfig");
-
             dgvMain.Columns.Clear();
             foreach (ColumnConfig column in _tableConfig.Columns)
             {
@@ -388,6 +391,11 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
         {
             _logger.LogInformation("Change User ToolStripMenuItem clicked");
             ChangeUserRequested?.Invoke(sender, e);
+        }
+
+        public void InvokeFormLoadOccurred(object? sender, EventArgs e)
+        {
+            FormLoadOccurred?.Invoke(sender, e);
         }
     }
 }
