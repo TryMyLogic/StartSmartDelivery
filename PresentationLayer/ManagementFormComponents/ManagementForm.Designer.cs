@@ -98,8 +98,9 @@
             // changeUserToolStripMenuItem
             // 
             changeUserToolStripMenuItem.Name = "changeUserToolStripMenuItem";
-            changeUserToolStripMenuItem.Size = new Size(141, 22);
+            changeUserToolStripMenuItem.Size = new Size(180, 22);
             changeUserToolStripMenuItem.Text = "Change User";
+            changeUserToolStripMenuItem.Click += changeUserToolStripMenuItem_Click;
             // 
             // navigateToolStripMenuItem
             // 

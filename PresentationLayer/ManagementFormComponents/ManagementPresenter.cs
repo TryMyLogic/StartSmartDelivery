@@ -72,10 +72,10 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
             _managementForm.GoToPageClicked += HandleGoToPageClicked;
             _managementForm.PrintClicked += HandlePrintClicked;
 
-            _managementForm.DashboardFormFormRequested += HandleDashboardFormFormRequested;
-            _managementForm.DeliveryManagementFormFormRequested += HandleDeliveryManagementFormFormRequested;
-            _managementForm.VehicleManagementFormFormRequested += HandleVehicleManagementFormFormRequested;
-            _managementForm.DriverManagementFormFormRequested += HandleDriverManagementFormFormRequested;
+            _managementForm.DashboardFormRequested += HandleDashboardFormFormRequested;
+            _managementForm.DeliveryManagementFormRequested += HandleDeliveryManagementFormFormRequested;
+            _managementForm.VehicleManagementFormRequested += HandleVehicleManagementFormFormRequested;
+            _managementForm.DriverManagementFormRequested += HandleDriverManagementFormFormRequested;
 
             _managementModel.DisplayErrorMessage += _managementForm.ShowMessageBox;
             _managementModel.PageChanged += HandlePageChange;
@@ -96,7 +96,11 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
                 _managementForm.DataSource = _managementModel.DgvTable;
                 _managementForm.UpdatePaginationDisplay(_managementModel.PaginationManager.CurrentPage, _managementModel.PaginationManager.TotalPages);
                 _managementForm.AddEditDeleteButtons();
+                _managementForm.SetTableConfig(_tableConfig);
+                _managementForm.ConfigureDataGridViewColumns();
+                _managementForm.SetSearchOptions();
                 _managementForm.HideExcludedColumns();
+           
             }
             catch (InvalidOperationException ex)
             {

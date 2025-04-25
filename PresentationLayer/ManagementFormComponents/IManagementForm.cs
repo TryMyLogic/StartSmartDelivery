@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using StartSmartDeliveryForm.SharedLayer.Interfaces;
+using static StartSmartDeliveryForm.SharedLayer.TableDefinition;
 
 namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 {
@@ -22,10 +23,12 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
         event EventHandler<int> GoToPageClicked;
         event EventHandler PrintClicked;
 
-        event EventHandler DashboardFormFormRequested;
-        event EventHandler DeliveryManagementFormFormRequested;
-        event EventHandler VehicleManagementFormFormRequested;
-        event EventHandler DriverManagementFormFormRequested;
+        event EventHandler DashboardFormRequested;
+        event EventHandler DeliveryManagementFormRequested;
+        event EventHandler VehicleManagementFormRequested;
+        event EventHandler DriverManagementFormRequested;
+
+        event EventHandler ChangeUserRequested;
 
         void AddEditDeleteButtons(Func<string, Image>? imageLoader = null);
         void ShowMessageBox(string Text, string Caption, MessageBoxButtons Buttons, MessageBoxIcon Icon);
@@ -34,5 +37,8 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
         void ConfigureDataGridViewColumns();
         string StartPageText { get; set; }
         string EndPageText { get; set; }
+
+        void SetTableConfig(TableConfig config);
+        void SetSearchOptions();
     }
 }

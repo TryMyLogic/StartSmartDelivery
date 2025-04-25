@@ -2,6 +2,7 @@
 using System.IO.Abstractions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Serilog;
 using StartSmartDeliveryForm.SharedLayer;
 using StartSmartDeliveryForm.SharedLayer.Enums;
 using StartSmartDeliveryForm.SharedLayer.EventArgs;
@@ -21,25 +22,27 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 
         private readonly IMessageBox _messageBox;
         private readonly ILogger<ManagementForm> _logger;
-        private readonly TableConfig _tableConfig;
+        private TableConfig? _tableConfig;
 
-        public ManagementForm() : this(TableConfigs.Empty, NullLogger<ManagementForm>.Instance, new MessageBoxWrapper(), new FileSystem()) { }
-        public ManagementForm(TableConfig config, ILogger<ManagementForm>? logger = null, IMessageBox? messageBox = null, IFileSystem? fileSystem = null)
+        public ManagementForm() : this(NullLogger<ManagementForm>.Instance, new MessageBoxWrapper(), new FileSystem())
+        {
+            Log.Warning("MangementForms empty constructor was used.");
+        }
+        public ManagementForm(ILogger<ManagementForm>? logger = null, IMessageBox? messageBox = null, IFileSystem? fileSystem = null)
         {
             InitializeComponent();
             _fileSystem = FileSystem ?? new FileSystem();
             _messageBox = messageBox ?? new MessageBoxWrapper();
             _logger = logger ?? NullLogger<ManagementForm>.Instance;
-            _tableConfig = config;
         }
 
         private void ManagementForm_Load(object sender, EventArgs e)
         {
+            if (_tableConfig == null) { _logger.LogWarning("TableConfig has not been set"); }
+            _logger.LogInformation("ManagementForm Loaded");
             SetTheme();
             dgvMain.RowHeadersVisible = false; // Hides Row Number Column
             AdjustDataGridViewHeight();
-            ConfigureDataGridViewColumns();
-            SetSearchOptions();
             FormLoadOccurred?.Invoke(this, e);
         }
 
@@ -50,6 +53,12 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
         {
             get => dgvMain.DataSource as DataTable ?? throw new InvalidOperationException("DataSource is not a DataTable.");
             set => dgvMain.DataSource = value;
+        }
+
+        public void SetTableConfig(TableConfig config)
+        {
+            _tableConfig = config ?? throw new ArgumentNullException(nameof(config));
+            _logger.LogInformation("TableConfig set for type: {TableType}", config.TableName);
         }
 
         private void btnSearch_Click(object sender, EventArgs e)
@@ -151,6 +160,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 
         public HashSet<string> GetExcludedColumns()
         {
+            if (_tableConfig == null) return [];
             return [_tableConfig.PrimaryKey];
         }
 
@@ -168,7 +178,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
             }
         }
 
-        private void SetSearchOptions()
+        public void SetSearchOptions()
         {
             cboSearchOptions.Items.Clear();
 
@@ -288,7 +298,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
         private void btnPrint_Click(object sender, EventArgs e) { PrintClicked?.Invoke(sender, e); }
         private void dgvMain_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            if (_tableConfig.TableName == "Drivers" && dgvMain.Columns[e.ColumnIndex].Name == "LicenseType" && e.Value != null)
+            if (_tableConfig != null && _tableConfig.TableName == "Drivers" && dgvMain.Columns[e.ColumnIndex].Name == "LicenseType" && e.Value != null)
             {
                 try
                 {
@@ -327,6 +337,9 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 
         public void ConfigureDataGridViewColumns()
         {
+            if (_tableConfig == null)
+                throw new InvalidOperationException("Attempted to use ConfigureDataGridViewColumns without first setting the TableConfig");
+
             dgvMain.Columns.Clear();
             foreach (ColumnConfig column in _tableConfig.Columns)
             {
@@ -340,33 +353,41 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
             }
         }
 
-        public event EventHandler? DashboardFormFormRequested;
-        public event EventHandler? DeliveryManagementFormFormRequested;
-        public event EventHandler? VehicleManagementFormFormRequested;
-        public event EventHandler? DriverManagementFormFormRequested;
+        public event EventHandler? DashboardFormRequested;
+        public event EventHandler? DeliveryManagementFormRequested;
+        public event EventHandler? VehicleManagementFormRequested;
+        public event EventHandler? DriverManagementFormRequested;
 
         private void dashboardToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            DashboardFormFormRequested?.Invoke(sender, e);
+            _logger.LogInformation("Dashboard ToolStripMenuItem clicked");
+            DashboardFormRequested?.Invoke(sender, e);
         }
 
         private void deliveryManagementToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            DeliveryManagementFormFormRequested?.Invoke(sender, e);
+            _logger.LogInformation("Delivery Management ToolStripMenuItem clicked");
+            DeliveryManagementFormRequested?.Invoke(sender, e);
         }
 
         public void vehicleManagementToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            VehicleManagementFormFormRequested?.Invoke(sender, e);
+            _logger.LogInformation("Vehicle Management ToolStripMenuItem clicked");
+            VehicleManagementFormRequested?.Invoke(sender, e);
         }
 
         private void driverManagementToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            DriverManagementFormFormRequested?.Invoke(sender, e);
+            _logger.LogInformation("Driver Management ToolStripMenuItem clicked");
+            DriverManagementFormRequested?.Invoke(sender, e);
         }
 
-     
+        public event EventHandler? ChangeUserRequested;
 
-
+        private void changeUserToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _logger.LogInformation("Change User ToolStripMenuItem clicked");
+            ChangeUserRequested?.Invoke(sender, e);
+        }
     }
 }
