@@ -47,7 +47,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.ManagementFormComp
             _mockRetryEventService = Substitute.For<RetryEventService>();
 
             ILogger<Repository<DriversDTO>> repositoryLogger = SharedFunctions.CreateTestLogger<Repository<DriversDTO>>(output);
-            _repository = new Repository<DriversDTO>(_mockPipelineProvider, _mockConfiguration, TableConfigs.Drivers, repositoryLogger, _connectionString, _mockRetryEventService);
+            _repository = new Repository<DriversDTO>(_mockPipelineProvider, _mockConfiguration, repositoryLogger, _connectionString, _mockRetryEventService);
 
             _paginationManager = new(_repository, null);
         }
@@ -86,7 +86,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.ManagementFormComp
             dataTable.Rows.Add(4, "Doe", (int)LicenseType.Code8, false);
 
             IRepository<DriversDTO> mockRepository = Substitute.For<IRepository<DriversDTO>>();
-            _managementModel = new(mockRepository, TableConfigs.Drivers, _paginationManager, _testLogger);
+            _managementModel = new(mockRepository, _paginationManager, _testLogger);
             SearchRequestEventArgs eventArgsMock = Substitute.For<SearchRequestEventArgs>(dataTable, selectedOption, searchTerm, false);
 
             // Act
@@ -129,7 +129,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.ManagementFormComp
             dataTable.Rows.Add(4, "null", (int)LicenseType.Code8, false);
 
             IRepository<DriversDTO> mockRepository = Substitute.For<IRepository<DriversDTO>>();
-            _managementModel = new(mockRepository, TableConfigs.Drivers, _paginationManager, _testLogger);
+            _managementModel = new(mockRepository, _paginationManager, _testLogger);
             SearchRequestEventArgs eventArgsMock = Substitute.For<SearchRequestEventArgs>(dataTable, selectedOption, searchTerm, isCaseSensitive);
 
             // Act
@@ -172,7 +172,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.ManagementFormComp
             dataTable.Rows.Add(1, "John", (int)LicenseType.Code8, true);
 
             IRepository<DriversDTO> mockRepository = Substitute.For<IRepository<DriversDTO>>();
-            _managementModel = new(mockRepository, TableConfigs.Drivers, _paginationManager, _testLogger);
+            _managementModel = new(mockRepository, _paginationManager, _testLogger);
             SearchRequestEventArgs eventArgsMock = Substitute.For<SearchRequestEventArgs>(dataTable, selectedOption, searchTerm, isCaseSensitive);
 
             // Act
@@ -217,7 +217,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.ManagementFormComp
             dataTable.Rows.Add(1, "John", (int)LicenseType.Code8, false);
 
             IRepository<DriversDTO> mockRepository = Substitute.For<IRepository<DriversDTO>>();
-            _managementModel = new(mockRepository, TableConfigs.Drivers, _paginationManager, _testLogger);
+            _managementModel = new(mockRepository, _paginationManager, _testLogger);
             SearchRequestEventArgs eventArgsMock = Substitute.For<SearchRequestEventArgs>(dataTable, selectedOption, searchTerm, isCaseSensitive);
 
             // Act
@@ -283,7 +283,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.ManagementFormComp
             dataTable.Rows.Add(2, "null", (int)LicenseType.Code14, false);
 
             IRepository<DriversDTO> mockRepository = Substitute.For<IRepository<DriversDTO>>();
-            _managementModel = new(mockRepository, TableConfigs.Drivers, _paginationManager, _testLogger);
+            _managementModel = new(mockRepository, _paginationManager, _testLogger);
             SearchRequestEventArgs eventArgsMock = Substitute.For<SearchRequestEventArgs>(dataTable, selectedOption, searchTerm, isCaseSensitive);
 
             // Act
@@ -318,7 +318,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.ManagementFormComp
         {
             // Arrange
             PaginationManager<DriversDTO> paginationManager = new(_repository, null);
-            _managementModel = new(_repository, TableConfigs.Drivers, paginationManager, _testLogger);
+            _managementModel = new(_repository, paginationManager, _testLogger);
 
             // Act
             await _managementModel.InitializeAsync();
@@ -338,7 +338,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.ManagementFormComp
 
             // Real PaginationManager will try to access mock function with no set behaviour, causing error
             PaginationManager<DriversDTO> paginationManager = new(_repositoryMock);
-            _managementModel = new(_repository, TableConfigs.Drivers, paginationManager, _testLogger);
+            _managementModel = new(_repository, paginationManager, _testLogger);
 
             // Act
             InvalidOperationException exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _managementModel.InitializeAsync());
@@ -353,7 +353,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.ManagementFormComp
         public async Task OnPageChanged_EmitsPageChangedEvent()
         {
             // Arrange
-            _managementModel = new(_repository, TableConfigs.Drivers, _paginationManager, _testLogger);
+            _managementModel = new(_repository, _paginationManager, _testLogger);
 
             bool eventRaised = false;
             void PageChangedHandler(object? sender, EventArgs args) => eventRaised = true;
@@ -371,7 +371,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.ManagementFormComp
         public async Task OnPageChanged_SetsDgvTableToExpectedData_WhenPageFound()
         {
             // Arrange
-            _managementModel = new(_repository, TableConfigs.Drivers, _paginationManager, _testLogger);
+            _managementModel = new(_repository, _paginationManager, _testLogger);
             await _managementModel.InitializeAsync();
 
             // Act
@@ -390,7 +390,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.ManagementFormComp
         public async Task OnPageChanged_SetsDgvTableToEmpty_WhenGetRecordsAtPageAsyncReturnsNull()
         {
             // Arrange
-            _managementModel = new(_repository, TableConfigs.Drivers, _paginationManager, _testLogger);
+            _managementModel = new(_repository, _paginationManager, _testLogger);
             await _managementModel.InitializeAsync();
 
             // Act
@@ -404,7 +404,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.ManagementFormComp
         public void GetEntityFromRow_ReturnsCorrectDTO()
         {
             // Arrange
-            _managementModel = new(_repository, TableConfigs.Drivers, _paginationManager, _testLogger);
+            _managementModel = new(_repository, _paginationManager, _testLogger);
             DataGridView dgv = new();
             dgv.Columns.Add("DriverID", "DriverID");
             dgv.Columns.Add("Name", "Name");
@@ -439,7 +439,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.ManagementFormComp
         {
             // Arrange
             PaginationManager<DriversDTO> paginationManager = new(_repository);
-            _managementModel = new(_repository, TableConfigs.Drivers, paginationManager, _testLogger);
+            _managementModel = new(_repository, paginationManager, _testLogger);
             await _managementModel.InitializeAsync();
             await _managementModel.PaginationManager.GoToLastPageAsync();
 
@@ -466,7 +466,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.ManagementFormComp
             Skip.If(_shouldSkipTests, "Test Database is not available. Skipping this test");
 
             // Arrange
-            _managementModel = new(_repository, TableConfigs.Drivers, _paginationManager, _testLogger);
+            _managementModel = new(_repository, _paginationManager, _testLogger);
             await _managementModel.InitializeAsync();
 
             DriversDTO mockDriver = new(
@@ -526,7 +526,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.ManagementFormComp
 
             string message = $"\"Drivers\" with PK {DriverID} was not found for update";
             InitializeMemorySinkLogger();
-            _managementModel = new(_repository, TableConfigs.Drivers, _paginationManager, _memoryLogger);
+            _managementModel = new(_repository, _paginationManager, _memoryLogger);
             await _managementModel.InitializeAsync();
 
             // Act
@@ -543,7 +543,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.ManagementFormComp
             Skip.If(_shouldSkipTests, "Test Database is not available. Skipping this test");
 
             // Arrange
-            _managementModel = new(_repository, TableConfigs.Drivers, _paginationManager, _testLogger);
+            _managementModel = new(_repository, _paginationManager, _testLogger);
 
             int DriverID = 105;
 
@@ -605,7 +605,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.ManagementFormComp
 
             string message = $"\"Drivers\" with PK {DriverID} was not found for deletion";
             InitializeMemorySinkLogger();
-            _managementModel = new(_repository, TableConfigs.Drivers, _paginationManager, _memoryLogger);
+            _managementModel = new(_repository, _paginationManager, _memoryLogger);
             await _managementModel.InitializeAsync();
             await _managementModel.OnPageChanged(6);
 
@@ -623,7 +623,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.ManagementFormComp
 
             // Arrange
 
-            _managementModel = new(_repository, TableConfigs.Drivers, _paginationManager, _testLogger);
+            _managementModel = new(_repository, _paginationManager, _testLogger);
 
             int DriverID = 105;
             await _managementModel.OnPageChanged(6); // Load page with DriverID 105

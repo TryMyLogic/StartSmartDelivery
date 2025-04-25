@@ -48,7 +48,6 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
             _repository = new Repository<DriversDTO>(
                 _mockPipelineProvider,
                 _mockConfiguration,
-                TableConfigs.Drivers,
                 _testLogger,
                 _connectionString,
                 _mockRetryEventService
@@ -353,7 +352,6 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
             var mockRepository = new Repository<DriversDTO>(
                 _mockPipelineProvider,
                 _mockConfiguration,
-                TableConfigs.Drivers,
                 _memoryLogger,
                 _connectionString,
                 _mockRetryEventService
@@ -442,7 +440,6 @@ namespace StartSmartDeliveryForm.Tests.DataLayerTests
             var mockRepository = new Repository<DriversDTO>(
                 _mockPipelineProvider,
                 _mockConfiguration,
-                TableConfigs.Drivers,
                 _memoryLogger,
                 _connectionString,
                 _mockRetryEventService

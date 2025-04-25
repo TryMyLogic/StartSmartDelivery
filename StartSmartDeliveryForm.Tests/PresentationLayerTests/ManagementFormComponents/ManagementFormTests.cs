@@ -20,7 +20,6 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.ManagementFormComp
         {
             _testLogger = SharedFunctions.CreateTestLogger<ManagementForm>(output);
             _noMsgBoxManagementForm = new ManagementForm(
-                config: TableConfigs.Drivers, // Use Drivers config for consistency
                 logger: _testLogger,
                 messageBox: new NoMessageBox()
             );
@@ -88,7 +87,6 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.ManagementFormComp
             mockFileSystem.AddFile(deletePath, new MockFileData(pngBytes));
 
             ManagementForm form = new(
-                config: TableConfigs.Drivers,
                 logger: _testLogger,
                 messageBox: new NoMessageBox(),
                 fileSystem: mockFileSystem
@@ -129,7 +127,6 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.ManagementFormComp
             // Arrange
             TestMessageBox testMsgBox = new();
             _testMsgBoxManagementForm = new ManagementForm(
-                config: TableConfigs.Drivers,
                 logger: _testLogger,
                 messageBox: testMsgBox
             );
@@ -164,6 +161,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.ManagementFormComp
             // Arrange
 
             // Act
+            _noMsgBoxManagementForm.SetTableConfig(TableConfigs.Drivers);
             _noMsgBoxManagementForm.ConfigureDataGridViewColumns();
 
             // Assert
@@ -185,7 +183,8 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.ManagementFormComp
         public void HideExcludedColumns_HidesPrimaryKeyColumn()
         {
             // Arrange
-            ManagementForm form = new(TableConfigs.Drivers, _testLogger);
+            ManagementForm form = new(_testLogger);
+            form.SetTableConfig(TableConfigs.Drivers);
             form.ConfigureDataGridViewColumns();
 
             // Act
