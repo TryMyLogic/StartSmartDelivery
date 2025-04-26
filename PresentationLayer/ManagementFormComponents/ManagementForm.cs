@@ -40,6 +40,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
         public bool FirstLoad { get; set; }
         private void ManagementForm_Load(object sender, EventArgs e)
         {
+            DisableWIP();
             _logger.LogInformation("ManagementForm Loaded");
             SetTheme();
             dgvMain.RowHeadersVisible = false; // Hides Row Number Column
@@ -50,6 +51,13 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
                 FormLoadOccurred?.Invoke(this, e);
                 FirstLoad = true;
             }
+        }
+
+        private void DisableWIP()
+        {
+            fileToolStripMenuItem.Visible = false;
+            dashboardToolStripMenuItem.Visible= false;
+            printAllPagesByRowCountToolStripMenuItem.Visible= false;
         }
 
         public event EventHandler<SearchRequestEventArgs>? SearchClicked;
@@ -150,7 +158,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 
             int rowHeight = dgvMain.RowTemplate.Height;
 
-            int requiredHeight = rowHeight * (records + 1) + dgvMain.ColumnHeadersHeight + 2;
+            int requiredHeight = rowHeight * (records) + dgvMain.ColumnHeadersHeight;
 
             if (dgvMain.Parent != null)
             {
