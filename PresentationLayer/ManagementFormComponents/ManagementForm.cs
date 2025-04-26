@@ -37,7 +37,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
             _tableConfig = TableConfigs.Empty;
         }
 
-        public bool FirstLoad {  get; set; }
+        public bool FirstLoad { get; set; }
         private void ManagementForm_Load(object sender, EventArgs e)
         {
             _logger.LogInformation("ManagementForm Loaded");
@@ -66,6 +66,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
             _tableConfig = config ?? throw new ArgumentNullException(nameof(config));
             _logger.LogInformation("TableConfig set for type: {TableType}", config.TableName);
         }
+
 
         private void btnSearch_Click(object sender, EventArgs e)
         {
@@ -258,6 +259,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
         public event EventHandler<int>? EditClicked;
         public event EventHandler<int>? DeleteClicked;
         public event EventHandler? ReloadClicked;
+        public event EventHandler? RefreshedClicked;
         public event EventHandler? RollbackClicked;
         public event EventHandler? PrintAllPagesByRowCountClicked;
         public event EventHandler? FirstPageClicked;
@@ -270,18 +272,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
         private void btnAdd_Click(object sender, EventArgs e) { AddClicked?.Invoke(sender, e); }
         private void btnEdit_Click(int RowIndex) { EditClicked?.Invoke(this, RowIndex); }
         private void btnDelete_Click(int RowIndex) { DeleteClicked?.Invoke(this, RowIndex); }
-        private void btnRefresh_Click(object sender, EventArgs e)
-        {
-            if (DgvMain.DataSource is DataTable dataTable)
-            {
-                dataTable.DefaultView.RowFilter = string.Empty;
-                DgvMain.DataSource = null;
-                DgvMain.DataSource = dataTable;
-                ConfigureDataGridViewColumns();
-                HideExcludedColumns();
-                MessageBox.Show("Successfully Refreshed", "Refresh Status");
-            }
-        }
+        private void btnRefresh_Click(object sender, EventArgs e) { RefreshedClicked?.Invoke(sender, e); }
         private void reloadToolStripMenuItem_Click(object sender, EventArgs e) { ReloadClicked?.Invoke(sender, e); }
         private void rollbackToolStripMenuItem_Click(object sender, EventArgs e) { RollbackClicked?.Invoke(sender, e); }
         private void printAllPagesByRowCountToolStripMenuItem_Click(object sender, EventArgs e) { PrintAllPagesByRowCountClicked?.Invoke(sender, e); }

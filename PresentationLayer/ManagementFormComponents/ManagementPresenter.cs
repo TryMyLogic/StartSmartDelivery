@@ -7,6 +7,8 @@ using StartSmartDeliveryForm.SharedLayer.Enums;
 using StartSmartDeliveryForm.SharedLayer.EventArgs;
 using static StartSmartDeliveryForm.SharedLayer.TableDefinition;
 using StartSmartDeliveryForm.DataLayer.Repositories;
+using System.Data;
+using System.DirectoryServices.ActiveDirectory;
 
 namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 {
@@ -58,6 +60,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
             _managementForm.AddClicked += HandleAddClicked;
             _managementForm.EditClicked += HandleEditClicked;
             _managementForm.DeleteClicked += HandleDeleteClicked;
+            _managementForm.RefreshedClicked += HandleRefreshClicked;
             _managementForm.ReloadClicked += HandleReloadClicked;
             _managementForm.RollbackClicked += HandleRollbackClicked;
             _managementForm.PrintAllPagesByRowCountClicked += HandlePrintAllPagesByRowCount;
@@ -72,8 +75,10 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
             _managementModel.PageChanged += HandlePageChange;
         }
 
+        private DataTable _unfilteredDgvTable;
         private void HandleSearchClicked(object? sender, SearchRequestEventArgs e)
         {
+            _unfilteredDgvTable = e.DataTable;
             _managementModel.ApplyFilter(sender, e);
             _managementForm.DataSource = _managementModel.DgvTable;
         }
@@ -85,13 +90,14 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
             {
                 await _managementModel.InitializeAsync();
                 _managementForm.DataSource = _managementModel.DgvTable;
+                _unfilteredDgvTable = _managementModel.DgvTable;
                 _managementForm.UpdatePaginationDisplay(_managementModel.PaginationManager.CurrentPage, _managementModel.PaginationManager.TotalPages);
                 _managementForm.AddEditDeleteButtons();
                 _managementForm.SetTableConfig(_tableConfig);
                 _managementForm.ConfigureDataGridViewColumns();
                 _managementForm.SetSearchOptions();
                 _managementForm.HideExcludedColumns();
-           
+
             }
             catch (InvalidOperationException ex)
             {
@@ -169,6 +175,14 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
                 _logger.LogInformation("Deleting record from {TableName} with ID: {ID}", _tableConfig.TableName, id);
                 await _managementModel.DeleteRecordAsync(id);
             }
+        }
+
+        private void HandleRefreshClicked(object? sender, EventArgs e)
+        {
+            _managementForm.DataSource = _unfilteredDgvTable;
+            _managementForm.ConfigureDataGridViewColumns();
+            _managementForm.HideExcludedColumns();
+            _managementForm.ShowMessageBox("Successfully Refreshed", "Refresh Status", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private async void HandleReloadClicked(object? sender, EventArgs e)

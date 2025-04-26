@@ -14,6 +14,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
         event EventHandler AddClicked;
         event EventHandler<int> EditClicked;
         event EventHandler<int> DeleteClicked;
+        event EventHandler RefreshedClicked;
         event EventHandler ReloadClicked;
         event EventHandler RollbackClicked;
         event EventHandler PrintAllPagesByRowCountClicked;
