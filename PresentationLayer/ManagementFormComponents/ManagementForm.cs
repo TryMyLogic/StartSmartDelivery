@@ -217,7 +217,10 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 
         private void AddEditDeleteButtons(Func<string, Image>? imageLoader = null)
         {
-            imageLoader ??= (path) => Image.FromStream(new MemoryStream(_fileSystem.File.ReadAllBytes(path)));
+            imageLoader ??= (path) => {
+                using Image original = Image.FromStream(new MemoryStream(_fileSystem.File.ReadAllBytes(path)));
+                return new Bitmap(original, new Size(20, 20));
+            };
 
             string editIconPath = GetIconPath("EditIcon.png");
             string deleteIconPath = GetIconPath("DeleteIcon.png");
@@ -353,7 +356,10 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
                 };
                 dgvMain.Columns.Add(dgvColumn);
             }
+            _logger.LogInformation($"Row height after ConfigureDataGridViewColumns: {dgvMain.Rows[0].Height}");
             AddEditDeleteButtons();
+            _logger.LogInformation($"Row height after Added: {dgvMain.Rows[0].Height}");
+
         }
 
         public event EventHandler? DashboardFormRequested;
