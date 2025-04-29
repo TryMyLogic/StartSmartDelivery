@@ -28,6 +28,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
         private readonly TableConfig _tableConfig;
         private readonly IRepository<T> _repository;
 
+        private DataTable? _unfilteredDgvTable;
         public ManagementPresenter(
         IManagementForm managementForm,
         IManagementModel<T> managementModel,
@@ -75,7 +76,6 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
             _managementModel.PageChanged += HandlePageChange;
         }
 
-        private DataTable _unfilteredDgvTable;
         private void HandleSearchClicked(object? sender, SearchRequestEventArgs e)
         {
             _unfilteredDgvTable = e.DataTable;
@@ -92,7 +92,6 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
                 _managementForm.DataSource = _managementModel.DgvTable;
                 _unfilteredDgvTable = _managementModel.DgvTable;
                 _managementForm.UpdatePaginationDisplay(_managementModel.PaginationManager.CurrentPage, _managementModel.PaginationManager.TotalPages);
-                _managementForm.AddEditDeleteButtons();
                 _managementForm.SetTableConfig(_tableConfig);
                 _managementForm.ConfigureDataGridViewColumns();
                 _managementForm.SetSearchOptions();

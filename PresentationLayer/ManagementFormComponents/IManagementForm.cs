@@ -32,7 +32,6 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 
         event EventHandler ChangeUserRequested;
 
-        void AddEditDeleteButtons(Func<string, Image>? imageLoader = null);
         void ShowMessageBox(string Text, string Caption, MessageBoxButtons Buttons, MessageBoxIcon Icon);
         void UpdatePaginationDisplay(int CurrentPage, int TotalPages);
         void HideExcludedColumns();

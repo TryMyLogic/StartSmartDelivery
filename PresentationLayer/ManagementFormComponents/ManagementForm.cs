@@ -215,7 +215,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
             }
         }
 
-        public void AddEditDeleteButtons(Func<string, Image>? imageLoader = null)
+        private void AddEditDeleteButtons(Func<string, Image>? imageLoader = null)
         {
             imageLoader ??= (path) => Image.FromStream(new MemoryStream(_fileSystem.File.ReadAllBytes(path)));
 
@@ -353,6 +353,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
                 };
                 dgvMain.Columns.Add(dgvColumn);
             }
+            AddEditDeleteButtons();
         }
 
         public event EventHandler? DashboardFormRequested;
