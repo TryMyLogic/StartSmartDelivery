@@ -29,7 +29,7 @@ namespace StartSmartDeliveryForm.PresentationLayer
         {
             _managementForm.VehicleManagementFormRequested += (s, e) => SetManagementType<VehiclesDTO>();
             _managementForm.DriverManagementFormRequested += (s, e) => SetManagementType<DriversDTO>();
-            //_managementForm.DeliveryManagementFormRequested += (s, e) => SetManagementType<DeliveriesDTO>();
+            _managementForm.DeliveryManagementFormRequested += (s, e) => SetManagementType<DeliveriesDTO>();
             //_managementForm.DashboardFormRequested += HandleDashboardFormRequested;
         }
 
@@ -59,7 +59,7 @@ namespace StartSmartDeliveryForm.PresentationLayer
         public void Start()
         {
             _logger.LogInformation("Starting Application");
-            SetManagementType<DriversDTO>();
+            SetManagementType<DeliveriesDTO>();
             Application.Run(_managementForm);
         }
     }
