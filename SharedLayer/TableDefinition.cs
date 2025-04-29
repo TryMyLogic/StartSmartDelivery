@@ -7,13 +7,16 @@ namespace StartSmartDeliveryForm.SharedLayer
 {
     public class TableDefinition
     {
-        public class ColumnConfig(string name, SqlDbType sqlType, bool isIdentity = false, bool isUnique = false, int? size = null)
+        public record ColumnConfig(string name, SqlDbType sqlType, bool isIdentity = false, bool isUnique = false, bool isNullable = false, int? size = null, int? precision = null, int? scale = null)
         {
             public string Name { get; } = name;
             public SqlDbType SqlType { get; } = sqlType;
             public bool IsIdentity { get; } = isIdentity;
             public bool IsUnique { get; } = isUnique;
+            public bool IsNullable { get; } = isNullable;
             public int? Size { get; } = size;
+            public int? Precision { get; } = precision;
+            public int? Scale { get; } = scale;
         }
 
         public class TableConfig
@@ -44,8 +47,19 @@ namespace StartSmartDeliveryForm.SharedLayer
                     {
                         System.Reflection.PropertyInfo? prop = entity.GetType().GetProperty(col.Name);
                         object? value = prop?.GetValue(entity);
+
                         if (prop?.PropertyType.IsEnum == true) value = (int)value!;
-                        cmd.Parameters.Add(new SqlParameter($"@{col.Name}", col.SqlType, col.Size ?? 0) { Value = value ?? DBNull.Value });
+
+                        if (!col.IsNullable && value == null) throw new InvalidOperationException($"Non-nullable column {col.Name} cannot be null.");
+
+                        SqlParameter parameter = new($"@{col.Name}", col.SqlType, col.Size ?? 0) { Value = value ?? DBNull.Value };
+                        if (col.SqlType == SqlDbType.Decimal && col.Precision.HasValue && col.Scale.HasValue)
+                        {
+                            parameter.Precision = (byte)col.Precision.Value;
+                            parameter.Scale = (byte)col.Scale.Value;
+                        }
+
+                        cmd.Parameters.Add(parameter);
                     }
                 };
 
@@ -55,8 +69,19 @@ namespace StartSmartDeliveryForm.SharedLayer
                     {
                         System.Reflection.PropertyInfo? prop = entity.GetType().GetProperty(col.Name);
                         object? value = prop?.GetValue(entity);
+
+                        if (!col.IsNullable && value == null && !col.IsIdentity) throw new InvalidOperationException($"Non-nullable column {col.Name} cannot be null.");
+
                         if (prop?.PropertyType.IsEnum == true) value = (int)value!;
-                        cmd.Parameters.Add(new SqlParameter($"@{col.Name}", col.SqlType, col.Size ?? 0) { Value = value ?? DBNull.Value });
+
+                        SqlParameter parameter = new($"@{col.Name}", col.SqlType, col.Size ?? 0) { Value = value ?? DBNull.Value };
+                        if (col.SqlType == SqlDbType.Decimal && col.Precision.HasValue && col.Scale.HasValue)
+                        {
+                            parameter.Precision = (byte)col.Precision.Value;
+                            parameter.Scale = (byte)col.Scale.Value;
+                        }
+
+                        cmd.Parameters.Add(parameter);
                     }
                 };
 
@@ -66,7 +91,11 @@ namespace StartSmartDeliveryForm.SharedLayer
                     {
                         System.Reflection.PropertyInfo? prop = entity.GetType().GetProperty(col.Name);
                         object? value = prop?.GetValue(entity);
+
+                        if (!col.IsNullable && value == null && !col.IsIdentity) throw new InvalidOperationException($"Non-nullable column {col.Name} cannot be null.");
+
                         if (prop?.PropertyType.IsEnum == true) value = (int)value!;
+
                         row[col.Name] = value ?? DBNull.Value;
                     }
                 };
@@ -77,7 +106,7 @@ namespace StartSmartDeliveryForm.SharedLayer
                     foreach (ColumnConfig col in Columns)
                     {
                         System.Reflection.PropertyInfo? prop = entityType.GetProperty(col.Name);
-                        if (prop != null && row.Cells[col.Name].Value != null)
+                        if (prop != null && row.Cells[col.Name].Value != null && row.Cells[col.Name].Value != DBNull.Value)
                         {
                             object value = row.Cells[col.Name].Value;
                             if (prop.PropertyType.IsEnum) value = Enum.ToObject(prop.PropertyType, value);
@@ -137,9 +166,9 @@ namespace StartSmartDeliveryForm.SharedLayer
             }
 
             // Fluent API
-            public TableConfig AddColumn(string name, SqlDbType sqlType, bool isIdentity = false, bool isUnique = false, int? size = null)
+            public TableConfig AddColumn(string name, SqlDbType sqlType, bool isIdentity = false, bool isUnique = false, bool isNullable = false, int? size = null, int? precision = null, int? scale = null)
             {
-                Columns.Add(new ColumnConfig(name, sqlType, isIdentity, isUnique, size));
+                Columns.Add(new ColumnConfig(name, sqlType, isIdentity, isUnique, isNullable, size, precision, scale));
                 return this;
             }
 
@@ -180,6 +209,33 @@ namespace StartSmartDeliveryForm.SharedLayer
                     "Availability" => true,
                     _ => col.SqlType == SqlDbType.Bit ? false : null
                 });
+
+            public static readonly TableConfig Deliveries = new TableConfig("DeliveryTask", "TaskID", typeof(DeliveriesDTO))
+                .AddColumn("TaskID", SqlDbType.Int, isIdentity: true)
+                .AddColumn("OrderNumber", SqlDbType.NVarChar, size: 50)
+                .AddColumn("CustomerCode", SqlDbType.NVarChar, size: 50)
+                .AddColumn("Name", SqlDbType.NVarChar, size: 100)
+                .AddColumn("Telephone", SqlDbType.NVarChar, size: 20, isNullable: true)
+                .AddColumn("Cellphone", SqlDbType.NVarChar, size: 20)
+                .AddColumn("Email", SqlDbType.NVarChar, size: 100, isNullable: true)
+                .AddColumn("Address", SqlDbType.NVarChar, size: 200)
+                .AddColumn("Product", SqlDbType.NVarChar, size: 100)
+                .AddColumn("Amount", SqlDbType.Decimal, precision: 18, scale: 2)
+                .AddColumn("PaymentMethod", SqlDbType.NVarChar, size: 50)
+                .AddColumn("Notes", SqlDbType.NVarChar, size: 500, isNullable: true)
+                .AddColumn("ReceivedTimestamp", SqlDbType.DateTime)
+                .AddColumn("DispatchTimestamp", SqlDbType.DateTime, isNullable: true)
+                .AddColumn("AssignedDriver", SqlDbType.NVarChar, size: 200)
+                .WithDefaults(col => col.Name switch
+                {
+                    _ => col.SqlType switch
+                    {
+                        SqlDbType.NVarChar => string.Empty,
+                        SqlDbType.Decimal => 0m,
+                        SqlDbType.DateTime => DateTime.MinValue,
+                        _ => null
+                    }
+                });
         }
 
         public class TableConfigResolver
@@ -194,8 +250,10 @@ namespace StartSmartDeliveryForm.SharedLayer
                 {
                     return TableConfigs.Vehicles;
                 }
-                // Add more conditions as needed for other DTOs
-                throw new InvalidOperationException($"No TableConfig found for type {typeof(T).Name}");
+                else if (typeof(T) == typeof(DeliveriesDTO))
+                    return TableConfigs.Deliveries;
+                else
+                    throw new InvalidOperationException($"No TableConfig found for type {typeof(T).Name}");
             }
         }
     }
