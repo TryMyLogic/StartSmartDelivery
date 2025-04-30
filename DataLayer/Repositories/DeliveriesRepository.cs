@@ -172,10 +172,11 @@ namespace StartSmartDeliveryForm.DataLayer.Repositories
             SELECT 
             dt.TaskID, dt.OrderNumber, dt.CustomerCode, dt.Name, dt.Telephone, dt.Cellphone, dt.Email, 
             dt.Address, dt.Product, dt.Amount, dt.PaymentMethod, dt.Notes, dt.ReceivedTimestamp, 
-            d.DispatchTimestamp, CONCAT(dr.Name, ' ', dr.Surname) AS AssignedDriver
+            d.DispatchTimestamp, CONCAT(dr.Name, ' ', dr.Surname) AS AssignedDriver, v.NumberPlate AS AssignedVehicle
             FROM DeliveryTask dt
             INNER JOIN Delivery d ON dt.TaskID = d.TaskID
             INNER JOIN Drivers dr ON d.DriverID = dr.DriverID
+            INNER JOIN Vehicles v ON d.VehicleID = v.VehicleID
             WHERE dt.TaskID = @TaskID";
 
             DataTable dt = new();
