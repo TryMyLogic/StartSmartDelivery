@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Diagnostics;
 using System.IO.Abstractions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -24,14 +25,14 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
         private readonly ILogger<ManagementForm> _logger;
         private TableConfig _tableConfig;
 
-        public ManagementForm() : this(NullLogger<ManagementForm>.Instance, new MessageBoxWrapper(), new FileSystem())
+        internal ManagementForm() : this(NullLogger<ManagementForm>.Instance, new MessageBoxWrapper(), new FileSystem())
         {
-            Log.Warning("MangementForms empty constructor was used.");
+            Log.Warning("MangementForm's empty constructor was used.");
         }
         public ManagementForm(ILogger<ManagementForm>? logger = null, IMessageBox? messageBox = null, IFileSystem? fileSystem = null)
         {
             InitializeComponent();
-            _fileSystem = FileSystem ?? new FileSystem();
+            _fileSystem = fileSystem ?? new FileSystem();
             _messageBox = messageBox ?? new MessageBoxWrapper();
             _logger = logger ?? NullLogger<ManagementForm>.Instance;
             _tableConfig = TableConfigs.Empty;
@@ -41,7 +42,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
         private void ManagementForm_Load(object sender, EventArgs e)
         {
             DisableWIP();
-            _logger.LogInformation("ManagementForm Loaded");
+            _logger.LogInformation("ManagementForm loaded, FirstLoad: {FirstLoad}, Table: {TableName}", FirstLoad, _tableConfig.TableName);
             SetTheme();
             dgvMain.RowHeadersVisible = false; // Hides Row Number Column
             AdjustDataGridViewHeight();
@@ -56,8 +57,8 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
         private void DisableWIP()
         {
             fileToolStripMenuItem.Visible = false;
-            dashboardToolStripMenuItem.Visible= false;
-            printAllPagesByRowCountToolStripMenuItem.Visible= false;
+            dashboardToolStripMenuItem.Visible = false;
+            printAllPagesByRowCountToolStripMenuItem.Visible = false;
         }
 
         public event EventHandler<SearchRequestEventArgs>? SearchClicked;
@@ -66,13 +67,17 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
         public DataTable DataSource
         {
             get => dgvMain.DataSource as DataTable ?? throw new InvalidOperationException("DataSource is not a DataTable.");
-            set => dgvMain.DataSource = value;
+            set
+            {
+                _logger.LogInformation("Setting DataSource for Table: {TableName}, Columns: {Columns}, Rows: {RowCount}", _tableConfig.TableName, string.Join(", ", value.Columns.Cast<DataColumn>().Select(c => c.ColumnName)), value.Rows.Count);
+                dgvMain.DataSource = value;
+            }
         }
 
         public void SetTableConfig(TableConfig config)
         {
             _tableConfig = config ?? throw new ArgumentNullException(nameof(config));
-            _logger.LogInformation("TableConfig set for type: {TableType}", config.TableName);
+            _logger.LogInformation("TableConfig set, Table: {TableName}, Columns: {Columns}", config.TableName, string.Join(", ", config.Columns.Select(c => c.Name)));
         }
 
 
@@ -83,16 +88,18 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 
             if (SelectedOption != null)
             {
+                _logger.LogInformation("Search initiated, Table: {TableName}, Column: {Column}, Term: {SearchTerm}, CaseSensitive: {IsCaseSensitive}", _tableConfig.TableName, SelectedOption, SearchTerm, _isCaseSensitive);
                 SearchClicked?.Invoke(this, new SearchRequestEventArgs((DataTable)dgvMain.DataSource, SelectedOption, SearchTerm, _isCaseSensitive));
             }
             else
             {
-                _logger.LogError("Search coloumn was not set properly");
+                _logger.LogError("Search column not set, Table: {TableName}, SearchTerm: {SearchTerm}", _tableConfig.TableName, SearchTerm);
             }
         }
         private void btnMatchCase_Click(object sender, EventArgs e)
         {
             _isCaseSensitive = !_isCaseSensitive;
+            _logger.LogDebug("MatchCase toggled, IsCaseSensitive: {IsCaseSensitive}, Table: {TableName}", _isCaseSensitive, _tableConfig.TableName);
             btnMatchCase.BackColor = _isCaseSensitive ? Color.White : GlobalConstants.SoftBeige;
         }
 
@@ -153,11 +160,8 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 
         private void AdjustDataGridViewHeight()
         {
-
             int records = Math.Min(GlobalConstants.s_recordLimit, 30);
-
             int rowHeight = dgvMain.RowTemplate.Height;
-
             int requiredHeight = rowHeight * (records) + dgvMain.ColumnHeadersHeight;
 
             if (dgvMain.Parent != null)
@@ -165,23 +169,23 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
                 int formHeightWithoutDataGridView = dgvMain.Parent.Height - dgvMain.Height;
                 int newHeight = formHeightWithoutDataGridView + requiredHeight;
                 dgvMain.Parent.Height = newHeight;
-                _logger.LogInformation("Row Height: {RowHeight}, Column Headers Height: {ColumnHeadersHeight}, New Height: {NewHeight}", rowHeight, dgvMain.ColumnHeadersHeight, newHeight);
+                _logger.LogInformation("Adjusted DataGridView height, Table: {TableName}, RowHeight: {RowHeight}, ColumnHeadersHeight: {ColumnHeadersHeight}, NewHeight: {NewHeight}", _tableConfig.TableName, rowHeight, dgvMain.ColumnHeadersHeight, newHeight);
             }
             else
             {
-                _logger.LogWarning("DataGridView parent is null.");
+                _logger.LogWarning("DataGridView parent is null, Table: {TableName}", _tableConfig.TableName);
             }
         }
 
         public HashSet<string> GetExcludedColumns()
         {
-            if (_tableConfig == null) return [];
             return [_tableConfig.PrimaryKey];
         }
 
         public void HideExcludedColumns()
         {
             HashSet<string> excludedColumns = GetExcludedColumns();
+            _logger.LogDebug("Hiding excluded columns: {ExcludedColumns}, Table: {TableName}", string.Join(", ", excludedColumns), _tableConfig.TableName);
 
             foreach (string columnName in excludedColumns)
             {
@@ -190,6 +194,10 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
                 {
                     column.Visible = false;
                 }
+                else
+                {
+                    _logger.LogWarning("Column {ColumnName} not found in DataGridView, Table: {TableName}", columnName, _tableConfig.TableName);
+                }
             }
         }
 
@@ -197,7 +205,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
         {
             cboSearchOptions.Items.Clear();
 
-            var excludedColumns = GetExcludedColumns().Select(c => c.ToLower()).ToHashSet();
+            HashSet<string> excludedColumns = GetExcludedColumns().Select(c => c.ToLower()).ToHashSet();
             excludedColumns.Add("edit");
             excludedColumns.Add("delete");
 
@@ -212,12 +220,18 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
             if (cboSearchOptions.Items.Count > 0)
             {
                 cboSearchOptions.SelectedIndex = 0;
+                _logger.LogDebug("Set search options, Table: {TableName}, Options: {Options}", _tableConfig.TableName, string.Join(", ", cboSearchOptions.Items.Cast<string>()));
+            }
+            else
+            {
+                _logger.LogWarning("No search options available, Table: {TableName}", _tableConfig.TableName);
             }
         }
 
         private void AddEditDeleteButtons(Func<string, Image>? imageLoader = null)
         {
-            imageLoader ??= (path) => {
+            imageLoader ??= (path) =>
+            {
                 using Image original = Image.FromStream(new MemoryStream(_fileSystem.File.ReadAllBytes(path)));
                 return new Bitmap(original, new Size(20, 20));
             };
@@ -230,12 +244,22 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 
             dgvMain.Columns.Add(editButtonColumn);
             dgvMain.Columns.Add(deleteButtonColumn);
+            _logger.LogDebug("Added Edit and Delete buttons, Table: {TableName}", _tableConfig.TableName);
         }
 
         private string GetIconPath(string FileName)
         {
             string path = _fileSystem.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "PresentationLayer", "Images", FileName);
-            return _fileSystem.Path.GetFullPath(path);
+            string fullPath = _fileSystem.Path.GetFullPath(path);
+            if (!_fileSystem.File.Exists(fullPath))
+            {
+                _logger.LogError("Icon file not found: {FullPath}, Table: {TableName}", fullPath, _tableConfig.TableName);
+            }
+            else
+            {
+                _logger.LogDebug("Resolved icon path: {FullPath}, Table: {TableName}", fullPath, _tableConfig.TableName);
+            }
+            return fullPath;
         }
 
         private static DataGridViewImageColumn CreateImageColumn(string name, string imagePath, Func<string, Image> imageLoader)
@@ -280,30 +304,88 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
         public event EventHandler<int>? GoToPageClicked;
         public event EventHandler? PrintClicked;
 
-        private void btnAdd_Click(object sender, EventArgs e) { AddClicked?.Invoke(sender, e); }
-        private void btnEdit_Click(int RowIndex) { EditClicked?.Invoke(this, RowIndex); }
-        private void btnDelete_Click(int RowIndex) { DeleteClicked?.Invoke(this, RowIndex); }
-        private void btnRefresh_Click(object sender, EventArgs e) { RefreshedClicked?.Invoke(sender, e); }
-        private void reloadToolStripMenuItem_Click(object sender, EventArgs e) { ReloadClicked?.Invoke(sender, e); }
-        private void rollbackToolStripMenuItem_Click(object sender, EventArgs e) { RollbackClicked?.Invoke(sender, e); }
-        private void printAllPagesByRowCountToolStripMenuItem_Click(object sender, EventArgs e) { PrintAllPagesByRowCountClicked?.Invoke(sender, e); }
-        private void btnFirst_Click(object sender, EventArgs e) { FirstPageClicked?.Invoke(sender, e); }
-        private void btnPrevious_Click(object sender, EventArgs e) { PreviousPageClicked?.Invoke(sender, e); }
-        private void btnNext_Click(object sender, EventArgs e) { NextPageClicked?.Invoke(sender, e); }
-        private void btnLast_Click(object sender, EventArgs e) { LastPageClicked?.Invoke(sender, e); }
+        private void btnAdd_Click(object sender, EventArgs e)
+        {
+            _logger.LogDebug("Invoking AddClicked, Table: {TableName}", _tableConfig.TableName);
+            AddClicked?.Invoke(sender, e);
+        }
+        private void btnEdit_Click(int RowIndex)
+        {
+            _logger.LogDebug("Invoking EditClicked for row {RowIndex}, Table: {TableName}", RowIndex, _tableConfig.TableName);
+            EditClicked?.Invoke(this, RowIndex);
+        }
+        private void btnDelete_Click(int RowIndex)
+        {
+            _logger.LogDebug("Invoking DeleteClicked for row {RowIndex}, Table: {TableName}", RowIndex, _tableConfig.TableName);
+            if (DeleteClicked == null)
+            {
+                _logger.LogWarning("DeleteClicked has no subscribers for row {RowIndex}, Table: {TableName}", RowIndex, _tableConfig.TableName);
+            }
+            DeleteClicked?.Invoke(this, RowIndex);
+        }
+        private void btnRefresh_Click(object sender, EventArgs e)
+        {
+            _logger.LogDebug("Invoking RefreshedClicked, Table: {TableName}", _tableConfig.TableName);
+            RefreshedClicked?.Invoke(sender, e);
+        }
+        private void reloadToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _logger.LogDebug("Invoking ReloadClicked, Table: {TableName}", _tableConfig.TableName);
+            ReloadClicked?.Invoke(sender, e);
+        }
+        private void rollbackToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _logger.LogDebug("Invoking RollbackClicked, Table: {TableName}", _tableConfig.TableName);
+            RollbackClicked?.Invoke(sender, e);
+        }
+        private void printAllPagesByRowCountToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _logger.LogDebug("Invoking PrintAllPagesByRowCountClicked, Table: {TableName}", _tableConfig.TableName);
+            PrintAllPagesByRowCountClicked?.Invoke(sender, e);
+        }
+
+        private void btnFirst_Click(object sender, EventArgs e)
+        {
+            _logger.LogDebug("Invoking FirstPageClicked, Table: {TableName}", _tableConfig.TableName);
+            FirstPageClicked?.Invoke(sender, e);
+        }
+
+        private void btnPrevious_Click(object sender, EventArgs e)
+        {
+            _logger.LogDebug("Invoking PreviousPageClicked, Table: {TableName}", _tableConfig.TableName);
+            PreviousPageClicked?.Invoke(sender, e);
+        }
+
+        private void btnNext_Click(object sender, EventArgs e)
+        {
+            _logger.LogDebug("Invoking NextPageClicked, Table: {TableName}", _tableConfig.TableName);
+            NextPageClicked?.Invoke(sender, e);
+        }
+
+        private void btnLast_Click(object sender, EventArgs e)
+        {
+            _logger.LogDebug("Invoking LastPageClicked, Table: {TableName}", _tableConfig.TableName);
+            LastPageClicked?.Invoke(sender, e);
+        }
         private void btnGotoPage_Click(object sender, EventArgs e)
         {
             if (int.TryParse(txtStartPage.Text, out int pageValue))
             {
+                _logger.LogDebug("Invoking GoToPageClicked for page {PageValue}, Table: {TableName}", pageValue, _tableConfig.TableName);
                 GoToPageClicked?.Invoke(this, pageValue);
             }
             else
             {
+                _logger.LogError("Invalid page number entered: {InputText}, Table: {TableName}", txtStartPage.Text, _tableConfig.TableName);
                 ShowMessageBox("Page number is out of range", "Invalid Number", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        private void btnPrint_Click(object sender, EventArgs e) { PrintClicked?.Invoke(sender, e); }
+        private void btnPrint_Click(object sender, EventArgs e)
+        {
+            _logger.LogDebug("Invoking PrintClicked, Table: {TableName}", _tableConfig.TableName);
+            PrintClicked?.Invoke(sender, e);
+        }
         private void dgvMain_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
             if (_tableConfig.TableName == "Drivers" && dgvMain.Columns[e.ColumnIndex].Name == "LicenseType" && e.Value != null)
@@ -315,6 +397,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
                 }
                 catch
                 {
+                    _logger.LogWarning("Failed to format LicenseType for row {RowIndex}, column {ColumnName}", e.RowIndex, dgvMain.Columns[e.ColumnIndex].Name);
                     e.FormattingApplied = true; // Leave invalid values as-is
                 }
             }
@@ -322,29 +405,41 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 
         public void ShowMessageBox(string Text, string Caption, MessageBoxButtons Buttons, MessageBoxIcon Icon)
         {
+            _logger.LogInformation("Showing MessageBox, Table: {TableName}, Caption: {Caption}, Text: {Text}, Icon: {Icon}", _tableConfig.TableName, Caption, Text, Icon);
             _messageBox.Show(Text, Caption, Buttons, Icon);
         }
 
         public string StartPageText
         {
             get => txtStartPage.Text;
-            set => txtStartPage.Text = value;
+            set
+            {
+                txtStartPage.Text = value;
+                _logger.LogDebug("Updated StartPageText to {Value}, Table: {TableName}", value, _tableConfig.TableName);
+            }
         }
 
         public string EndPageText
         {
             get => lblEndPage.Text;
-            set => lblEndPage.Text = value;
+            set
+            {
+                lblEndPage.Text = value;
+                _logger.LogDebug("Updated EndPageText to {Value}, Table: {TableName}", value, _tableConfig.TableName);
+            }
         }
 
         public void UpdatePaginationDisplay(int CurrentPage, int TotalPages)
         {
             StartPageText = $"{CurrentPage}";
             EndPageText = $"/{TotalPages}";
+
+            _logger.LogInformation("Updated pagination display, Table: {TableName}, CurrentPage: {CurrentPage}, TotalPages: {TotalPages}", _tableConfig.TableName, CurrentPage, TotalPages);
         }
 
         public void ConfigureDataGridViewColumns()
         {
+            _logger.LogDebug("Configuring DataGridView columns for Table: {TableName}", _tableConfig.TableName);
             dgvMain.Columns.Clear();
             foreach (ColumnConfig column in _tableConfig.Columns)
             {
@@ -356,10 +451,17 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
                 };
                 dgvMain.Columns.Add(dgvColumn);
             }
-            _logger.LogInformation($"Row height after ConfigureDataGridViewColumns: {dgvMain.Rows[0].Height}");
-            AddEditDeleteButtons();
-            _logger.LogInformation($"Row height after Added: {dgvMain.Rows[0].Height}");
 
+            int initialRowHeight = dgvMain.Rows[0].Height;
+            AddEditDeleteButtons();
+            int currentRowHeight = dgvMain.Rows[0].Height;
+
+            if (initialRowHeight != currentRowHeight)
+            {
+                _logger.LogError("Row height differs after adding edit and delete buttons. Initial: {InitialRowHeight}, Current: {CurrentRowHeight}. Ensure images are being scaled properly.", initialRowHeight, currentRowHeight);
+            }
+
+            _logger.LogInformation("Configured DataGridView columns for Table: {TableName}", _tableConfig.TableName);
         }
 
         public event EventHandler? DashboardFormRequested;
@@ -369,25 +471,25 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 
         private void dashboardToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            _logger.LogInformation("Dashboard ToolStripMenuItem clicked");
+            _logger.LogDebug("Dashboard ToolStripMenuItem invoked, Table: {TableName}", _tableConfig.TableName);
             DashboardFormRequested?.Invoke(sender, e);
         }
 
         private void deliveryManagementToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            _logger.LogInformation("Delivery Management ToolStripMenuItem clicked");
+            _logger.LogDebug("Delivery Management ToolStripMenuItem invoked, Table: {TableName}", _tableConfig.TableName);
             DeliveryManagementFormRequested?.Invoke(sender, e);
         }
 
         public void vehicleManagementToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            _logger.LogInformation("Vehicle Management ToolStripMenuItem clicked");
+            _logger.LogDebug("Vehicle Management ToolStripMenuItem invoked, Table: {TableName}", _tableConfig.TableName);
             VehicleManagementFormRequested?.Invoke(sender, e);
         }
 
         private void driverManagementToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            _logger.LogInformation("Driver Management ToolStripMenuItem clicked");
+            _logger.LogDebug("Driver Management ToolStripMenuItem invoked, Table: {TableName}", _tableConfig.TableName);
             DriverManagementFormRequested?.Invoke(sender, e);
         }
 
@@ -395,12 +497,13 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 
         private void changeUserToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            _logger.LogInformation("Change User ToolStripMenuItem clicked");
+            _logger.LogInformation("Change User ToolStripMenuItem invoked");
             ChangeUserRequested?.Invoke(sender, e);
         }
 
         public void InvokeFormLoadOccurred(object? sender, EventArgs e)
         {
+            _logger.LogDebug("Invoking FormLoadOccurred, Table: {TableName}", _tableConfig.TableName);
             FormLoadOccurred?.Invoke(sender, e);
         }
     }

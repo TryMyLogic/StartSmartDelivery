@@ -122,7 +122,6 @@ namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
             int row = 0, col = 0;
             var entityProperties = _entityType.GetProperties().ToDictionary(p => p.Name, p => p);
 
-            _logger.LogInformation("TableConfig Columns: {Columns}", string.Join(", ", _tableConfig.Columns.Select(col => col.Name)));
             foreach (ColumnConfig column in _tableConfig.Columns)
             {
                 Label label = new()

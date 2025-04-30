@@ -47,6 +47,7 @@ namespace StartSmartDeliveryForm.SharedLayer
 
             // Serilog setup
             Log.Logger = new LoggerConfiguration()
+           .MinimumLevel.Debug()
            .WriteTo.File(logFilePath,
                   rollingInterval: RollingInterval.Day,
                   retainedFileCountLimit: 7,
