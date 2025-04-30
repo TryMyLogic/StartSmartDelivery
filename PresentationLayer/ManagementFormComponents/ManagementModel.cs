@@ -24,6 +24,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
         public event MessageBoxEventDelegate? DisplayErrorMessage;
         protected void InvokeDisplayErrorMessage(string text, string caption, MessageBoxButtons button, MessageBoxIcon icon)
         {
+            _logger.LogDebug("Invoking DisplayErrorMessage with text: {Text}, caption: {Caption}", text, caption);
             DisplayErrorMessage?.Invoke(text, caption, button, icon);
         }
 
@@ -48,18 +49,19 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
             {
                 await PaginationManager.InitializeAsync();
                 await PaginationManager.GoToFirstPageAsync();
-                _logger.LogInformation("CurrentPage: {CurrentPage}, TotalPages: {TotalPages}",
-                    PaginationManager.CurrentPage, PaginationManager.TotalPages);
+                _logger.LogInformation("Initialized model for {TableName} with {CurrentPage}/{TotalPages} pages", _tableConfig.TableName, PaginationManager.CurrentPage, PaginationManager.TotalPages);
             }
             catch (InvalidOperationException ex)
             {
+                _logger.LogError(ex, "Initialization failed for {TableName}: {ErrorMessage}", _tableConfig.TableName, ex.Message);
                 throw new InvalidOperationException("Fatal error during initialization. Pagination will not function.", ex);
             }
         }
 
         public void ApplyFilter(object? sender, SearchRequestEventArgs e)
         {
-            _logger.LogInformation("Applying Filter");
+            _logger.LogDebug("Applying filter with search term {SearchTerm}, option {SelectedOption}, case sensitive {IsCaseSensitive}", e.SearchTerm, e.SelectedOption, e.IsCaseSensitive);
+
             string? searchTerm = e.SearchTerm;
             DataTable dataTable = e.DataTable;
             string selectedOption = e.SelectedOption;
@@ -67,13 +69,13 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 
             if (searchTerm == null)
             {
-                _logger.LogError("SearchTerm is null");
+                _logger.LogWarning("Search term is null for {TableName}", _tableConfig.TableName);
                 InvokeDisplayErrorMessage("Search Term is null", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
             if (dataTable == null || string.IsNullOrEmpty(selectedOption))
             {
-                _logger.LogError("Invalid parameters for filtering.");
+                _logger.LogWarning("Invalid filter parameters: DataTable is {DataTableStatus}, SelectedOption is {SelectedOptionStatus}", dataTable == null ? "null" : "not null", string.IsNullOrEmpty(selectedOption) ? "empty" : "not empty");
                 InvokeDisplayErrorMessage("Datatable and SelectedOption is null", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
@@ -88,7 +90,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 
             DgvTable = filteredData;
 
-            _logger.LogInformation("Filtered {X} rows for '{Option}' with search term '{Term}' (CaseSensitive: {Sensitivity}).", filteredRows.Count, selectedOption, searchTerm, isCaseSensitive);
+            _logger.LogInformation("Filtered {X} rows for '{Option}' with search term '{Term}' (CaseSensitive: {Sensitivity} for {TableName}).", filteredRows.Count, selectedOption, searchTerm, isCaseSensitive, _tableConfig.TableName);
         }
 
         public static List<DataRow> FilterRows(DataTable dataTable, string selectedOption, string? searchTerm, bool isCaseSensitive)
@@ -145,27 +147,54 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
         public event EventHandler? PageChanged;
         public async Task OnPageChanged(int currentPage)
         {
-            _logger.LogInformation("Page changed to {CurrentPage}", currentPage);
-            DataTable? result = await _repository.GetRecordsAtPageAsync(currentPage);
-            if (result == null)
+            try
             {
-                _logger.LogWarning("No data returned for page {CurrentPage}", currentPage);
+                DataTable? result = await _repository.GetRecordsAtPageAsync(currentPage);
+                if (result == null)
+                {
+                    DgvTable = new DataTable();
+                    _logger.LogWarning("No data returned for page {CurrentPage} in {TableName}", currentPage, _tableConfig.TableName);
+                }
+                else
+                {
+                    DgvTable = result;
+                    _logger.LogInformation("Fetched {RowCount} rows for page {CurrentPage} in {TableName}", DgvTable.Rows.Count, currentPage, _tableConfig.TableName);
+                }
+                PageChanged?.Invoke(this, EventArgs.Empty);
             }
-            DgvTable = result ?? new DataTable();
-            PageChanged?.Invoke(this, EventArgs.Empty);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to fetch records for page {CurrentPage} in {TableName}: {ErrorMessage}",
+                    currentPage, _tableConfig.TableName, ex.Message);
+                DgvTable = new DataTable();
+                PageChanged?.Invoke(this, EventArgs.Empty);
+            }
         }
 
         public async Task AddRecordAsync(T entity)
         {
-            int newPk = await _repository.InsertRecordAsync(entity);
-            if (newPk != -1)
+            try
             {
+                int newPk = await _repository.InsertRecordAsync(entity);
+                if (newPk == -1)
+                {
+                    _logger.LogWarning("Failed to insert record into {TableName}: No primary key returned", _tableConfig.TableName);
+                    InvokeDisplayErrorMessage("Failed to add record to database", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
                 DataRow newRow = DgvTable.NewRow();
                 _tableConfig.MapToRow(newRow, entity);
                 newRow[_tableConfig.PrimaryKey] = newPk;
                 DgvTable.Rows.Add(newRow);
                 PaginationManager.UpdateRecordCountAsync(PaginationManager.RecordCount + 1);
                 await PaginationManager.GoToLastPageAsync();
+                _logger.LogInformation("Added record with PK {PrimaryKey} to {TableName}", newPk, _tableConfig.TableName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to add record to {TableName}: {ErrorMessage}", _tableConfig.TableName, ex.Message);
+                InvokeDisplayErrorMessage("Failed to add record to database", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -195,46 +224,85 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 
         public async Task DeleteRecordAsync(int PkID)
         {
-            string table = _tableConfig.TableName;
-            DataRow? rowToDelete = DgvTable.Rows.Find(PkID);
-            if (rowToDelete == null)
+            try
             {
-                _logger.LogWarning("{Table} with PK {Pk} was not found for deletion", table, PkID);
-                return;
-            }
+                DataRow? rowToDelete = DgvTable.Rows.Find(PkID);
+                if (rowToDelete == null)
+                {
+                    _logger.LogWarning("Row with PK {PrimaryKey} not found in {TableName} for deletion", PkID, _tableConfig.TableName);
+                    InvokeDisplayErrorMessage($"Record with ID {PkID} not found", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
 
-            bool success = await _repository.DeleteRecordAsync(PkID);
-            if (success)
-            {
-                DgvTable.Rows.Remove(rowToDelete);
-                PaginationManager.UpdateRecordCountAsync(PaginationManager.RecordCount - 1);
-                await PaginationManager.EnsureValidPageAsync();
-                _logger.LogInformation("{Table} with PK {Pk} deleted successfully", table, PkID);
+                bool success = await _repository.DeleteRecordAsync(PkID);
+                if (success)
+                {
+                    DgvTable.Rows.Remove(rowToDelete);
+                    PaginationManager.UpdateRecordCountAsync(PaginationManager.RecordCount - 1);
+                    await PaginationManager.EnsureValidPageAsync();
+                    _logger.LogInformation("Deleted record with PK {PrimaryKey} from {TableName}", PkID, _tableConfig.TableName);
+                }
+                else
+                {
+                    _logger.LogWarning("Failed to delete record with PK {PrimaryKey} from {TableName}", PkID, _tableConfig.TableName);
+                    InvokeDisplayErrorMessage($"Failed to delete record with ID {PkID}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                InvokeDisplayErrorMessage($"Failed to delete {PkID} from database", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                _logger.LogError(ex, "Failed to delete record with PK {PrimaryKey} from {TableName}: {ErrorMessage}", PkID, _tableConfig.TableName, ex.Message);
+                InvokeDisplayErrorMessage($"Failed to delete record with ID {PkID}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         public T GetEntityFromRow(DataGridViewRow SelectedRow)
         {
-            return (T)_tableConfig.CreateFromRow(SelectedRow);
+            try
+            {
+                T entity = (T)_tableConfig.CreateFromRow(SelectedRow);
+                _logger.LogDebug("Created entity from row for {TableName}", _tableConfig.TableName);
+                return entity;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to create entity from row for {TableName}: {ErrorMessage}", _tableConfig.TableName, ex.Message);
+                throw;
+            }
         }
 
         public async Task FetchAndBindRecordsAtPageAsync()
         {
-            DgvTable = await _repository.GetRecordsAtPageAsync(PaginationManager.CurrentPage) ?? new DataTable();
+            try
+            {
+                DgvTable = await _repository.GetRecordsAtPageAsync(PaginationManager.CurrentPage) ?? new DataTable();
+                _logger.LogInformation("Fetched {RowCount} rows for page {CurrentPage} in {TableName}", DgvTable.Rows.Count, PaginationManager.CurrentPage, _tableConfig.TableName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to fetch records for page {CurrentPage} in {TableName}: {ErrorMessage}", PaginationManager.CurrentPage, _tableConfig.TableName, ex.Message);
+                DgvTable = new DataTable();
+            }
         }
 
         private int GetPrimaryKeyFromEntity(T Entity)
         {
-            using SqlCommand DummyCommand = new();
-            _tableConfig.MapUpdateParameters(Entity, DummyCommand);
-            SqlParameter? param = DummyCommand.Parameters.Cast<SqlParameter>().FirstOrDefault(p => p.ParameterName == "@" + _tableConfig.PrimaryKey);
-            if (param == null || param.Value == null)
-                throw new InvalidOperationException($"Primary key {_tableConfig.PrimaryKey} not found in mapped parameters.");
-            return (int)param.Value;
+            try
+            {
+                using SqlCommand DummyCommand = new();
+                _tableConfig.MapUpdateParameters(Entity, DummyCommand);
+                SqlParameter? param = DummyCommand.Parameters.Cast<SqlParameter>().FirstOrDefault(p => p.ParameterName == "@" + _tableConfig.PrimaryKey);
+                if (param == null || param.Value == null)
+                {
+                    _logger.LogError("Primary key {PrimaryKey} not found in mapped parameters for {TableName}", _tableConfig.PrimaryKey, _tableConfig.TableName);
+                    throw new InvalidOperationException($"Primary key {_tableConfig.PrimaryKey} not found in mapped parameters.");
+                }
+                return (int)param.Value;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to extract primary key for {TableName}: {ErrorMessage}", _tableConfig.TableName, ex.Message);
+                throw;
+            }
         }
 
         protected virtual void Dispose(bool disposing)
