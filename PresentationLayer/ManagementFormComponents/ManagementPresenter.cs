@@ -123,6 +123,13 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
             DataFormPresenter<T> presenter = new(_dataForm, _repository, _tableConfig, _validator, _dataFormPresenterLogger);
             presenter.SubmissionCompleted += DataForm_SubmitClicked;
 
+            _dataForm.FormClosed += (_, _) =>
+            {
+                presenter.SubmissionCompleted -= DataForm_SubmitClicked;
+                _dataForm.Dispose();
+                _dataForm = null;
+            };
+
             _dataForm.Show();
         }
 
@@ -145,6 +152,14 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
             _dataForm.InitializeEditing(entity);
             var presenter = new DataFormPresenter<T>(_dataForm, _repository, _tableConfig, _validator, _dataFormPresenterLogger);
             presenter.SubmissionCompleted += DataForm_SubmitClicked;
+
+            _dataForm.FormClosed += (_, _) =>
+            {
+                presenter.SubmissionCompleted -= DataForm_SubmitClicked;
+                _dataForm.Dispose();
+                _dataForm = null;
+            };
+
             _dataForm.Show();
         }
 
@@ -178,10 +193,13 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 
         private void HandleRefreshClicked(object? sender, EventArgs e)
         {
-            _managementForm.DataSource = _unfilteredDgvTable;
-            _managementForm.ConfigureDataGridViewColumns();
-            _managementForm.HideExcludedColumns();
-            _managementForm.ShowMessageBox("Successfully Refreshed", "Refresh Status", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            if (_unfilteredDgvTable != null)
+            {
+                _managementForm.DataSource = _unfilteredDgvTable;
+                _managementForm.ConfigureDataGridViewColumns();
+                _managementForm.HideExcludedColumns();
+                _managementForm.ShowMessageBox("Successfully Refreshed", "Refresh Status", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
         }
 
         private async void HandleReloadClicked(object? sender, EventArgs e)
