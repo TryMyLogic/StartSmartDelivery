@@ -9,6 +9,7 @@ using static StartSmartDeliveryForm.SharedLayer.TableDefinition;
 using StartSmartDeliveryForm.DataLayer.Repositories;
 using System.Data;
 using System.DirectoryServices.ActiveDirectory;
+using System.Diagnostics;
 
 namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 {
@@ -53,11 +54,13 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
             _printDataFormLogger = printDataFormLogger ?? NullLogger<PrintDataForm>.Instance;
             _printDataPresenterLogger = printDataPresenterLogger ?? NullLogger<PrintDataPresenter<T>>.Instance;
 
+            _logger.LogInformation("Created ManagementPresenter, DTO: {DtoType}, Table: {TableName}", typeof(T).Name, _tableConfig.TableName);
             WireUpEvents();
         }
 
         private void WireUpEvents()
         {
+            _logger.LogDebug("Subscribing to ManagementForm and ManagementModel events, DTO: {DtoType}, Table: {TableName}", typeof(T).Name, _tableConfig.TableName);
             _managementForm.FormLoadOccurred += HandleFormLoadOccurred;
             _managementForm.SearchClicked += HandleSearchClicked;
             _managementForm.AddClicked += HandleAddClicked;
@@ -80,14 +83,16 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 
         private void HandleSearchClicked(object? sender, SearchRequestEventArgs e)
         {
+            _logger.LogInformation("Handling SearchClicked, DTO: {DtoType}, Table: {TableName}, Column: {Column}, Term: {SearchTerm}, CaseSensitive: {IsCaseSensitive}", typeof(T).Name, _tableConfig.TableName, e.SelectedOption, e.SearchTerm, e.IsCaseSensitive);
             _unfilteredDgvTable = e.DataTable;
             _managementModel.ApplyFilter(sender, e);
             _managementForm.DataSource = _managementModel.DgvTable;
+            _logger.LogInformation("Search completed, DTO: {DtoType}, Table: {TableName}, Rows: {RowCount}", typeof(T).Name, _tableConfig.TableName, _managementModel.DgvTable.Rows.Count);
         }
 
         private async void HandleFormLoadOccurred(object? sender, EventArgs e)
         {
-            _logger.LogInformation("Form Load Occurred");
+            _logger.LogInformation("Handling FormLoadOccurred, DTO: {DtoType}, Table: {TableName}", typeof(T).Name, _tableConfig.TableName);
             try
             {
                 _managementForm.SetTableConfig(_tableConfig);
@@ -98,35 +103,38 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
                 _managementForm.ConfigureDataGridViewColumns();
                 _managementForm.SetSearchOptions();
                 _managementForm.HideExcludedColumns();
-
+                _logger.LogInformation("Form initialized, DTO: {DtoType}, Table: {TableName}, Rows: {RowCount}", typeof(T).Name, _tableConfig.TableName, _managementModel.DgvTable.Rows.Count);
             }
             catch (InvalidOperationException ex)
             {
-                _logger.LogError("Initialization failed: {Error}", ex);
+                _logger.LogError(ex, "Initialization failed, DTO: {DtoType}, Table: {TableName}", typeof(T).Name, _tableConfig.TableName);
                 _managementForm.ShowMessageBox("Initialization failed. This may result in errors such as Pagination not functioning", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         public void HandlePageChange(object? sender, EventArgs e)
         {
+            _logger.LogDebug("Handling PageChange, DTO: {DtoType}, Table: {TableName}", typeof(T).Name, _tableConfig.TableName);
             UpdateView();
         }
 
         public void UpdateView()
         {
+            _logger.LogDebug("Updating view, DTO: {DtoType}, Table: {TableName}, Rows: {RowCount}", typeof(T).Name, _tableConfig.TableName, _managementModel.DgvTable.Rows.Count);
             _managementForm.DataSource = _managementModel.DgvTable;
             _managementForm.UpdatePaginationDisplay(_managementModel.PaginationManager.CurrentPage, _managementModel.PaginationManager.TotalPages);
         }
 
         private void HandleAddClicked(object? sender, EventArgs e)
         {
-            _logger.LogInformation("Add Clicked");
+            _logger.LogDebug("Handling AddClicked, DTO: {DtoType}, Table: {TableName}", typeof(T).Name, _tableConfig.TableName);
             _dataForm = new(typeof(T), _tableConfig, _dataFormLogger);
             DataFormPresenter<T> presenter = new(_dataForm, _repository, _tableConfig, _validator, _dataFormPresenterLogger);
             presenter.SubmissionCompleted += DataForm_SubmitClicked;
 
             _dataForm.FormClosed += (_, _) =>
             {
+                _logger.LogDebug("DataForm closed for Add, DTO: {DtoType}, Table: {TableName}", typeof(T).Name, _tableConfig.TableName);
                 presenter.SubmissionCompleted -= DataForm_SubmitClicked;
                 _dataForm.Dispose();
                 _dataForm = null;
@@ -137,18 +145,10 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 
         private void HandleEditClicked(object? sender, int rowIndex)
         {
-            _logger.LogInformation("Edit Clicked for row {RowIndex}", rowIndex);
+            _logger.LogDebug("Handling EditClicked for row {RowIndex}, DTO: {DtoType}, Table: {TableName}", rowIndex, typeof(T).Name, _tableConfig.TableName);
 
             DataGridViewRow selectedRow = _managementForm.DgvMain.Rows[rowIndex];
             T entity = _managementModel.GetEntityFromRow(selectedRow);
-
-            object? primaryKeyValue = selectedRow.Cells[_tableConfig.PrimaryKey].Value;
-            if (primaryKeyValue == null || int.TryParse(primaryKeyValue.ToString(), out int id) && id == 0)
-            {
-                _logger.LogError("Selected row returned no valid entity data");
-                _managementForm.ShowMessageBox("Cannot open edit form", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
 
             _dataForm = new DataForm(typeof(T), _tableConfig, _dataFormLogger) { Mode = FormMode.Edit };
             _dataForm.InitializeEditing(entity);
@@ -157,6 +157,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 
             _dataForm.FormClosed += (_, _) =>
             {
+                _logger.LogDebug("DataForm closed for Edit, DTO: {DtoType}, Table: {TableName}, RowIndex: {RowIndex}", typeof(T).Name, _tableConfig.TableName, rowIndex);
                 presenter.SubmissionCompleted -= DataForm_SubmitClicked;
                 _dataForm.Dispose();
                 _dataForm = null;
@@ -175,7 +176,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
             }
             catch (Exception ex)
             {
-                _logger.LogError("Delete failed: {Error}", ex.Message);
+                _logger.LogError(ex, "Delete failed for row {RowIndex}, DTO: {DtoType}, Table: {TableName}", RowIndex, typeof(T).Name, _tableConfig.TableName);
                 _managementForm.ShowMessageBox("Failed to delete record", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -195,18 +196,25 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 
         private void HandleRefreshClicked(object? sender, EventArgs e)
         {
+            _logger.LogDebug("Handling RefreshClicked, DTO: {DtoType}, Table: {TableName}", typeof(T).Name, _tableConfig.TableName);
             if (_unfilteredDgvTable != null)
             {
                 _managementForm.DataSource = _unfilteredDgvTable;
                 _managementForm.ConfigureDataGridViewColumns();
                 _managementForm.HideExcludedColumns();
+                _logger.LogInformation("Refresh completed, DTO: {DtoType}, Table: {TableName}, Rows: {RowCount}", typeof(T).Name, _tableConfig.TableName, _unfilteredDgvTable.Rows.Count);
                 _managementForm.ShowMessageBox("Successfully Refreshed", "Refresh Status", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                _logger.LogWarning("No unfiltered table to refresh, DTO: {DtoType}, Table: {TableName}", typeof(T).Name, _tableConfig.TableName);
+                _managementForm.ShowMessageBox("No data to refresh", "Refresh Status", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
         private async void HandleReloadClicked(object? sender, EventArgs e)
         {
-            _logger.LogInformation("Reload Clicked");
+            _logger.LogDebug("Handling ReloadClicked, DTO: {DtoType}, Table: {TableName}", typeof(T).Name, _tableConfig.TableName);
 
             //Refetch data and rebind
             await _managementModel.FetchAndBindRecordsAtPageAsync();
@@ -214,53 +222,53 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
             _managementForm.DgvMain.DataSource = _managementModel.DgvTable;
             _managementForm.ConfigureDataGridViewColumns();
             _managementForm.HideExcludedColumns();
-
-            _managementForm.ShowMessageBox("Succesfully Reloaded", "Reload Status", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            _logger.LogInformation("Reload completed, DTO: {DtoType}, Table: {TableName}, Rows: {RowCount}", typeof(T).Name, _tableConfig.TableName, _managementModel.DgvTable.Rows.Count);
+            _managementForm.ShowMessageBox("Successfully Reloaded", "Reload Status", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void HandleRollbackClicked(object? sender, EventArgs e)
         {
-            _logger.LogInformation("Rollback Clicked");
+            _logger.LogDebug("Handling RollbackClicked, DTO: {DtoType}, Table: {TableName}", typeof(T).Name, _tableConfig.TableName); ;
         }
 
         private void HandlePrintAllPagesByRowCount(object? sender, EventArgs e)
         {
-            _logger.LogInformation("Print All Pages By Row Count Clicked");
+            _logger.LogDebug("Handling PrintAllPagesByRowCountClicked, DTO: {DtoType}, Table: {TableName}", typeof(T).Name, _tableConfig.TableName);
         }
 
         private async void HandleFirstPageClicked(object? sender, EventArgs e)
         {
-            _logger.LogInformation("First Page Clicked");
+            _logger.LogDebug("Handling FirstPageClicked, DTO: {DtoType}, Table: {TableName}", typeof(T).Name, _tableConfig.TableName);
             await _managementModel.PaginationManager.GoToFirstPageAsync();
         }
 
         private async void HandlePreviousPageClicked(object? sender, EventArgs e)
         {
-            _logger.LogInformation("Previous Page Clicked");
+            _logger.LogDebug("Handling PreviousPageClicked, DTO: {DtoType}, Table: {TableName}", typeof(T).Name, _tableConfig.TableName);
             await _managementModel.PaginationManager.GoToPreviousPageAsync();
         }
 
         private async void HandleNextPageClicked(object? sender, EventArgs e)
         {
-            _logger.LogInformation("Next Page Clicked");
+            _logger.LogDebug("Handling NextPageClicked, DTO: {DtoType}, Table: {TableName}", typeof(T).Name, _tableConfig.TableName);
             await _managementModel.PaginationManager.GoToNextPageAsync();
         }
 
         private async void HandleLastPageClicked(object? sender, EventArgs e)
         {
-            _logger.LogInformation("Last Page Clicked");
+            _logger.LogDebug("Handling LastPageClicked, DTO: {DtoType}, Table: {TableName}", typeof(T).Name, _tableConfig.TableName);
             await _managementModel.PaginationManager.GoToLastPageAsync();
         }
 
         private async void HandleGoToPageClicked(object? sender, int pageNumber)
         {
-            _logger.LogInformation("Go To Page Clicked");
+            _logger.LogDebug("Handling GoToPageClicked for page {PageNumber}, DTO: {DtoType}, Table: {TableName}", pageNumber, typeof(T).Name, _tableConfig.TableName);
             await _managementModel.PaginationManager.GoToPageAsync(pageNumber);
         }
 
         private async void HandlePrintClicked(object? sender, EventArgs e)
         {
-            _logger.LogInformation("Print Clicked");
+            _logger.LogDebug("Handling PrintClicked, DTO: {DtoType}, Table: {TableName}", typeof(T).Name, _tableConfig.TableName);
 
             PrintDataForm preview = new(_printDataFormLogger);
             _ = await PrintDataPresenter<T>.CreateAsync(preview, _repository, _managementModel.DgvTable, _printDataPresenterLogger);
@@ -273,13 +281,17 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
         private async void DataForm_SubmitClicked(object? sender, EventArgs e) { await DataForm_SubmitClickedAsync(sender, e); }
         private async Task DataForm_SubmitClickedAsync(object? sender, EventArgs e)
         {
-            if (_dataForm == null) return;
+            if (_dataForm == null)
+            {
+                _logger.LogWarning("DataForm is null during submission, DTO: {DtoType}, Table: {TableName}", typeof(T).Name, _tableConfig.TableName);
+                return;
+            }
 
-            _logger.LogInformation("Submission completed event received from {Sender}", sender);
+            _logger.LogDebug("Submission completed event received, DTO: {DtoType}, Table: {TableName}, Sender: {Sender}", typeof(T).Name, _tableConfig.TableName, sender);
 
             if (e is SubmissionCompletedEventArgs args)
             {
-                _logger.LogInformation("Submitted data: {Data}", args.Data);
+                _logger.LogDebug("Submitted data, DTO: {DtoType}, Table: {TableName}, Data: {Data}", typeof(T).Name, _tableConfig.TableName, args.Data);
                 if (args.Data is T entity)
                 {
                     try
@@ -300,13 +312,13 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError("Failed to process submission: {Error}", ex.Message);
+                        _logger.LogError("Failed to process submission,  DTO: {DtoType}, Table: {TableName}, Error: {Error}", typeof(T).Name, _tableConfig.TableName, ex.Message);
                         _managementForm.ShowMessageBox("Failed to save record", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
                 else
                 {
-                    _logger.LogWarning("Submitted data is not of type {Type}: {Data}", typeof(T).Name, args.Data);
+                    _logger.LogWarning("Submitted data is not of type {Type}, DTO: {DtoType}, Table: {TableName}, Data: {Data}", typeof(T).Name, typeof(T).Name, _tableConfig.TableName, args.Data);
                 }
 
                 _dataForm.ClearData();
@@ -341,7 +353,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
             {
                 if (disposing)
                 {
-                    _logger.LogInformation("Disposing ManagementPresenter for type {Type}", typeof(T).Name);
+                    _logger.LogInformation("Disposing ManagementPresenter, DTO: {DtoType}, Table: {TableName}", typeof(T).Name, _tableConfig.TableName);
 
                     if (_managementModel is IDisposable disposableModel)
                     {
