@@ -44,7 +44,22 @@ namespace StartSmartDeliveryForm.PresentationLayer
                     return;
                 }
 
+                if (_currentPresenter != null)
+                {
+                    _logger.LogInformation("Disposing old presenter for type {Type}", _currentPresenter.GetType().Name);
+                    if (_currentPresenter is IDisposable disposablePresenter)
+                    {
+                        disposablePresenter.Dispose();
+                    }
+                }
+                _currentPresenter = null;
+
+                _managementForm.DgvMain.Columns.Clear();
+                _managementForm.DgvMain.DataSource = null;
+
                 _currentPresenter = _formFactory.CreatePresenter<T>(_managementForm);
+                _logger.LogInformation("New presenter created: {PresenterType}", _currentPresenter.GetType().Name);
+                _logger.LogInformation("New presenter created: {PresenterType}", _currentPresenter.GetType());
 
                 if (_managementForm.FirstLoad == true)
                     _managementForm.InvokeFormLoadOccurred(null, EventArgs.Empty);

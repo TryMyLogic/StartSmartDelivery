@@ -11,11 +11,12 @@ using StartSmartDeliveryForm.DataLayer.Repositories;
 
 namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 {
-    public class ManagementModel<T> : IManagementModel<T> where T : class
+    public class ManagementModel<T> : IDisposable, IManagementModel<T> where T : class
     {
         private readonly ILogger<ManagementModel<T>> _logger;
         private readonly IRepository<T> _repository;
         private readonly TableConfig _tableConfig;
+        private bool _disposedValue;
 
         public DataTable DgvTable { get; private set; }
         public PaginationManager<T> PaginationManager { get; }
@@ -234,6 +235,39 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
             if (param == null || param.Value == null)
                 throw new InvalidOperationException($"Primary key {_tableConfig.PrimaryKey} not found in mapped parameters.");
             return (int)param.Value;
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposedValue)
+            {
+                if (disposing)
+                {
+                    _logger.LogInformation("Disposing ManagementModel for type {Type}", typeof(T).Name);
+                    DgvTable?.Dispose();
+
+                    PaginationManager.PageChanged -= OnPageChanged;
+
+                    DisplayErrorMessage = null;
+                    PageChanged = null;
+
+                    // IRepository does not currently need IDisposable. If it does, cleanup here
+                }
+
+                _disposedValue = true;
+            }
+        }
+
+        ~ManagementModel()
+        {
+            Dispose(disposing: false);
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

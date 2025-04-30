@@ -12,7 +12,7 @@ using System.DirectoryServices.ActiveDirectory;
 
 namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 {
-    public class ManagementPresenter<T> where T : class, new()
+    public class ManagementPresenter<T> : IDisposable where T : class, new()
     {
         private readonly IManagementForm _managementForm;
         private readonly IManagementModel<T> _managementModel;
@@ -29,6 +29,8 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
         private readonly IRepository<T> _repository;
 
         private DataTable? _unfilteredDgvTable;
+        private bool _disposedValue;
+
         public ManagementPresenter(
         IManagementForm managementForm,
         IManagementModel<T> managementModel,
@@ -88,11 +90,11 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
             _logger.LogInformation("Form Load Occurred");
             try
             {
+                _managementForm.SetTableConfig(_tableConfig);
                 await _managementModel.InitializeAsync();
                 _managementForm.DataSource = _managementModel.DgvTable;
                 _unfilteredDgvTable = _managementModel.DgvTable;
                 _managementForm.UpdatePaginationDisplay(_managementModel.PaginationManager.CurrentPage, _managementModel.PaginationManager.TotalPages);
-                _managementForm.SetTableConfig(_tableConfig);
                 _managementForm.ConfigureDataGridViewColumns();
                 _managementForm.SetSearchOptions();
                 _managementForm.HideExcludedColumns();
@@ -309,6 +311,65 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 
                 _dataForm.ClearData();
             }
+        }
+
+        private void UnwireEvents()
+        {
+            _managementForm.FormLoadOccurred -= HandleFormLoadOccurred;
+            _managementForm.SearchClicked -= HandleSearchClicked;
+            _managementForm.AddClicked -= HandleAddClicked;
+            _managementForm.EditClicked -= HandleEditClicked;
+            _managementForm.DeleteClicked -= HandleDeleteClicked;
+            _managementForm.RefreshedClicked -= HandleRefreshClicked;
+            _managementForm.ReloadClicked -= HandleReloadClicked;
+            _managementForm.RollbackClicked -= HandleRollbackClicked;
+            _managementForm.PrintAllPagesByRowCountClicked -= HandlePrintAllPagesByRowCount;
+            _managementForm.FirstPageClicked -= HandleFirstPageClicked;
+            _managementForm.PreviousPageClicked -= HandlePreviousPageClicked;
+            _managementForm.NextPageClicked -= HandleNextPageClicked;
+            _managementForm.LastPageClicked -= HandleLastPageClicked;
+            _managementForm.GoToPageClicked -= HandleGoToPageClicked;
+            _managementForm.PrintClicked -= HandlePrintClicked;
+
+            _managementModel.DisplayErrorMessage -= _managementForm.ShowMessageBox;
+            _managementModel.PageChanged -= HandlePageChange;
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposedValue)
+            {
+                if (disposing)
+                {
+                    _logger.LogInformation("Disposing ManagementPresenter for type {Type}", typeof(T).Name);
+
+                    if (_managementModel is IDisposable disposableModel)
+                    {
+                        disposableModel.Dispose();
+                    }
+
+                    _dataForm?.Dispose();
+                    _dataForm = null;
+
+                    _unfilteredDgvTable?.Dispose();
+                    _unfilteredDgvTable = null;
+
+                    UnwireEvents();
+                }
+
+                _disposedValue = true;
+            }
+        }
+
+        ~ManagementPresenter()
+        {
+            Dispose(disposing: false);
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }
