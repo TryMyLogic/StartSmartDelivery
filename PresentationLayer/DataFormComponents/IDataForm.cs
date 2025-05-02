@@ -1,17 +1,14 @@
-﻿using StartSmartDeliveryForm.SharedLayer.Enums;
-using StartSmartDeliveryForm.SharedLayer.EventArgs;
+﻿using StartSmartDeliveryForm.SharedLayer.EventArgs;
 
 namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
 {
     public interface IDataForm
     {
         Dictionary<string, Control> GetControls();
-        public FormMode Mode { get; set; }
-        public event EventHandler<SubmissionCompletedEventArgs>? SubmitClicked;
-        void OnSubmissionComplete(object sender, SubmissionCompletedEventArgs e);
-        void InitializeEditing(object data);
+        event EventHandler<SubmissionCompletedEventArgs> SubmitClicked;
+        void InitializeEditing(Dictionary<string, object> values);
         void ClearData();
-        object GetData();
-        void ShowMessageBox(string Text, string Caption, MessageBoxButtons Buttons, MessageBoxIcon Icon);
+        void ShowMessageBox(string text, string caption, MessageBoxButtons buttons, MessageBoxIcon icon);
+        void RenderControls(Dictionary<string, (Label Label, Control Control)> controlsLayout);
     }
 }

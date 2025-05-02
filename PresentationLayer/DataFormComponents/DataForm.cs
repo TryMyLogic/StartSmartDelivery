@@ -1,38 +1,32 @@
-﻿using System.Data;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using StartSmartDeliveryForm.SharedLayer;
 using StartSmartDeliveryForm.SharedLayer.Enums;
 using StartSmartDeliveryForm.SharedLayer.EventArgs;
 using StartSmartDeliveryForm.SharedLayer.Interfaces;
-using static StartSmartDeliveryForm.SharedLayer.TableDefinition;
 
 namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
 {
     public partial class DataForm : Form, IDataForm
     {
         public FormMode Mode { get; set; }
-        public readonly ILogger<DataForm> _logger;
+        public readonly ILogger<IDataForm> _logger;
         private readonly IMessageBox _messageBox;
-        private readonly Type _entityType;
-        private readonly TableConfig _tableConfig;
         private readonly Dictionary<string, Control> _dynamicControls = [];
-
-        public DataForm() : this(typeof(object), TableConfigs.Empty, NullLogger<DataForm>.Instance, new MessageBoxWrapper()) { }
-        public DataForm(Type entityType, TableConfig tableConfig, ILogger<DataForm>? logger = null, IMessageBox? messageBox = null)
+        public DataForm() : this(NullLogger<IDataForm>.Instance, new MessageBoxWrapper()) { }
+        public DataForm(ILogger<IDataForm>? logger = null, IMessageBox? messageBox = null)
         {
             InitializeComponent();
-            _logger = logger ?? NullLogger<DataForm>.Instance;
+            _logger = logger ?? NullLogger<IDataForm>.Instance;
             _messageBox = messageBox ?? new MessageBoxWrapper();
-            _entityType = entityType ?? throw new ArgumentNullException(nameof(entityType));
-            _tableConfig = tableConfig ?? throw new ArgumentNullException(nameof(tableConfig));
-            GenerateDynamicFields();
+            _logger.LogInformation("DataForm created");
         }
 
         private void DataForm_Load(object sender, EventArgs e)
         {
             btnSubmit.BackColor = GlobalConstants.SoftBeige;
             btnSubmit.FlatAppearance.BorderSize = 0;
+            _logger.LogInformation("DataForm loaded");
         }
 
         private event EventHandler<SubmissionCompletedEventArgs>? _submitClicked;
@@ -48,22 +42,37 @@ namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
             _submitClicked?.Invoke(this, SubmissionCompletedEventArgs.Empty);
         }
 
-        public virtual void OnSubmissionComplete(object? sender, SubmissionCompletedEventArgs e) { }
-
-        public void ShowMessageBox(string Text, string Caption, MessageBoxButtons Buttons, MessageBoxIcon Icon)
+        public void InitializeEditing(Dictionary<string, object> values)
         {
-            _messageBox.Show(Text, Caption, Buttons, Icon);
-        }
-
-        public void InitializeEditing(object data)
-        {
-            if (data == null) return;
-            _tableConfig.MapToForm(data, _dynamicControls);
+            _logger.LogDebug("Initializing editing with {ValueCount} values", values.Count);
+            foreach ((string name, object value) in values)
+            {
+                if (_dynamicControls.TryGetValue(name, out Control? control))
+                {
+                    switch (control)
+                    {
+                        case TextBox textBox:
+                            textBox.Text = value?.ToString() ?? string.Empty;
+                            break;
+                        case ComboBox comboBox:
+                            comboBox.SelectedItem = value?.ToString();
+                            if (value == null || comboBox.SelectedItem == null)
+                            {
+                                comboBox.SelectedIndex = -1;
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+            _logger.LogInformation("Editing initialized with {ValueCount} values", values.Count);
         }
 
         public void ClearData()
         {
-            foreach ((ColumnConfig column, Control control) in _tableConfig.Columns.Zip(_dynamicControls.Values))
+            _logger.LogDebug("Clearing data for {ControlCount} controls", _dynamicControls.Count);
+            foreach (Control control in _dynamicControls.Values)
             {
                 switch (control)
                 {
@@ -71,39 +80,40 @@ namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
                         textBox.Clear();
                         break;
                     case ComboBox comboBox:
-                        object? defaultValue = _tableConfig.GetDefaultValue(column);
-                        if (defaultValue != null)
-                            comboBox.SelectedItem = defaultValue.ToString();
-                        else
-                            comboBox.SelectedIndex = column.SqlType == SqlDbType.Bit ? 1 : -1; // False for bool, -1 for enums
+                        comboBox.SelectedIndex = -1; // Will be overridden by Model's ClearData
+                        break;
+                    default:
                         break;
                 }
             }
+            _logger.LogInformation("Data cleared for {ControlCount} controls", _dynamicControls.Count);
         }
 
-        public object GetData()
+        public void ShowMessageBox(string text, string caption, MessageBoxButtons buttons, MessageBoxIcon icon)
         {
-            return _tableConfig.CreateFromForm(_dynamicControls);
+            _messageBox.Show(text, caption, buttons, icon);
+            _logger.LogInformation("Message box shown: {Caption}", caption);
         }
 
-        private void GenerateDynamicFields()
+        public void RenderControls(Dictionary<string, (Label Label, Control Control)> controlsLayout)
         {
-            // Clear existing (If any)
+            //TODO - Cache static layouts
+
+            _logger.LogDebug("Rendering {ControlCount} controls", controlsLayout.Count);
             tlpDynamicFields.Controls.Clear();
             _dynamicControls.Clear();
             tlpDynamicFields.ColumnStyles.Clear();
+            tlpDynamicFields.RowStyles.Clear();
 
-            // Layout constants
             const int MAX_COLUMN_PAIRS = 2;
             const int CONTROLS_PER_PAIR = 2;
             const int CONTROL_WIDTH = 150;
             const int LABEL_WIDTH = 100;
             const int CONTROL_HEIGHT_ESTIMATE = 55;
-            int totalFields = _tableConfig.Columns.Count;
+            int totalFields = controlsLayout.Count;
             int columnsPerRow = Math.Min(MAX_COLUMN_PAIRS, (totalFields + 1) / 2) * CONTROLS_PER_PAIR;
             int rowsNeeded = (int)Math.Ceiling((double)totalFields / (columnsPerRow / CONTROLS_PER_PAIR));
 
-            // Configure TableLayoutPanel
             tlpDynamicFields.ColumnCount = columnsPerRow;
             tlpDynamicFields.RowCount = rowsNeeded;
 
@@ -112,70 +122,17 @@ namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
                 tlpDynamicFields.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, LABEL_WIDTH));
                 tlpDynamicFields.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, CONTROL_WIDTH));
             }
-            tlpDynamicFields.RowStyles.Clear();
             for (int i = 0; i < rowsNeeded; i++)
             {
                 tlpDynamicFields.RowStyles.Add(new RowStyle(SizeType.AutoSize));
             }
 
-            // Generate controls
             int row = 0, col = 0;
-            var entityProperties = _entityType.GetProperties().ToDictionary(p => p.Name, p => p);
-
-            foreach (ColumnConfig column in _tableConfig.Columns)
+            foreach ((string name, (Label label, Control control)) in controlsLayout)
             {
-                Label label = new()
-                {
-                    Text = column.Name,
-                    AutoSize = true,
-                    Anchor = AnchorStyles.Left | AnchorStyles.Top,
-                    TextAlign = ContentAlignment.MiddleLeft,
-                    Margin = new Padding(3, 6, 3, 3)
-                };
                 tlpDynamicFields.Controls.Add(label, col, row);
-
-                Control control;
-                if (column.SqlType == SqlDbType.Bit)
-                {
-                    control = new ComboBox
-                    {
-                        DropDownStyle = ComboBoxStyle.DropDownList,
-                        Name = $"cbo{column.Name}",
-                        Width = CONTROL_WIDTH,
-                        Anchor = AnchorStyles.Left | AnchorStyles.Top,
-                        Margin = new Padding(3)
-                    };
-                    ((ComboBox)control).Items.AddRange(["False", "True"]); // Putting True first means 0 index is True
-
-                    object? defaultValue = _tableConfig.GetDefaultValue(column);
-                    if (defaultValue is bool boolValue && boolValue) { ((ComboBox)control).SelectedIndex = 1; }
-                }
-                else if (entityProperties.TryGetValue(column.Name, out System.Reflection.PropertyInfo? prop) && prop.PropertyType.IsEnum)
-                {
-                    control = new ComboBox
-                    {
-                        DropDownStyle = ComboBoxStyle.DropDownList,
-                        Name = $"cbo{column.Name}",
-                        Width = CONTROL_WIDTH,
-                        Anchor = AnchorStyles.Left | AnchorStyles.Top,
-                        Margin = new Padding(3)
-                    };
-                    ((ComboBox)control).Items.AddRange(Enum.GetNames(prop.PropertyType));
-                    ((ComboBox)control).SelectedIndex = 0;
-                }
-                else
-                {
-                    control = new TextBox
-                    {
-                        Name = $"txt{column.Name}",
-                        Width = CONTROL_WIDTH,
-                        Anchor = AnchorStyles.Left | AnchorStyles.Top,
-                        Margin = new Padding(3)
-                    };
-                }
-
                 tlpDynamicFields.Controls.Add(control, col + 1, row);
-                _dynamicControls[column.Name] = control;
+                _dynamicControls[name] = control;
 
                 col += CONTROLS_PER_PAIR;
                 if (col >= columnsPerRow)
@@ -185,19 +142,17 @@ namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
                 }
             }
 
-            // Calculate required size
             int requiredWidth = (columnsPerRow / 2 * LABEL_WIDTH) + (columnsPerRow / 2 * CONTROL_WIDTH) + 20;
-            int requiredHeight = rowsNeeded * CONTROL_HEIGHT_ESTIMATE; // Height for fields + button/padding
-
-            // Set form size and minimum size
-            tlpDynamicFields.AutoScroll = true; // Scroll if exceeds screen
-            AutoSize = false; // Manual sizing with scrolling
-            MinimumSize = new Size(requiredWidth, requiredHeight); // Minimum size to fit all fields
-            Size = new Size(requiredWidth, requiredHeight); // Initial size matches content
+            int requiredHeight = rowsNeeded * CONTROL_HEIGHT_ESTIMATE;
+            tlpDynamicFields.AutoScroll = true;
+            AutoSize = false;
+            Size = new Size(requiredWidth, requiredHeight);
+            _logger.LogInformation("Controls rendered: {ControlCount} controls in {RowCount} rows", controlsLayout.Count, rowsNeeded);
         }
 
         public Dictionary<string, Control> GetControls()
         {
+            _logger.LogDebug("Returning {ControlCount} controls", _dynamicControls.Count);
             return _dynamicControls;
         }
     }

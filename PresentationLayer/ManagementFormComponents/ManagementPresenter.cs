@@ -17,17 +17,14 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
     {
         private readonly IManagementForm _managementForm;
         private readonly IManagementModel<T> _managementModel;
+        private readonly IRepository<T> _repository;
+        private readonly TableConfig _tableConfig;
         private readonly ILogger<ManagementPresenter<T>> _logger;
-        private readonly ILogger<DataForm> _dataFormLogger;
+
+        private DataPresenter<T> _dataPresenter;
 
         private readonly ILogger<PrintDataForm> _printDataFormLogger;
-        private readonly DataFormValidator _validator;
-        private DataForm? _dataForm;
-        private readonly ILogger<DataFormPresenter<T>> _dataFormPresenterLogger;
         private readonly ILogger<PrintDataPresenter<T>> _printDataPresenterLogger;
-
-        private readonly TableConfig _tableConfig;
-        private readonly IRepository<T> _repository;
 
         private DataTable? _unfilteredDgvTable;
         private bool _disposedValue;
@@ -36,21 +33,24 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
         IManagementForm managementForm,
         IManagementModel<T> managementModel,
         IRepository<T> repository,
+        IDataForm dataForm,
+        IDataModel<T> dataModel,
         ILogger<ManagementPresenter<T>>? logger = null,
-        ILogger<DataForm>? dataFormLogger = null,
-        ILogger<DataFormPresenter<T>>? dataFormPresenterLogger = null,
+        ILogger<IDataForm>? dataFormLogger = null,
+        ILogger<IDataModel<T>>? dataModelLogger = null,
+        ILogger<IDataPresenter<T>>? dataPresenterLogger = null,
         ILogger<PrintDataForm>? printDataFormLogger = null,
         ILogger<PrintDataPresenter<T>>? printDataPresenterLogger = null
         )
         {
             _managementForm = managementForm ?? throw new ArgumentNullException(nameof(managementForm));
             _managementModel = managementModel ?? throw new ArgumentNullException(nameof(managementModel));
+            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _tableConfig = TableConfigResolver.Resolve<T>();
             _logger = logger ?? NullLogger<ManagementPresenter<T>>.Instance;
-            _dataFormLogger = dataFormLogger ?? NullLogger<DataForm>.Instance;
-            _dataFormPresenterLogger = dataFormPresenterLogger ?? NullLogger<DataFormPresenter<T>>.Instance;
-            _validator = new DataFormValidator();
-            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+
+            _dataPresenter = new(dataForm, dataModel, dataPresenterLogger, dataFormLogger);
+
             _printDataFormLogger = printDataFormLogger ?? NullLogger<PrintDataForm>.Instance;
             _printDataPresenterLogger = printDataPresenterLogger ?? NullLogger<PrintDataPresenter<T>>.Instance;
 
@@ -79,6 +79,8 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 
             _managementModel.DisplayErrorMessage += _managementForm.ShowMessageBox;
             _managementModel.PageChanged += HandlePageChange;
+
+            _dataPresenter.SubmissionCompleted += DataForm_SubmitClicked;
         }
 
         private void HandleSearchClicked(object? sender, SearchRequestEventArgs e)
@@ -128,19 +130,8 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
         private void HandleAddClicked(object? sender, EventArgs e)
         {
             _logger.LogDebug("Handling AddClicked, DTO: {DtoType}, Table: {TableName}", typeof(T).Name, _tableConfig.TableName);
-            _dataForm = new(typeof(T), _tableConfig, _dataFormLogger);
-            DataFormPresenter<T> presenter = new(_dataForm, _repository, _tableConfig, _validator, _dataFormPresenterLogger);
-            presenter.SubmissionCompleted += DataForm_SubmitClicked;
 
-            _dataForm.FormClosed += (_, _) =>
-            {
-                _logger.LogDebug("DataForm closed for Add, DTO: {DtoType}, Table: {TableName}", typeof(T).Name, _tableConfig.TableName);
-                presenter.SubmissionCompleted -= DataForm_SubmitClicked;
-                _dataForm.Dispose();
-                _dataForm = null;
-            };
-
-            _dataForm.Show();
+            _dataPresenter.SetMode(FormMode.Add);
         }
 
         private void HandleEditClicked(object? sender, int rowIndex)
@@ -150,20 +141,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
             DataGridViewRow selectedRow = _managementForm.DgvMain.Rows[rowIndex];
             T entity = _managementModel.GetEntityFromRow(selectedRow);
 
-            _dataForm = new DataForm(typeof(T), _tableConfig, _dataFormLogger) { Mode = FormMode.Edit };
-            _dataForm.InitializeEditing(entity);
-            var presenter = new DataFormPresenter<T>(_dataForm, _repository, _tableConfig, _validator, _dataFormPresenterLogger);
-            presenter.SubmissionCompleted += DataForm_SubmitClicked;
-
-            _dataForm.FormClosed += (_, _) =>
-            {
-                _logger.LogDebug("DataForm closed for Edit, DTO: {DtoType}, Table: {TableName}, RowIndex: {RowIndex}", typeof(T).Name, _tableConfig.TableName, rowIndex);
-                presenter.SubmissionCompleted -= DataForm_SubmitClicked;
-                _dataForm.Dispose();
-                _dataForm = null;
-            };
-
-            _dataForm.Show();
+            _dataPresenter.SetMode(FormMode.Edit, entity);
         }
 
         private async void HandleDeleteClicked(object? sender, int RowIndex)
@@ -278,50 +256,37 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
         }
 
         // DataForm submit button event handlers
-        private async void DataForm_SubmitClicked(object? sender, EventArgs e) { await DataForm_SubmitClickedAsync(sender, e); }
-        private async Task DataForm_SubmitClickedAsync(object? sender, EventArgs e)
+        private async void DataForm_SubmitClicked(object? sender, SubmissionCompletedEventArgs e) { await DataForm_SubmitClickedAsync(sender, e); }
+        private async Task DataForm_SubmitClickedAsync(object? sender, SubmissionCompletedEventArgs e)
         {
-            if (_dataForm == null)
+            _logger.LogInformation("DataForm SUBMITTED!!!!!");
+            try
             {
-                _logger.LogWarning("DataForm is null during submission, DTO: {DtoType}, Table: {TableName}", typeof(T).Name, _tableConfig.TableName);
-                return;
+                if (e.Data is T entity)
+                {
+                    if (e.Mode == FormMode.Add)
+                    {
+                        await _managementModel.AddRecordAsync(entity);
+                        _logger.LogInformation("Inserted new entity, DTO: {DtoType}", typeof(T).Name);
+                    }
+                    else if (e.Mode == FormMode.Edit)
+                    {
+                        await _managementModel.UpdateRecordAsync(entity);
+                        _logger.LogInformation("Updated entity, DTO: {DtoType}", typeof(T).Name);
+                    }
+
+                   UpdateView();
+                }
+                else if (e.Data != null)
+                {
+                    _logger.LogWarning("Submitted data is not of type {Type}, DTO: {DtoType}, Table: {TableName}, Data: {Data}", typeof(T).Name, typeof(T).Name, _tableConfig.TableName, e.Data);
+                    _managementForm.ShowMessageBox("Submission failed. ADD/EDIT was not performed", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
-
-            _logger.LogDebug("Submission completed event received, DTO: {DtoType}, Table: {TableName}, Sender: {Sender}", typeof(T).Name, _tableConfig.TableName, sender);
-
-            if (e is SubmissionCompletedEventArgs args)
+            catch (Exception ex)
             {
-                _logger.LogDebug("Submitted data, DTO: {DtoType}, Table: {TableName}, Data: {Data}", typeof(T).Name, _tableConfig.TableName, args.Data);
-                if (args.Data is T entity)
-                {
-                    try
-                    {
-                        if (args.Mode == FormMode.Add)
-                        {
-                            await _managementModel.AddRecordAsync(entity);
-                            _logger.LogInformation("Added new record: {Entity}", entity);
-                        }
-                        else if (args.Mode == FormMode.Edit)
-                        {
-                            await _managementModel.UpdateRecordAsync(entity);
-                            _logger.LogInformation("Updated record: {Entity}", entity);
-                        }
-
-                        UpdateView();
-                        _dataForm.Close();
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError("Failed to process submission,  DTO: {DtoType}, Table: {TableName}, Error: {Error}", typeof(T).Name, _tableConfig.TableName, ex.Message);
-                        _managementForm.ShowMessageBox("Failed to save record", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                }
-                else
-                {
-                    _logger.LogWarning("Submitted data is not of type {Type}, DTO: {DtoType}, Table: {TableName}, Data: {Data}", typeof(T).Name, typeof(T).Name, _tableConfig.TableName, args.Data);
-                }
-
-                _dataForm.ClearData();
+                _logger.LogError(ex, "Submission failed, DTO: {DtoType}, Table: {TableName}", typeof(T).Name, _tableConfig.TableName);
+                _managementForm.ShowMessageBox("Submission failed. ADD/EDIT was not performed", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -360,8 +325,8 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
                         disposableModel.Dispose();
                     }
 
-                    _dataForm?.Dispose();
-                    _dataForm = null;
+                    //_dataForm?.Dispose();
+                    //_dataForm = null;
 
                     _unfilteredDgvTable?.Dispose();
                     _unfilteredDgvTable = null;

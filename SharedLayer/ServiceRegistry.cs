@@ -10,6 +10,7 @@ using StartSmartDeliveryForm.BusinessLogicLayer;
 using StartSmartDeliveryForm.DataLayer.DTOs;
 using StartSmartDeliveryForm.DataLayer.Repositories;
 using StartSmartDeliveryForm.PresentationLayer;
+using StartSmartDeliveryForm.PresentationLayer.DataFormComponents;
 using StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents;
 using static StartSmartDeliveryForm.SharedLayer.TableDefinition;
 
@@ -157,6 +158,10 @@ namespace StartSmartDeliveryForm.SharedLayer
                 .AddScoped<ManagementModel<VehiclesDTO>>()
                 .AddTransient<ManagementPresenter<VehiclesDTO>>()
                 .AddScoped<IRepository<VehiclesDTO>, Repository<VehiclesDTO>>()
+
+                // DataForm
+                .AddScoped<IDataForm, DataForm>()
+                .AddScoped(typeof(IDataModel<>), typeof(DataModel<>))
 
                 .BuildServiceProvider();
 

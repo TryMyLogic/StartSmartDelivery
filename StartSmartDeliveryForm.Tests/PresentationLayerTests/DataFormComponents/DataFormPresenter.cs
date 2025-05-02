@@ -12,7 +12,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DataFormComponents
 {
     public class DataFormPresenterTests(DatabaseFixture fixture, ITestOutputHelper output) : IClassFixture<DatabaseFixture>
     {
-        private readonly ILogger<DataFormPresenter<DriversDTO>> _testLogger = SharedFunctions.CreateTestLogger<DataFormPresenter<DriversDTO>>(output);
+        private readonly ILogger<DataPresenter<DriversDTO>> _testLogger = SharedFunctions.CreateTestLogger<DataPresenter<DriversDTO>>(output);
         private readonly IRepository<DriversDTO> _repository = fixture.DriversRepository;
         private readonly DataFormValidator _genericDataFormValidator = new();
         private DataForm? _genericDataForm;
@@ -38,7 +38,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DataFormComponents
             _genericDataForm = new(typeof(DriversDTO), TableConfigs.Drivers, null, new NoMessageBox());
             DriversDTO Driver = new(DriverID, Name, Surname, EmployeeNo, LicenseType, Availability);
             _genericDataForm.InitializeEditing(Driver);
-            DataFormPresenter<DriversDTO> presenter = new(_genericDataForm, _repository, TableConfigs.Drivers, _genericDataFormValidator);
+            DataPresenter<DriversDTO> presenter = new(_genericDataForm, _repository, TableConfigs.Drivers, _genericDataFormValidator);
 
             // Act
             bool result = await presenter.ValidFormAsync();

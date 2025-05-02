@@ -62,8 +62,15 @@ namespace StartSmartDeliveryForm.PresentationLayer
                 IManagementModel<T> model = _serviceProvider.GetRequiredService<IManagementModel<T>>();
                 IRepository<T> repository = _serviceProvider.GetRequiredService<IRepository<T>>();
                 ILogger<ManagementPresenter<T>> logger = _serviceProvider.GetRequiredService<ILogger<ManagementPresenter<T>>>();
-                ILogger<DataForm> dataFormLogger = _serviceProvider.GetRequiredService<ILogger<DataForm>>();
-                ILogger<DataFormPresenter<T>> dataFormPresenterLogger = _serviceProvider.GetRequiredService<ILogger<DataFormPresenter<T>>>();
+        
+           
+
+                IDataForm dataForm = _serviceProvider.GetRequiredService<IDataForm>();
+                IDataModel<T> dataModel = _serviceProvider.GetRequiredService<IDataModel<T>>();
+                ILogger<IDataForm> dataFormLogger = _serviceProvider.GetRequiredService<ILogger<IDataForm>>();
+                ILogger<IDataModel<T>> dataModelLogger = _serviceProvider.GetRequiredService<ILogger<IDataModel<T>>>();
+                ILogger<IDataPresenter<T>> dataPresenterLogger = _serviceProvider.GetRequiredService<ILogger<IDataPresenter<T>>>();
+
                 ILogger<PrintDataForm> printDataFormLogger = _serviceProvider.GetRequiredService<ILogger<PrintDataForm>>();
                 ILogger<PrintDataPresenter<T>> printDataPresenterLogger = _serviceProvider.GetRequiredService<ILogger<PrintDataPresenter<T>>>();
 
@@ -71,11 +78,13 @@ namespace StartSmartDeliveryForm.PresentationLayer
                     form,
                     model,
                     repository,
-                    logger,
-                    dataFormLogger,
-                    dataFormPresenterLogger,
-                    printDataFormLogger,
-                    printDataPresenterLogger
+                    dataForm,
+                    dataModel,
+                    logger
+                    //
+                    //
+                    //printDataFormLogger,
+                    //printDataPresenterLogger
                 );
 
                 _logger.LogInformation("Successfully created ManagementPresenter for {DTOType}", typeof(T).Name);
