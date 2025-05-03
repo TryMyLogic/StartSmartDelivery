@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using StartSmartDeliveryForm.SharedLayer.Enums;
-
-namespace StartSmartDeliveryForm.DataLayer.DTOs
+﻿namespace StartSmartDeliveryForm.DataLayer.DTOs
 {
     public record VehiclesDTO(
         int VehicleID,

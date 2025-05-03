@@ -12,7 +12,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
         private readonly ILogger<IDataPresenter<T>> _logger;
         private readonly ILogger<IDataForm> _dataFormLogger;
         public FormMode Mode { set; get; }
-         
+
         private bool _disposedValue;
 
         public DataPresenter(

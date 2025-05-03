@@ -16,7 +16,6 @@ using StartSmartDeliveryForm.SharedLayer.Enums;
 using StartSmartDeliveryForm.SharedLayer.EventArgs;
 using StartSmartDeliveryForm.Tests.SharedTestItems;
 using Xunit.Abstractions;
-using static StartSmartDeliveryForm.SharedLayer.TableDefinition;
 
 namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.ManagementFormComponents
 {

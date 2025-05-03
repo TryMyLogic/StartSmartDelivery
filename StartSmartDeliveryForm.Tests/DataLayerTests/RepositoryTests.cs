@@ -12,7 +12,6 @@ using StartSmartDeliveryForm.SharedLayer;
 using StartSmartDeliveryForm.SharedLayer.Enums;
 using StartSmartDeliveryForm.Tests.SharedTestItems;
 using Xunit.Abstractions;
-using static StartSmartDeliveryForm.SharedLayer.TableDefinition;
 
 namespace StartSmartDeliveryForm.Tests.DataLayerTests
 {

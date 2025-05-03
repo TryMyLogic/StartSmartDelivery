@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging.Abstractions;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using StartSmartDeliveryForm.DataLayer.DTOs;
+using Microsoft.Extensions.Logging.Abstractions;
 using StartSmartDeliveryForm.DataLayer.Repositories;
 using StartSmartDeliveryForm.PresentationLayer.DataFormComponents;
 using StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents;
@@ -62,8 +56,8 @@ namespace StartSmartDeliveryForm.PresentationLayer
                 IManagementModel<T> model = _serviceProvider.GetRequiredService<IManagementModel<T>>();
                 IRepository<T> repository = _serviceProvider.GetRequiredService<IRepository<T>>();
                 ILogger<ManagementPresenter<T>> logger = _serviceProvider.GetRequiredService<ILogger<ManagementPresenter<T>>>();
-        
-           
+
+
 
                 IDataForm dataForm = _serviceProvider.GetRequiredService<IDataForm>();
                 IDataModel<T> dataModel = _serviceProvider.GetRequiredService<IDataModel<T>>();
@@ -81,10 +75,10 @@ namespace StartSmartDeliveryForm.PresentationLayer
                     dataForm,
                     dataModel,
                     logger
-                    //
-                    //
-                    //printDataFormLogger,
-                    //printDataPresenterLogger
+                //
+                //
+                //printDataFormLogger,
+                //printDataPresenterLogger
                 );
 
                 _logger.LogInformation("Successfully created ManagementPresenter for {DTOType}", typeof(T).Name);

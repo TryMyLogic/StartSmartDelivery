@@ -1,15 +1,12 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Data;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using StartSmartDeliveryForm.BusinessLogicLayer;
+using StartSmartDeliveryForm.DataLayer.Repositories;
 using StartSmartDeliveryForm.PresentationLayer.DataFormComponents;
 using StartSmartDeliveryForm.PresentationLayer.PrintDataFormComponents;
 using StartSmartDeliveryForm.SharedLayer.Enums;
 using StartSmartDeliveryForm.SharedLayer.EventArgs;
 using static StartSmartDeliveryForm.SharedLayer.TableDefinition;
-using StartSmartDeliveryForm.DataLayer.Repositories;
-using System.Data;
-using System.DirectoryServices.ActiveDirectory;
-using System.Diagnostics;
 
 namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 {
@@ -21,7 +18,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
         private readonly TableConfig _tableConfig;
         private readonly ILogger<ManagementPresenter<T>> _logger;
 
-        private DataPresenter<T> _dataPresenter;
+        private readonly DataPresenter<T> _dataPresenter;
 
         private readonly ILogger<PrintDataForm> _printDataFormLogger;
         private readonly ILogger<PrintDataPresenter<T>> _printDataPresenterLogger;
@@ -275,7 +272,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
                         _logger.LogInformation("Updated entity, DTO: {DtoType}", typeof(T).Name);
                     }
 
-                   UpdateView();
+                    UpdateView();
                 }
                 else if (e.Data != null)
                 {

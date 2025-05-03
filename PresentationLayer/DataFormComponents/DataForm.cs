@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Primitives;
 using StartSmartDeliveryForm.SharedLayer;
 using StartSmartDeliveryForm.SharedLayer.Enums;
 using StartSmartDeliveryForm.SharedLayer.EventArgs;
@@ -106,7 +105,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
                         }
                         else
                         {
-                            comboBox.SelectedIndex = -1; 
+                            comboBox.SelectedIndex = -1;
                         }
                         _logger.LogDebug("Set {ControlName}.SelectedItem to {DefaultValue}", key, defaultValue);
                         break;

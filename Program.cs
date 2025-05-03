@@ -1,12 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using StartSmartDeliveryForm.DataLayer.DTOs;
-using StartSmartDeliveryForm.PresentationLayer.DataFormComponents;
-using StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents;
-using StartSmartDeliveryForm.SharedLayer;
-using static StartSmartDeliveryForm.SharedLayer.TableDefinition;
-using StartSmartDeliveryForm.DataLayer.Repositories;
 using StartSmartDeliveryForm.PresentationLayer;
+using StartSmartDeliveryForm.SharedLayer;
 
 namespace StartSmartDeliveryForm
 {

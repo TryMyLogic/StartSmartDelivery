@@ -140,7 +140,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.ManagementFormComp
 
             // Assert
             DataGridViewColumnCollection columns = form.DgvMain.Columns;
-            Assert.Equal(TableConfigs.Drivers.Columns.Count, columns.Count-2); // -2 is for Edit and Delete columns
+            Assert.Equal(TableConfigs.Drivers.Columns.Count, columns.Count - 2); // -2 is for Edit and Delete columns
 
             foreach (ColumnConfig columnConfig in TableConfigs.Drivers.Columns)
             {

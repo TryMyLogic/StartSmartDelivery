@@ -1,17 +1,11 @@
 ﻿using Microsoft.Extensions.Logging;
-using StartSmartDeliveryForm.BusinessLogicLayer;
+using NSubstitute;
 using StartSmartDeliveryForm.DataLayer.DTOs;
+using StartSmartDeliveryForm.DataLayer.Repositories;
 using StartSmartDeliveryForm.PresentationLayer.DataFormComponents;
 using StartSmartDeliveryForm.SharedLayer.Enums;
 using StartSmartDeliveryForm.Tests.SharedTestItems;
 using Xunit.Abstractions;
-using static StartSmartDeliveryForm.SharedLayer.TableDefinition;
-using StartSmartDeliveryForm.DataLayer.Repositories;
-using System.Windows.Forms;
-using NSubstitute.ExceptionExtensions;
-using NSubstitute;
-using StartSmartDeliveryForm.SharedLayer.EventArgs;
-using StartSmartDeliveryForm.SharedLayer.Interfaces;
 
 namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DataFormComponents
 {

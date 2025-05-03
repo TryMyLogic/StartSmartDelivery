@@ -1,15 +1,11 @@
-﻿using System.Drawing;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
 using StartSmartDeliveryForm.DataLayer.DTOs;
-using StartSmartDeliveryForm.DataLayer.Repositories;
 using StartSmartDeliveryForm.PresentationLayer.DataFormComponents;
 using StartSmartDeliveryForm.SharedLayer.Enums;
 using StartSmartDeliveryForm.SharedLayer.EventArgs;
 using StartSmartDeliveryForm.Tests.SharedTestItems;
 using Xunit.Abstractions;
-using static StartSmartDeliveryForm.SharedLayer.TableDefinition;
 
 namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DataFormComponents
 {

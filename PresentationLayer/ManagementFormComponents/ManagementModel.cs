@@ -3,11 +3,11 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using StartSmartDeliveryForm.BusinessLogicLayer;
+using StartSmartDeliveryForm.DataLayer.Repositories;
 using StartSmartDeliveryForm.SharedLayer.Enums;
 using StartSmartDeliveryForm.SharedLayer.EventArgs;
 using StartSmartDeliveryForm.SharedLayer.EventDelegates;
 using static StartSmartDeliveryForm.SharedLayer.TableDefinition;
-using StartSmartDeliveryForm.DataLayer.Repositories;
 
 namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
 {

@@ -1,7 +1,6 @@
 ﻿using System.Data;
 using Microsoft.Data.SqlClient;
 using StartSmartDeliveryForm.DataLayer.DTOs;
-using StartSmartDeliveryForm.SharedLayer.Enums;
 
 namespace StartSmartDeliveryForm.SharedLayer
 {
