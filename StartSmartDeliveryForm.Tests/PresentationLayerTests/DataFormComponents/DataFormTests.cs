@@ -1,6 +1,9 @@
-﻿using System.Windows.Forms;
+﻿using System.Drawing;
+using System.Windows.Forms;
 using Microsoft.Extensions.Logging;
+using NSubstitute;
 using StartSmartDeliveryForm.DataLayer.DTOs;
+using StartSmartDeliveryForm.DataLayer.Repositories;
 using StartSmartDeliveryForm.PresentationLayer.DataFormComponents;
 using StartSmartDeliveryForm.SharedLayer.Enums;
 using StartSmartDeliveryForm.SharedLayer.EventArgs;
@@ -10,16 +13,23 @@ using static StartSmartDeliveryForm.SharedLayer.TableDefinition;
 
 namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DataFormComponents
 {
-    public class DataFormTests
+    public class DataFormTests : IClassFixture<DatabaseFixture>
     {
         private readonly ILogger<DataForm> _testLogger;
+        private readonly ILogger<IDataPresenter<DriversDTO>> _dataPresenterLogger;
+
         private readonly DataForm _noMsgBoxDataForm;
         private DataForm? _testMsgDataForm;
 
-        public DataFormTests(ITestOutputHelper output)
+        private readonly DataModel<DriversDTO> _dataModel;
+        private DataPresenter<DriversDTO>? _dataPresenter;
+
+        public DataFormTests(DatabaseFixture fixture, ITestOutputHelper output)
         {
             _testLogger = SharedFunctions.CreateTestLogger<DataForm>(output);
-            _noMsgBoxDataForm = new(typeof(DriversDTO), TableConfigs.Drivers, _testLogger, new NoMessageBox());
+            _dataPresenterLogger = SharedFunctions.CreateTestLogger<IDataPresenter<DriversDTO>>(output);
+            _noMsgBoxDataForm = new(_testLogger, new NoMessageBox());
+            _dataModel = new(fixture.DriversRepository);
         }
 
         [Fact]
@@ -66,7 +76,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DataFormComponents
         {
             // Arrange
             TestMessageBox testMsgBox = new();
-            _testMsgDataForm = new(typeof(DriversDTO), TableConfigs.Drivers, _testLogger, testMsgBox);
+            _testMsgDataForm = new(_testLogger, testMsgBox);
 
             // Act
             _testMsgDataForm.ShowMessageBox(text, caption, button, icon);
@@ -89,7 +99,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DataFormComponents
         public void InitializeEditing_ProperlySetsFieldsValues(int DriverID, string Name, string Surname, string EmployeeNo, LicenseType LicenseType, bool Availability)
         {
             // Arrange
-            _testMsgDataForm = new(typeof(DriversDTO), TableConfigs.Drivers, _testLogger);
+            _testMsgDataForm = new(_testLogger);
 
             DriversDTO mockDriver = new(
             DriverID: DriverID,
@@ -101,7 +111,14 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DataFormComponents
             );
 
             // Act
-            _testMsgDataForm.InitializeEditing(mockDriver);
+            Dictionary<string, object> values = _dataModel.MapToForm(mockDriver);
+            _dataPresenter = new(_testMsgDataForm, _dataModel);
+            _testMsgDataForm.InitializeEditing(values);
+
+            foreach (Control control in _testMsgDataForm.Controls)
+            {
+                _testLogger.LogInformation("Control: {Control}", control);
+            }
 
             // Assert
             Assert.Equal(DriverID.ToString(), ((TextBox)_testMsgDataForm.Controls.Find("txtDriverID", true)[0]).Text);
@@ -122,7 +139,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DataFormComponents
         public void ClearData_ClearsDataFormFields(int DriverID, string Name, string Surname, string EmployeeNo, LicenseType LicenseType, bool Availability)
         {
             // Arrange
-            _testMsgDataForm = new(typeof(DriversDTO), TableConfigs.Drivers, _testLogger);
+            _testMsgDataForm = new(_testLogger);
 
             DriversDTO mockDriver = new(
             DriverID: DriverID,
@@ -133,18 +150,19 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DataFormComponents
             Availability: Availability
             );
 
-            _testMsgDataForm.InitializeEditing(mockDriver);
+            Dictionary<string, object> values = _dataModel.MapToForm(mockDriver);
+            _dataPresenter = new(_testMsgDataForm, _dataModel, _dataPresenterLogger);
+            _testMsgDataForm.InitializeEditing(values);
 
             // Act
             _testMsgDataForm.ClearData();
 
-            // Assert
             Assert.Equal("", ((TextBox)_testMsgDataForm.Controls.Find("txtDriverID", true)[0]).Text);
             Assert.Equal("", ((TextBox)_testMsgDataForm.Controls.Find("txtName", true)[0]).Text);
             Assert.Equal("", ((TextBox)_testMsgDataForm.Controls.Find("txtSurname", true)[0]).Text);
             Assert.Equal("", ((TextBox)_testMsgDataForm.Controls.Find("txtEmployeeNo", true)[0]).Text);
             Assert.Equal(-1, ((ComboBox)_testMsgDataForm.Controls.Find("cboLicenseType", true)[0]).SelectedIndex);
-            Assert.Equal("True", ((ComboBox)_testMsgDataForm.Controls.Find("cboAvailability", true)[0]).SelectedItem);
+            Assert.Equal(-1, ((ComboBox)_testMsgDataForm.Controls.Find("cboAvailability", true)[0]).SelectedIndex);
         }
 
         [Theory]
@@ -154,10 +172,10 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DataFormComponents
         [InlineData(4, "Jake", "White", "EMP004", LicenseType.Code10, true)]
         [InlineData(5, "Jill", "Green", "EMP005", LicenseType.Code14, false)]
         [InlineData(6, "Jack", "Black", "EMP006", LicenseType.Code14, true)]
-        public void GetData_GetsDataFromDataFormFields(int DriverID, string Name, string Surname, string EmployeeNo, LicenseType LicenseType, bool Availability)
+        public void ClearData_WithDefaultsOverridden_ClearsDataFormFieldsWithOverrides(int DriverID, string Name, string Surname, string EmployeeNo, LicenseType LicenseType, bool Availability)
         {
             // Arrange
-            _testMsgDataForm = new(typeof(DriversDTO), TableConfigs.Drivers, _testLogger);
+            _testMsgDataForm = new(_testLogger);
 
             DriversDTO mockDriver = new(
             DriverID: DriverID,
@@ -168,28 +186,49 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DataFormComponents
             Availability: Availability
             );
 
-            _testMsgDataForm.InitializeEditing(mockDriver);
+            Dictionary<string, object> values = _dataModel.MapToForm(mockDriver);
+            _dataPresenter = new(_testMsgDataForm, _dataModel, _dataPresenterLogger);
+            _testMsgDataForm.InitializeEditing(values);
+
+            Dictionary<string, object?> defaultValues = new()
+            {
+            { "DriverID", null },
+            { "Name", null },
+            { "Surname", null },
+            { "EmployeeNo", null },
+            { "LicenseType", null },
+            { "Availability", true }
+            };
 
             // Act
-            DriversDTO driver = (DriversDTO)_testMsgDataForm.GetData();
+            _testMsgDataForm.ClearData(defaultValues);
 
-            // Assert
-            Assert.Equal(DriverID, driver.DriverID);
-            Assert.Equal(Name, driver.Name);
-            Assert.Equal(Surname, driver.Surname);
-            Assert.Equal(EmployeeNo, driver.EmployeeNo);
-            Assert.Equal(LicenseType, driver.LicenseType);
-            Assert.Equal(Availability, driver.Availability);
+            Assert.Equal("", ((TextBox)_testMsgDataForm.Controls.Find("txtDriverID", true)[0]).Text);
+            Assert.Equal("", ((TextBox)_testMsgDataForm.Controls.Find("txtName", true)[0]).Text);
+            Assert.Equal("", ((TextBox)_testMsgDataForm.Controls.Find("txtSurname", true)[0]).Text);
+            Assert.Equal("", ((TextBox)_testMsgDataForm.Controls.Find("txtEmployeeNo", true)[0]).Text);
+            Assert.Equal(-1, ((ComboBox)_testMsgDataForm.Controls.Find("cboLicenseType", true)[0]).SelectedIndex);
+            Assert.Equal("True", ((ComboBox)_testMsgDataForm.Controls.Find("cboAvailability", true)[0]).SelectedItem);
         }
 
         [Fact]
-        public void GenerateDynamicFields_CreatesCorrectControls()
+        public void RenderControls_CreatesCorrectControls()
         {
             // Arrange
-            _testMsgDataForm = new(typeof(DriversDTO), TableConfigs.Drivers, _testLogger);
+            _testMsgDataForm = new(_testLogger);
+
+            Dictionary<string, (Label Label, Control Control)> controlsLayout = new()
+            {
+            { "DriverID", (new Label { Text = "DriverID" }, new TextBox { Name = "txtDriverID" }) },
+            { "Name", (new Label { Text = "Name" }, new TextBox { Name = "txtName" }) },
+            { "Surname", (new Label { Text = "Surname" }, new TextBox { Name = "txtSurname" }) },
+            { "EmployeeNo", (new Label { Text = "EmployeeNo" }, new TextBox { Name = "txtEmployeeNo" }) },
+            { "LicenseType", (new Label { Text = "LicenseType" },new ComboBox{Name = "cboLicenseType",Items = { LicenseType.Code8, LicenseType.Code10, LicenseType.Code14 }})},
+            { "Availability", (new Label { Text = "Availability" }, new ComboBox{Name = "cboAvailability",Items = { false, true }})}
+            };
 
             // Act
-            // GenerateDynamicFields called in constructor
+            _testMsgDataForm.RenderControls(controlsLayout);
 
             // Assert
             Assert.NotNull(_testMsgDataForm.Controls.Find("txtDriverID", true)[0] as TextBox);
@@ -198,12 +237,44 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.DataFormComponents
             Assert.NotNull(_testMsgDataForm.Controls.Find("txtEmployeeNo", true)[0] as TextBox);
             Assert.NotNull(_testMsgDataForm.Controls.Find("cboLicenseType", true)[0] as ComboBox);
             Assert.NotNull(_testMsgDataForm.Controls.Find("cboAvailability", true)[0] as ComboBox);
+        }
 
-            ComboBox licenseCombo = (ComboBox)_testMsgDataForm.Controls.Find("cboLicenseType", true)[0];
-            Assert.Equal(Enum.GetNames(typeof(LicenseType)).Length, licenseCombo.Items.Count);
-            ComboBox availCombo = (ComboBox)_testMsgDataForm.Controls.Find("cboAvailability", true)[0];
-            Assert.Equal(["False", "True"], availCombo.Items.Cast<string>());
-            Assert.Equal(1, availCombo.SelectedIndex);
+        [Theory]
+        [InlineData(1, "John", "Doe", "EMP001", LicenseType.Code8, false)]
+        [InlineData(2, "Jane", "Smith", "EMP002", LicenseType.Code8, true)]
+        [InlineData(3, "Jim", "Brown", "EMP003", LicenseType.Code10, false)]
+        [InlineData(4, "Jake", "White", "EMP004", LicenseType.Code10, true)]
+        [InlineData(5, "Jill", "Green", "EMP005", LicenseType.Code14, false)]
+        [InlineData(6, "Jack", "Black", "EMP006", LicenseType.Code14, true)]
+        public void GetControls_GetsDynamicControls(int DriverID, string Name, string Surname, string EmployeeNo, LicenseType LicenseType, bool Availability)
+        {
+            // Arrange
+            _testMsgDataForm = new(_testLogger);
+
+            DriversDTO mockDriver = new(
+            DriverID: DriverID,
+            Name: Name,
+            Surname: Surname,
+            EmployeeNo: EmployeeNo,
+            LicenseType: LicenseType,
+            Availability: Availability
+            );
+
+            Dictionary<string, object> values = _dataModel.MapToForm(mockDriver);
+            _dataPresenter = new(_testMsgDataForm, _dataModel, _dataPresenterLogger);
+            _testMsgDataForm.InitializeEditing(values);
+
+            // Act
+            Dictionary<string, Control> _dynamicControls = _testMsgDataForm.GetControls();
+
+            // Assert
+            Assert.Equal(DriverID.ToString(), _dynamicControls["DriverID"].Text);
+            Assert.Equal(Name, _dynamicControls["Name"].Text);
+            Assert.Equal(Surname, _dynamicControls["Surname"].Text);
+            Assert.Equal(EmployeeNo, _dynamicControls["EmployeeNo"].Text);
+            Assert.Equal(LicenseType.ToString(), _dynamicControls["LicenseType"].Text);
+            Assert.Equal(Availability.ToString(), _dynamicControls["Availability"].Text);
         }
     }
 }
+

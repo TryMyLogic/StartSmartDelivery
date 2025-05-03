@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Primitives;
 using StartSmartDeliveryForm.SharedLayer;
 using StartSmartDeliveryForm.SharedLayer.Enums;
 using StartSmartDeliveryForm.SharedLayer.EventArgs;
@@ -42,6 +43,12 @@ namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
             _submitClicked?.Invoke(this, SubmissionCompletedEventArgs.Empty);
         }
 
+        public void ShowMessageBox(string text, string caption, MessageBoxButtons buttons, MessageBoxIcon icon)
+        {
+            _messageBox.Show(text, caption, buttons, icon);
+            _logger.LogInformation("Message box shown: {Caption}", caption);
+        }
+
         public void InitializeEditing(Dictionary<string, object> values)
         {
             _logger.LogDebug("Initializing editing with {ValueCount} values", values.Count);
@@ -69,30 +76,47 @@ namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
             _logger.LogInformation("Editing initialized with {ValueCount} values", values.Count);
         }
 
-        public void ClearData()
+        public void ClearData(Dictionary<string, object?>? defaultValues = null)
         {
             _logger.LogDebug("Clearing data for {ControlCount} controls", _dynamicControls.Count);
-            foreach (Control control in _dynamicControls.Values)
+
+            if (defaultValues == null)
             {
+                _logger.LogWarning("No default values found");
+            }
+
+            foreach ((string key, Control control) in _dynamicControls)
+            {
+                object? defaultValueObject = null;
+                defaultValues?.TryGetValue(key, out defaultValueObject);
+                string? defaultValue = defaultValueObject?.ToString();
+                _logger.LogDebug("Default Value for {Key}: {defaultValue}", key, defaultValue);
+
                 switch (control)
                 {
                     case TextBox textBox:
-                        textBox.Clear();
+                        textBox.Text = defaultValue?.ToString() ?? string.Empty;
+                        _logger.LogDebug("Set {ControlName}.Text to {DefaultValue}", key, defaultValue);
                         break;
                     case ComboBox comboBox:
-                        comboBox.SelectedIndex = -1; // Will be overridden by Model's ClearData
+                        string? stringValue = defaultValue?.ToString();
+                        if (comboBox.Items.Contains(stringValue))
+                        {
+                            comboBox.SelectedItem = stringValue;
+                        }
+                        else
+                        {
+                            comboBox.SelectedIndex = -1; 
+                        }
+                        _logger.LogDebug("Set {ControlName}.SelectedItem to {DefaultValue}", key, defaultValue);
                         break;
                     default:
+                        _logger.LogWarning("Unsupported control type {ControlType} for {ControlName}", control.GetType().Name, key);
                         break;
                 }
             }
-            _logger.LogInformation("Data cleared for {ControlCount} controls", _dynamicControls.Count);
-        }
 
-        public void ShowMessageBox(string text, string caption, MessageBoxButtons buttons, MessageBoxIcon icon)
-        {
-            _messageBox.Show(text, caption, buttons, icon);
-            _logger.LogInformation("Message box shown: {Caption}", caption);
+            _logger.LogInformation("Data cleared for {ControlCount} controls", _dynamicControls.Count);
         }
 
         public void RenderControls(Dictionary<string, (Label Label, Control Control)> controlsLayout)

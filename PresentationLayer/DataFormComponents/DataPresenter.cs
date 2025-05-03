@@ -64,7 +64,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
                     {
                         dataForm.Close();
                     }
-                    _model.ClearData(_dataForm.GetControls());
+                    _dataForm.ClearData(_model.GetDefaultValues());
                 }
                 else
                 {
@@ -120,8 +120,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
             if (mode == FormMode.Add)
             {
                 _logger.LogDebug("Clearing data for Add mode for entity {EntityType}", typeof(T).Name);
-                _model.ClearData(_dataForm.GetControls());
-                _dataForm.ClearData();
+                _dataForm.ClearData(_model.GetDefaultValues());
                 InitializeView();
             }
             else if (mode == FormMode.Edit && entity != null)

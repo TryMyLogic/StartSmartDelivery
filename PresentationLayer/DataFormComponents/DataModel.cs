@@ -149,31 +149,16 @@ namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
             return values;
         }
 
-        public void ClearData(Dictionary<string, Control> controls)
+        public Dictionary<string, object?> GetDefaultValues()
         {
-            _logger.LogDebug("Clearing data for {ControlCount} controls in entity {EntityType}", controls.Count, typeof(T).Name);
-            foreach ((string columnName, Control control) in controls)
+            _logger.LogDebug("Generating default values for entity {EntityType}", typeof(T).Name);
+            Dictionary<string, object?> defaults = [];
+            foreach (ColumnConfig column in _tableConfig.Columns)
             {
-                ColumnConfig? column = _tableConfig.Columns.FirstOrDefault(c => c.Name == columnName);
-                if (column == null) continue;
-
-                switch (control)
-                {
-                    case TextBox textBox:
-                        textBox.Clear();
-                        break;
-                    case ComboBox comboBox:
-                        object? defaultValue = _tableConfig.GetDefaultValue(column);
-                        if (defaultValue != null)
-                            comboBox.SelectedItem = defaultValue.ToString();
-                        else
-                            comboBox.SelectedIndex = column.SqlType == SqlDbType.Bit ? 1 : -1; // False for bool, -1 for enums
-                        break;
-                    default:
-                        break;
-                }
+                object? defaultValue = _tableConfig.GetDefaultValue(column);
+                defaults[column.Name] = defaultValue;
             }
-            _logger.LogInformation("Data cleared for {ControlCount} controls in entity {EntityType}", controls.Count, typeof(T).Name);
+            return defaults;
         }
 
         public async Task<(bool IsValid, string? ErrorMessage)> ValidateFormAsync(Dictionary<string, Control> controls)

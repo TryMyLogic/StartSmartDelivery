@@ -8,7 +8,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
         Dictionary<string, (Label Label, Control Control)> GenerateControls();
         T CreateFromForm(Dictionary<string, Control> controls);
         Dictionary<string, object> MapToForm(T entity);
-        void ClearData(Dictionary<string, Control> controls);
+        Dictionary<string, object?> GetDefaultValues();
         Task<(bool IsValid, string? ErrorMessage)> ValidateFormAsync(Dictionary<string, Control> controls);
     }
 }

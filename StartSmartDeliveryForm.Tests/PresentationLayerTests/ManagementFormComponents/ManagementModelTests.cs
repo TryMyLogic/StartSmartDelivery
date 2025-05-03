@@ -603,7 +603,7 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.ManagementFormComp
             // Arrange
             int DriverID = 999;
 
-            string message = $"\"Drivers\" with PK {DriverID} was not found for deletion";
+            string message = $"Row with PK {DriverID} not found in \"Drivers\" for deletion";
             InitializeMemorySinkLogger();
             _managementModel = new(_repository, _paginationManager, _memoryLogger);
             await _managementModel.InitializeAsync();

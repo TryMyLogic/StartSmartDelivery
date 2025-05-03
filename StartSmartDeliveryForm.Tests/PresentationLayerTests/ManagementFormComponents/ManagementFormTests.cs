@@ -64,57 +64,6 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.ManagementFormComp
             Assert.Equal(dataTable, _noMsgBoxManagementForm.DgvMain.DataSource);
         }
 
-        [Fact]
-        public void AddEditDeleteButtons_AddsEditAndDeleteColumns()
-        {
-            // Arrange
-            MockFileSystem mockFileSystem = new();
-            string editPath = mockFileSystem.Path.GetFullPath(
-                mockFileSystem.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "PresentationLayer", "Images", "EditIcon.png"));
-            string deletePath = mockFileSystem.Path.GetFullPath(
-                mockFileSystem.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "PresentationLayer", "Images", "DeleteIcon.png"));
-
-            byte[] pngBytes = [
-            0x89, // Non-ASCII byte prevents misinterpretation as a text file
-            0x50, 0x4E, 0x47, // "P,N,G" in ASCII
-            0x0D,
-            0x0A,
-            0x1A,
-            0x0A
-            ];
-
-            mockFileSystem.AddFile(editPath, new MockFileData(pngBytes));
-            mockFileSystem.AddFile(deletePath, new MockFileData(pngBytes));
-
-            ManagementForm form = new(
-                logger: _testLogger,
-                messageBox: new NoMessageBox(),
-                fileSystem: mockFileSystem
-            );
-
-            static Image MockImageLoader(string _) => new Bitmap(1, 1);
-
-            // Act
-            form.AddEditDeleteButtons(MockImageLoader);
-
-            // Assert
-            DataGridViewColumnCollection columns = form.DgvMain.Columns;
-            Assert.Equal(2, columns.Count);
-
-            var editColumn = columns["Edit"] as DataGridViewImageColumn;
-            Assert.NotNull(editColumn);
-            Assert.Equal("Edit", editColumn.Name);
-            Assert.Equal("", editColumn.HeaderText);
-            Assert.NotNull(editColumn.Image);
-            Assert.Equal(30, editColumn.Width);
-            Assert.Equal(DataGridViewAutoSizeColumnMode.None, editColumn.AutoSizeMode);
-
-            var deleteColumn = columns["Delete"] as DataGridViewImageColumn;
-            Assert.NotNull(deleteColumn);
-            Assert.Equal("Delete", deleteColumn.Name);
-            Assert.Equal("", deleteColumn.HeaderText);
-        }
-
         [Theory]
         [InlineData("Test", "Details", MessageBoxButtons.OK, MessageBoxIcon.Exclamation)]
         [InlineData("Warning", "Alert", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning)]
@@ -159,14 +108,39 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.ManagementFormComp
         public void ConfigureDataGridViewColumns_SetsColumnsFromTableConfig()
         {
             // Arrange
+            MockFileSystem mockFileSystem = new();
+            string editPath = mockFileSystem.Path.GetFullPath(
+                mockFileSystem.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "PresentationLayer", "Images", "EditIcon.png"));
+            string deletePath = mockFileSystem.Path.GetFullPath(
+                mockFileSystem.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "PresentationLayer", "Images", "DeleteIcon.png"));
+
+            byte[] pngBytes = [
+            0x89, // Non-ASCII byte prevents misinterpretation as a text file
+                0x50, 0x4E, 0x47, // "P,N,G" in ASCII
+                0x0D,
+                0x0A,
+                0x1A,
+                0x0A
+            ];
+
+            mockFileSystem.AddFile(editPath, new MockFileData(pngBytes));
+            mockFileSystem.AddFile(deletePath, new MockFileData(pngBytes));
+
+            ManagementForm form = new(
+                logger: _testLogger,
+                messageBox: new NoMessageBox(),
+                fileSystem: mockFileSystem
+            );
+
+            static Image MockImageLoader(string _) => new Bitmap(1, 1);
 
             // Act
-            _noMsgBoxManagementForm.SetTableConfig(TableConfigs.Drivers);
-            _noMsgBoxManagementForm.ConfigureDataGridViewColumns();
+            form.SetTableConfig(TableConfigs.Drivers);
+            form.ConfigureDataGridViewColumns(MockImageLoader);
 
             // Assert
-            DataGridViewColumnCollection columns = _noMsgBoxManagementForm.DgvMain.Columns;
-            Assert.Equal(TableConfigs.Drivers.Columns.Count, columns.Count);
+            DataGridViewColumnCollection columns = form.DgvMain.Columns;
+            Assert.Equal(TableConfigs.Drivers.Columns.Count, columns.Count-2); // -2 is for Edit and Delete columns
 
             foreach (ColumnConfig columnConfig in TableConfigs.Drivers.Columns)
             {
@@ -183,9 +157,34 @@ namespace StartSmartDeliveryForm.Tests.PresentationLayerTests.ManagementFormComp
         public void HideExcludedColumns_HidesPrimaryKeyColumn()
         {
             // Arrange
-            ManagementForm form = new(_testLogger);
+            MockFileSystem mockFileSystem = new();
+            string editPath = mockFileSystem.Path.GetFullPath(
+                mockFileSystem.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "PresentationLayer", "Images", "EditIcon.png"));
+            string deletePath = mockFileSystem.Path.GetFullPath(
+                mockFileSystem.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "PresentationLayer", "Images", "DeleteIcon.png"));
+
+            byte[] pngBytes = [
+            0x89, // Non-ASCII byte prevents misinterpretation as a text file
+                0x50, 0x4E, 0x47, // "P,N,G" in ASCII
+                0x0D,
+                0x0A,
+                0x1A,
+                0x0A
+            ];
+
+            mockFileSystem.AddFile(editPath, new MockFileData(pngBytes));
+            mockFileSystem.AddFile(deletePath, new MockFileData(pngBytes));
+
+            ManagementForm form = new(
+                logger: _testLogger,
+                messageBox: new NoMessageBox(),
+                fileSystem: mockFileSystem
+            );
+
+            static Image MockImageLoader(string _) => new Bitmap(1, 1);
+
             form.SetTableConfig(TableConfigs.Drivers);
-            form.ConfigureDataGridViewColumns();
+            form.ConfigureDataGridViewColumns(MockImageLoader);
 
             // Act
             form.HideExcludedColumns();

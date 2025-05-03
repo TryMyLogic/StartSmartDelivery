@@ -30,8 +30,6 @@ namespace StartSmartDeliveryForm.SharedLayer
             public Action<object, SqlCommand> MapUpdateParameters { get; set; }
             public Action<DataRow, object> MapToRow { get; set; }
             public Func<DataGridViewRow, object> CreateFromRow { get; set; }
-            public Action<object, Dictionary<string, Control>> MapToForm { get; set; }
-            public Func<Dictionary<string, Control>, object> CreateFromForm { get; set; }
             public Func<ColumnConfig, object?> GetDefaultValue { get; set; }
 
             public TableConfig(string tableName, string primaryKey, Type entityType)
@@ -112,51 +110,6 @@ namespace StartSmartDeliveryForm.SharedLayer
                             if (prop.PropertyType.IsEnum) value = Enum.ToObject(prop.PropertyType, value);
                             else value = Convert.ChangeType(value, prop.PropertyType);
                             prop.SetValue(entity, value);
-                        }
-                    }
-                    return entity!;
-                };
-
-                MapToForm = (entity, controls) =>
-                {
-                    foreach (ColumnConfig col in Columns)
-                    {
-                        if (controls.TryGetValue(col.Name, out Control? control))
-                        {
-                            System.Reflection.PropertyInfo? prop = entity.GetType().GetProperty(col.Name);
-                            object? value = prop?.GetValue(entity);
-                            if (control is TextBox textBox) textBox.Text = value?.ToString() ?? "";
-                            else if (control is ComboBox comboBox)
-                            {
-                                if (prop?.PropertyType.IsEnum == true)
-                                {
-                                    comboBox.SelectedItem = Enum.GetName(prop.PropertyType, value!) ?? Enum.GetNames(prop.PropertyType)[0];
-                                }
-                                else comboBox.SelectedItem = value?.ToString();
-                            }
-                        }
-                    }
-                };
-
-                CreateFromForm = controls =>
-                {
-                    object? entity = Activator.CreateInstance(entityType, [0, "", "", "", default(LicenseType), false]);
-                    foreach (ColumnConfig col in Columns)
-                    {
-                        if (controls.TryGetValue(col.Name, out Control? control))
-                        {
-                            System.Reflection.PropertyInfo? prop = entityType.GetProperty(col.Name);
-                            if (prop != null)
-                            {
-                                object? value = control switch
-                                {
-                                    TextBox textBox => string.IsNullOrEmpty(textBox.Text) ? "" : Convert.ChangeType(textBox.Text, prop.PropertyType),
-                                    ComboBox comboBox when col.SqlType == SqlDbType.Bit => bool.Parse(comboBox.SelectedItem?.ToString() ?? "False"),
-                                    ComboBox comboBox when prop.PropertyType.IsEnum => Enum.Parse(prop.PropertyType, comboBox.SelectedItem?.ToString() ?? Enum.GetNames(prop.PropertyType)[0]),
-                                    _ => null
-                                };
-                                if (value != null) prop.SetValue(entity, value);
-                            }
                         }
                     }
                     return entity!;

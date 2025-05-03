@@ -80,7 +80,6 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
             _logger.LogInformation("TableConfig set, Table: {TableName}, Columns: {Columns}", config.TableName, string.Join(", ", config.Columns.Select(c => c.Name)));
         }
 
-
         private void btnSearch_Click(object sender, EventArgs e)
         {
             string? SelectedOption = cboSearchOptions.SelectedItem?.ToString();
@@ -437,7 +436,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
             _logger.LogInformation("Updated pagination display, Table: {TableName}, CurrentPage: {CurrentPage}, TotalPages: {TotalPages}", _tableConfig.TableName, CurrentPage, TotalPages);
         }
 
-        public void ConfigureDataGridViewColumns()
+        public void ConfigureDataGridViewColumns(Func<string, Image>? imageLoader = null)
         {
             _logger.LogDebug("Configuring DataGridView columns for Table: {TableName}", _tableConfig.TableName);
             dgvMain.Columns.Clear();
@@ -452,13 +451,21 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
                 dgvMain.Columns.Add(dgvColumn);
             }
 
-            int initialRowHeight = dgvMain.Rows[0].Height;
-            AddEditDeleteButtons();
-            int currentRowHeight = dgvMain.Rows[0].Height;
-
-            if (initialRowHeight != currentRowHeight)
+            if (dgvMain.Rows.Count > 0)
             {
-                _logger.LogError("Row height differs after adding edit and delete buttons. Initial: {InitialRowHeight}, Current: {CurrentRowHeight}. Ensure images are being scaled properly.", initialRowHeight, currentRowHeight);
+                int initialRowHeight = dgvMain.Rows[0].Height;
+                AddEditDeleteButtons(imageLoader);
+                int currentRowHeight = dgvMain.Rows[0].Height;
+
+                if (initialRowHeight != currentRowHeight)
+                {
+                    _logger.LogError("Row height differs after adding edit and delete buttons. Initial: {InitialRowHeight}, Current: {CurrentRowHeight}. Ensure images are being scaled properly.", initialRowHeight, currentRowHeight);
+                }
+            }
+            else
+            {
+                _logger.LogDebug("No rows in DataGridView; skipping row height check.");
+                AddEditDeleteButtons(imageLoader);
             }
 
             _logger.LogInformation("Configured DataGridView columns for Table: {TableName}", _tableConfig.TableName);

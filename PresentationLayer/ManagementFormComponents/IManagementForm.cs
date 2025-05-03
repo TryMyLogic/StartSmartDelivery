@@ -35,7 +35,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
         void ShowMessageBox(string Text, string Caption, MessageBoxButtons Buttons, MessageBoxIcon Icon);
         void UpdatePaginationDisplay(int CurrentPage, int TotalPages);
         void HideExcludedColumns();
-        void ConfigureDataGridViewColumns();
+        void ConfigureDataGridViewColumns(Func<string, Image>? imageLoader = null);
         string StartPageText { get; set; }
         string EndPageText { get; set; }
 
