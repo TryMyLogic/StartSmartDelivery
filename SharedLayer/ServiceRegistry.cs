@@ -159,6 +159,14 @@ namespace StartSmartDeliveryForm.SharedLayer
                 .AddTransient<ManagementPresenter<VehiclesDTO>>()
                 .AddScoped<IRepository<VehiclesDTO>, Repository<VehiclesDTO>>()
 
+                // DeliveryManagementForm
+                .AddScoped<IRepository<DeliveriesDTO>, DeliveriesRepository>()
+                .AddScoped<PaginationManager<DeliveriesDTO>>()
+                .AddScoped<IManagementModel<DeliveriesDTO>, ManagementModel<DeliveriesDTO>>()
+                .AddScoped<ManagementModel<DeliveriesDTO>>()
+                .AddTransient<ManagementPresenter<DeliveriesDTO>>()
+                .AddScoped<IRepository<DeliveriesDTO>, DeliveriesRepository>()
+
                 // DataForm
                 .AddScoped<IDataForm, DataForm>()
                 .AddScoped(typeof(IDataModel<>), typeof(DataModel<>))
