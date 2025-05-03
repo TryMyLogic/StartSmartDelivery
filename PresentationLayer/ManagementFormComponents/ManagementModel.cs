@@ -184,7 +184,9 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
                 }
 
                 DataRow newRow = DgvTable.NewRow();
-                _tableConfig.MapToRow(newRow, entity);
+
+                MapToRow(newRow, entity);
+
                 newRow[_tableConfig.PrimaryKey] = newPk;
                 DgvTable.Rows.Add(newRow);
                 PaginationManager.UpdateRecordCountAsync(PaginationManager.RecordCount + 1);
@@ -213,12 +215,29 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
             bool success = await _repository.UpdateRecordAsync(entity);
             if (success)
             {
-                _tableConfig.MapToRow(rowToUpdate, entity);
+                MapToRow(rowToUpdate, entity);
                 _logger.LogInformation("{Table} with PK {Pk} was updated successfully", table, pkValue);
             }
             else
             {
                 InvokeDisplayErrorMessage($"Failed to update {entity} in database", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void MapToRow(DataRow row, T entity)
+        {
+            foreach (ColumnConfig col in _tableConfig.Columns.Where(c => !c.IsIdentity))
+            {
+                System.Reflection.PropertyInfo? prop = entity.GetType().GetProperty(col.Name);
+                object? value = prop?.GetValue(entity);
+
+                if (!col.IsNullable && value == null)
+                    throw new InvalidOperationException($"Non-nullable column {col.Name} cannot be null.");
+
+                if (prop?.PropertyType.IsEnum == true)
+                    value = (int)value!;
+
+                row[col.Name] = value ?? DBNull.Value;
             }
         }
 
@@ -259,7 +278,32 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
         {
             try
             {
-                T entity = (T)_tableConfig.CreateFromRow(SelectedRow);
+                T entity = Activator.CreateInstance<T>(); // Ensure DTO has empty constructor
+                foreach (ColumnConfig col in _tableConfig.Columns)
+                {
+                    System.Reflection.PropertyInfo? prop = typeof(T).GetProperty(col.Name);
+                    if (prop != null && SelectedRow.Cells[col.Name].Value != null && SelectedRow.Cells[col.Name].Value != DBNull.Value)
+                    {
+                        object value = SelectedRow.Cells[col.Name].Value;
+                        Type targetType = prop.PropertyType;
+
+                        if (Nullable.GetUnderlyingType(targetType) != null)
+                        {
+                            targetType = Nullable.GetUnderlyingType(targetType) ?? targetType;
+                        }
+
+                        if (targetType.IsEnum)
+                        {
+                            value = Enum.ToObject(targetType, value);
+                        }
+                        else
+                        {
+                            value = Convert.ChangeType(value, targetType);
+                        }
+
+                        prop.SetValue(entity, value);
+                    }
+                }
                 _logger.LogDebug("Created entity from row for {TableName}", _tableConfig.TableName);
                 return entity;
             }

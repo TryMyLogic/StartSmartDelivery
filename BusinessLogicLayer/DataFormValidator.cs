@@ -49,5 +49,26 @@
             }
             return true;
         }
+
+        public bool IsValidDecimalValue(string? input, string fieldName)
+        {
+            if (!decimal.TryParse(input, out _))
+            {
+                RequestMessageBox?.Invoke($"'{input}' is not a valid decimal value for {fieldName}.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            return true;
+        }
+
+        public bool IsValidDateTimeValue(string? input, string fieldName)
+        {
+            if (!DateTime.TryParse(input, out _))
+            {
+                RequestMessageBox?.Invoke($"'{input}' is not a valid date/time value for {fieldName}.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            return true;
+        }
+
     }
 }

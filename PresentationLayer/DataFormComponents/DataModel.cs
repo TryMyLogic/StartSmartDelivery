@@ -182,53 +182,72 @@ namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
                     _ => null
                 };
 
-                if (stringValue == null)
+                if (stringValue == null && !column.IsNullable)
                 {
                     errorMessage = $"Value is null for column: {column.Name}";
                     _logger.LogWarning("Value is null for column: {ColumnName}", column.Name);
                     return (false, errorMessage);
                 }
 
-                switch (column.SqlType)
+                if (!column.IsNullable)
                 {
-                    case SqlDbType.NVarChar:
-                    case SqlDbType.VarChar:
-                        if (!validator.IsValidString(stringValue, column.Name))
-                        {
-                            errorMessage = $"Validation failed for string column: {column.Name}, Value: '{stringValue}'";
-                            _logger.LogWarning("Validation failed for string column: {ColumnName}, Value: '{StringValue}'", column.Name, stringValue);
-                            return (false, errorMessage);
-                        }
-                        break;
-                    case SqlDbType.Int:
-                        if (column.Name == "LicenseType")
-                        {
-                            if (!Enum.TryParse(typeof(LicenseType), stringValue, out _))
+                    switch (column.SqlType)
+                    {
+                        case SqlDbType.NVarChar:
+                        case SqlDbType.VarChar:
+                            if (!validator.IsValidString(stringValue!, column.Name))
                             {
-                                errorMessage = $"Validation failed for enum column: {column.Name}, Value: '{stringValue}'";
-                                _logger.LogWarning("Validation failed for enum column: {ColumnName}, Value: '{StringValue}'", column.Name, stringValue);
+                                errorMessage = $"Validation failed for string column: {column.Name}, Value: '{stringValue}'";
+                                _logger.LogWarning("Validation failed for string column: {ColumnName}, Value: '{StringValue}'", column.Name, stringValue);
                                 return (false, errorMessage);
                             }
-                            stringValue = ((int)Enum.Parse(typeof(LicenseType), stringValue)).ToString();
-                        }
-                        else if (!validator.IsValidIntValue(stringValue, column.Name))
-                        {
-                            errorMessage = $"Validation failed for int column: {column.Name}, Value: '{stringValue}'";
-                            _logger.LogWarning("Validation failed for int column: {ColumnName}, Value: '{StringValue}'", column.Name, stringValue);
-                            return (false, errorMessage);
-                        }
-                        break;
-                    case SqlDbType.Bit:
-                        if (!validator.IsValidBoolValue(stringValue))
-                        {
-                            errorMessage = $"Validation failed for bool column: {column.Name}, Value: '{stringValue}'";
-                            _logger.LogWarning("Validation failed for bool column: {ColumnName}, Value: '{StringValue}'", column.Name, stringValue);
-                            return (false, errorMessage);
-                        }
-                        break;
-                    default:
-                        _logger.LogWarning("Unhandled column.SqlType: {type}", column.SqlType);
-                        break;
+                            break;
+                        case SqlDbType.Int:
+                            if (column.Name == "LicenseType")
+                            {
+                                if (!Enum.TryParse(typeof(LicenseType), stringValue, out _))
+                                {
+                                    errorMessage = $"Validation failed for enum column: {column.Name}, Value: '{stringValue}'";
+                                    _logger.LogWarning("Validation failed for enum column: {ColumnName}, Value: '{StringValue}'", column.Name, stringValue);
+                                    return (false, errorMessage);
+                                }
+                                stringValue = ((int)Enum.Parse(typeof(LicenseType), stringValue!)).ToString();
+                            }
+                            else if (!validator.IsValidIntValue(stringValue, column.Name))
+                            {
+                                errorMessage = $"Validation failed for int column: {column.Name}, Value: '{stringValue}'";
+                                _logger.LogWarning("Validation failed for int column: {ColumnName}, Value: '{StringValue}'", column.Name, stringValue);
+                                return (false, errorMessage);
+                            }
+                            break;
+                        case SqlDbType.Bit:
+                            if (!validator.IsValidBoolValue(stringValue!))
+                            {
+                                errorMessage = $"Validation failed for bool column: {column.Name}, Value: '{stringValue}'";
+                                _logger.LogWarning("Validation failed for bool column: {ColumnName}, Value: '{StringValue}'", column.Name, stringValue);
+                                return (false, errorMessage);
+                            }
+                            break;
+                        case SqlDbType.Decimal:
+                            if (!validator.IsValidDecimalValue(stringValue!, column.Name))
+                            {
+                                errorMessage = $"Validation failed for decimal column: {column.Name}, Value: '{stringValue}'";
+                                _logger.LogWarning("Validation failed for decimal column: {ColumnName}, Value: '{StringValue}'", column.Name, stringValue);
+                                return (false, errorMessage);
+                            }
+                            break;
+                        case SqlDbType.DateTime:
+                            if (!validator.IsValidDateTimeValue(stringValue!, column.Name))
+                            {
+                                errorMessage = $"Validation failed for datetime column: {column.Name}, Value: '{stringValue}'";
+                                _logger.LogWarning("Validation failed for datetime column: {ColumnName}, Value: '{StringValue}'", column.Name, stringValue);
+                                return (false, errorMessage);
+                            }
+                            break;
+                        default:
+                            _logger.LogWarning("Unhandled column.SqlType: {type}", column.SqlType);
+                            break;
+                    }
                 }
 
                 if (Mode == FormMode.Add && column.IsUnique && !string.IsNullOrEmpty(stringValue))

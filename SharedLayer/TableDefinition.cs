@@ -27,8 +27,6 @@ namespace StartSmartDeliveryForm.SharedLayer
 
             public Action<object, SqlCommand> MapInsertParameters { get; set; }
             public Action<object, SqlCommand> MapUpdateParameters { get; set; }
-            public Action<DataRow, object> MapToRow { get; set; }
-            public Func<DataGridViewRow, object> CreateFromRow { get; set; }
             public Func<ColumnConfig, object?> GetDefaultValue { get; set; }
 
             public TableConfig(string tableName, string primaryKey, Type entityType)
@@ -81,39 +79,7 @@ namespace StartSmartDeliveryForm.SharedLayer
                         cmd.Parameters.Add(parameter);
                     }
                 };
-
-                MapToRow = (row, entity) =>
-                {
-                    foreach (ColumnConfig col in Columns.Where(c => !c.IsIdentity))
-                    {
-                        System.Reflection.PropertyInfo? prop = entity.GetType().GetProperty(col.Name);
-                        object? value = prop?.GetValue(entity);
-
-                        if (!col.IsNullable && value == null && !col.IsIdentity) throw new InvalidOperationException($"Non-nullable column {col.Name} cannot be null.");
-
-                        if (prop?.PropertyType.IsEnum == true) value = (int)value!;
-
-                        row[col.Name] = value ?? DBNull.Value;
-                    }
-                };
-
-                CreateFromRow = row =>
-                {
-                    object entity = Activator.CreateInstance(entityType)!; // Ensure DTO has empty constructor
-                    foreach (ColumnConfig col in Columns)
-                    {
-                        System.Reflection.PropertyInfo? prop = entityType.GetProperty(col.Name);
-                        if (prop != null && row.Cells[col.Name].Value != null && row.Cells[col.Name].Value != DBNull.Value)
-                        {
-                            object value = row.Cells[col.Name].Value;
-                            if (prop.PropertyType.IsEnum) value = Enum.ToObject(prop.PropertyType, value);
-                            else value = Convert.ChangeType(value, prop.PropertyType);
-                            prop.SetValue(entity, value);
-                        }
-                    }
-                    return entity!;
-                };
-
+  
                 GetDefaultValue = col => col.SqlType == SqlDbType.Bit ? false : null;
             }
 
