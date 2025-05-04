@@ -212,6 +212,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
                 return;
             }
 
+            _logger.LogDebug("Repository implementation: {Repo}", _repository.GetType().FullName);
             bool success = await _repository.UpdateRecordAsync(entity);
             if (success)
             {
@@ -228,6 +229,12 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
         {
             foreach (ColumnConfig col in _tableConfig.Columns.Where(c => !c.IsIdentity))
             {
+                if ((row.Table?.Columns[col.Name]?.ReadOnly ?? false))
+                {
+                    _logger.LogDebug("Skipping read-only column {ColumnName} in DataRow mapping.", col.Name);
+                    continue;
+                }
+
                 System.Reflection.PropertyInfo? prop = entity.GetType().GetProperty(col.Name);
                 object? value = prop?.GetValue(entity);
 

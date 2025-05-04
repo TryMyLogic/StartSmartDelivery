@@ -325,13 +325,16 @@ namespace StartSmartDeliveryForm.DataLayer.Repositories
                 shouldCloseConnection = true;
             }
 
-            SqlTransaction localTransaction = Transaction ?? Connection.BeginTransaction();
+            SqlTransaction? localTransaction = Transaction;
             bool success = false;
             try
             {
                 await _pipeline.ExecuteAsync(async _cancellationToken =>
                 {
                     await Connection.OpenAsync(_cancellationToken);
+
+                    localTransaction ??= Connection.BeginTransaction();
+
                     using (SqlCommand Command = localTransaction != null ? new(Query, Connection, localTransaction) : new(Query, Connection))
                     {
                         if (_tableConfig.MapUpdateParameters == null)

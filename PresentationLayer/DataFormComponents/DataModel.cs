@@ -120,6 +120,22 @@ namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
                             {
                                 prop.SetValue(entity, enumValue);
                             }
+                            else if (prop.PropertyType == typeof(DateTime) && DateTime.TryParse(value.ToString(), out DateTime dateTimeValue))
+                            {
+                                prop.SetValue(entity, dateTimeValue);
+                            }
+                            else if (prop.PropertyType == typeof(DateTime?) && DateTime.TryParse(value.ToString(), out DateTime nullableDateTimeValue))
+                            {
+                                prop.SetValue(entity, nullableDateTimeValue);
+                            }
+                            else if (prop.PropertyType == typeof(decimal) && decimal.TryParse(value.ToString(), out decimal decimalValue))
+                            {
+                                prop.SetValue(entity, decimalValue);
+                            }
+                            else
+                            {
+                                throw new InvalidOperationException($"CreateFromForm has no handling for: {prop.PropertyType}");
+                            }
                         }
                         catch (Exception ex)
                         {

@@ -19,8 +19,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
             IDataForm dataForm,
             IDataModel<T> model,
             ILogger<IDataPresenter<T>>? logger = null,
-            ILogger<IDataForm>? dataFormLogger = null
-            )
+            ILogger<IDataForm>? dataFormLogger = null)
         {
             _dataForm = dataForm ?? throw new ArgumentNullException(nameof(dataForm));
             _model = model ?? throw new ArgumentNullException(nameof(model));
@@ -87,7 +86,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
             }
         }
 
-        public void InitializeEditing(T entity)
+        private void InitializeEditing(T entity)
         {
             Dictionary<string, object> values = _model.MapToForm(entity);
             _dataForm.InitializeEditing(values);
@@ -121,7 +120,6 @@ namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
             {
                 _logger.LogDebug("Clearing data for Add mode for entity {EntityType}", typeof(T).Name);
                 _dataForm.ClearData(_model.GetDefaultValues());
-                InitializeView();
             }
             else if (mode == FormMode.Edit && entity != null)
             {

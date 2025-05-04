@@ -57,8 +57,6 @@ namespace StartSmartDeliveryForm.PresentationLayer
                 IRepository<T> repository = _serviceProvider.GetRequiredService<IRepository<T>>();
                 ILogger<ManagementPresenter<T>> logger = _serviceProvider.GetRequiredService<ILogger<ManagementPresenter<T>>>();
 
-
-
                 IDataForm dataForm = _serviceProvider.GetRequiredService<IDataForm>();
                 IDataModel<T> dataModel = _serviceProvider.GetRequiredService<IDataModel<T>>();
                 ILogger<IDataForm> dataFormLogger = _serviceProvider.GetRequiredService<ILogger<IDataForm>>();
@@ -69,16 +67,16 @@ namespace StartSmartDeliveryForm.PresentationLayer
                 ILogger<PrintDataPresenter<T>> printDataPresenterLogger = _serviceProvider.GetRequiredService<ILogger<PrintDataPresenter<T>>>();
 
                 ManagementPresenter<T> presenter = new(
-                    form,
-                    model,
-                    repository,
-                    dataForm,
-                    dataModel,
-                    logger
-                //
-                //
-                //printDataFormLogger,
-                //printDataPresenterLogger
+                form,
+                model,
+                repository,
+                dataForm,
+                dataModel,
+                logger,
+                dataFormLogger,
+                dataPresenterLogger,
+                printDataFormLogger,
+                printDataPresenterLogger
                 );
 
                 _logger.LogInformation("Successfully created ManagementPresenter for {DTOType}", typeof(T).Name);

@@ -34,7 +34,6 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
         IDataModel<T> dataModel,
         ILogger<ManagementPresenter<T>>? logger = null,
         ILogger<IDataForm>? dataFormLogger = null,
-        ILogger<IDataModel<T>>? dataModelLogger = null,
         ILogger<IDataPresenter<T>>? dataPresenterLogger = null,
         ILogger<PrintDataForm>? printDataFormLogger = null,
         ILogger<PrintDataPresenter<T>>? printDataPresenterLogger = null
@@ -321,9 +320,6 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
                     {
                         disposableModel.Dispose();
                     }
-
-                    //_dataForm?.Dispose();
-                    //_dataForm = null;
 
                     _unfilteredDgvTable?.Dispose();
                     _unfilteredDgvTable = null;
