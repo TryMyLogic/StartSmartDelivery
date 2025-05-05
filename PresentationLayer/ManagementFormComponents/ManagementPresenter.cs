@@ -94,6 +94,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
             try
             {
                 _managementForm.SetTableConfig(_tableConfig);
+                _dataPresenter.SetExcludedColumns(_managementForm.GetExcludedColumns());
                 await _managementModel.InitializeAsync();
                 _managementForm.DataSource = _managementModel.DgvTable;
                 _unfilteredDgvTable = _managementModel.DgvTable;

@@ -42,5 +42,6 @@ namespace StartSmartDeliveryForm.PresentationLayer.ManagementFormComponents
         void SetTableConfig(TableConfig config);
         void SetSearchOptions();
         void InvokeFormLoadOccurred(object? sender, EventArgs e);
+        HashSet<string> GetExcludedColumns();
     }
 }

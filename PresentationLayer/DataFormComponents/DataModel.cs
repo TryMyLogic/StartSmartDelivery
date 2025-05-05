@@ -18,6 +18,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
         private readonly TableConfig _tableConfig = TableConfigResolver.Resolve<T>();
 
         public FormMode Mode { set; get; }
+        private int? _pkValue;
 
         public Dictionary<string, (Label Label, Control Control)> GenerateControls()
         {
@@ -89,6 +90,25 @@ namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
             T entity = new();
             System.Reflection.PropertyInfo[] properties = typeof(T).GetProperties();
 
+            if (Mode == FormMode.Edit && _pkValue.HasValue && _pkValue.Value != 0)
+            {
+                System.Reflection.PropertyInfo? pkProp = properties.FirstOrDefault(p => p.Name == _tableConfig.PrimaryKey);
+                if (pkProp != null && pkProp.PropertyType == typeof(int))
+                {
+                    pkProp.SetValue(entity, _pkValue.Value);
+                    _logger.LogDebug("Set primary key {PropertyName} to {Value}", _tableConfig.PrimaryKey, _pkValue.Value);
+                }
+                else
+                {
+                    _logger.LogWarning("Primary key property {PropertyName} not found or not an integer in entity {EntityType}", _tableConfig.PrimaryKey, typeof(T).Name);
+                }
+            }
+            else if (Mode == FormMode.Edit && (!_pkValue.HasValue || _pkValue.Value == 0))
+            {
+                throw new InvalidOperationException($"Primary key value is null or zero in Edit mode for entity {typeof(T).Name}");
+            }
+            _pkValue = null; // Clear for next edit
+
             foreach (System.Reflection.PropertyInfo prop in properties)
             {
                 if (controls.TryGetValue(prop.Name, out Control? control))
@@ -158,6 +178,12 @@ namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
             foreach (System.Reflection.PropertyInfo prop in properties)
             {
                 object? value = prop.GetValue(entity);
+
+                if (prop.Name == _tableConfig.PrimaryKey)
+                {
+                    _pkValue = (int?)(value ?? 0);
+                }
+
                 values[prop.Name] = value ?? string.Empty;
             }
 
@@ -185,6 +211,12 @@ namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
             string? errorMessage = null;
             foreach (ColumnConfig column in _tableConfig.Columns)
             {
+                if (column.Name == _tableConfig.PrimaryKey)
+                {
+                    _logger.LogDebug("Skipping validation for primary key column: {ColumnName}", column.Name);
+                    continue;
+                }
+
                 if (!controls.TryGetValue(column.Name, out Control? control))
                 {
                     _logger.LogError("Control not found for column: {ColumnName}", column.Name);

@@ -13,6 +13,8 @@ namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
         public readonly ILogger<IDataForm> _logger;
         private readonly IMessageBox _messageBox;
         private readonly Dictionary<string, Control> _dynamicControls = [];
+        private HashSet<string> _excludedColumns = [];
+
         public DataForm() : this(NullLogger<IDataForm>.Instance, new MessageBoxWrapper()) { }
         public DataForm(ILogger<IDataForm>? logger = null, IMessageBox? messageBox = null)
         {
@@ -46,6 +48,12 @@ namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
         {
             _messageBox.Show(text, caption, buttons, icon);
             _logger.LogInformation("Message box shown: {Caption}", caption);
+        }
+
+        public void SetExcludedColumns(IEnumerable<string> columns)
+        {
+            _excludedColumns = new HashSet<string>(columns, StringComparer.OrdinalIgnoreCase);
+            _logger.LogDebug("Set excluded columns: {Columns}", string.Join(", ", _excludedColumns));
         }
 
         public void InitializeEditing(Dictionary<string, object> values)
@@ -122,18 +130,21 @@ namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
         {
             //TODO - Cache static layouts
 
-            _logger.LogDebug("Rendering {ControlCount} controls", controlsLayout.Count);
+            _logger.LogDebug("Rendering controls. Total controls: {ControlCount}, Excluded columns: {ExcludedColumns}", controlsLayout.Count, string.Join(", ", _excludedColumns));
+
             tlpDynamicFields.Controls.Clear();
             _dynamicControls.Clear();
             tlpDynamicFields.ColumnStyles.Clear();
             tlpDynamicFields.RowStyles.Clear();
+
+            Dictionary<string, (Label Label, Control Control)> filteredControls = controlsLayout.Where(keyValuePair => !_excludedColumns.Contains(keyValuePair.Key)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
             const int MAX_COLUMN_PAIRS = 2;
             const int CONTROLS_PER_PAIR = 2;
             const int CONTROL_WIDTH = 150;
             const int LABEL_WIDTH = 100;
             const int CONTROL_HEIGHT_ESTIMATE = 55;
-            int totalFields = controlsLayout.Count;
+            int totalFields = filteredControls.Count;
             int columnsPerRow = Math.Min(MAX_COLUMN_PAIRS, (totalFields + 1) / 2) * CONTROLS_PER_PAIR;
             int rowsNeeded = (int)Math.Ceiling((double)totalFields / (columnsPerRow / CONTROLS_PER_PAIR));
 
@@ -151,7 +162,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
             }
 
             int row = 0, col = 0;
-            foreach ((string name, (Label label, Control control)) in controlsLayout)
+            foreach ((string name, (Label label, Control control)) in filteredControls)
             {
                 tlpDynamicFields.Controls.Add(label, col, row);
                 tlpDynamicFields.Controls.Add(control, col + 1, row);
@@ -170,7 +181,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
             tlpDynamicFields.AutoScroll = true;
             AutoSize = false;
             Size = new Size(requiredWidth, requiredHeight);
-            _logger.LogInformation("Controls rendered: {ControlCount} controls in {RowCount} rows", controlsLayout.Count, rowsNeeded);
+            _logger.LogInformation("Controls rendered: {ControlCount} controls in {RowCount} rows", filteredControls.Count, rowsNeeded);
         }
 
         public Dictionary<string, Control> GetControls()

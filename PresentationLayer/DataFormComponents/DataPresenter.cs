@@ -57,7 +57,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
                 {
                     _logger.LogInformation("Form is valid");
                     T entity = _model.CreateFromForm(_dataForm.GetControls());
-
+                    _logger.LogInformation("Submission entity: {entity}", entity);
                     SubmissionCompleted?.Invoke(this, new SubmissionCompletedEventArgs(entity, Mode));
                     if (Mode == FormMode.Edit && _dataForm is Form dataForm)
                     {
@@ -93,6 +93,14 @@ namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
             _logger.LogInformation("Form initialized for editing entity {EntityType}", typeof(T).Name);
         }
 
+        private HashSet<string>? _dataFormsExcludedColumns;
+        public void SetExcludedColumns(HashSet<string> hashSet)
+        {
+            _dataFormsExcludedColumns = hashSet;
+            _dataForm.SetExcludedColumns(hashSet);
+            InitializeView();
+        }
+
         public void SetMode(FormMode mode, T? entity = null)
         {
             _logger.LogDebug("Switching mode to {Mode}, DTO: {DtoType}", mode, typeof(T).Name);
@@ -111,6 +119,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
 
                 _dataForm = new DataForm(_dataFormLogger);
                 form = _dataForm as DataForm ?? throw new InvalidOperationException("Failed to create new DataForm");
+                _dataForm.SetExcludedColumns(_dataFormsExcludedColumns ?? []);
                 WireUpEvents();
                 InitializeView();
             }
