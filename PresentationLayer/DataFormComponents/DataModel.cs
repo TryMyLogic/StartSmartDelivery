@@ -10,7 +10,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
 {
     public class DataModel<T>(
         IRepository<T> repository,
-        ILogger<DataModel<T>>? logger = null) : IDataModel<T> where T : class, new()
+        ILogger<DataModel<T>>? logger = null) : IDisposable, IDataModel<T> where T : class, new()
     {
         private readonly ILogger<DataModel<T>> _logger = logger ?? NullLogger<DataModel<T>>.Instance;
 
@@ -19,6 +19,7 @@ namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
 
         public FormMode Mode { set; get; }
         private int? _pkValue;
+        private bool _disposedValue;
 
         public Dictionary<string, (Label Label, Control Control)> GenerateControls()
         {
@@ -313,6 +314,35 @@ namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
 
             _logger.LogInformation("Form validation succeeded for entity {EntityType}", typeof(T).Name);
             return (true, errorMessage);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposedValue)
+            {
+                if (disposing)
+                {
+                    if (_repository is IDisposable disposableRepository)
+                    {
+                        disposableRepository.Dispose();
+                    }
+                }
+
+                _pkValue = null;
+                _disposedValue = true;
+            }
+        }
+
+        ~DataModel()
+        {
+            Dispose(disposing: false);
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

@@ -159,6 +159,11 @@ namespace StartSmartDeliveryForm.PresentationLayer.DataFormComponents
                         form.Dispose();
                         _logger.LogDebug("Disposed DataForm during DataPresenter disposal, DTO: {DtoType}", typeof(T).Name);
                     }
+
+                    if (_model is IDisposable disposableModel)
+                    {
+                        disposableModel.Dispose();
+                    }
                 }
 
                 _disposedValue = true;
