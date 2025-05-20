@@ -1,5 +1,9 @@
 # StartSmartDeliveryManagementSystem
 
+## Note: 
+> Development on this project is temporarily postponed while I focus on a long-term university project that has begun in May, involving a Braille display with IoT integration.  
+> Work will resume after its completion.
+
 ## Description
 The goal of this project is to resolve an issue encountered by Tiago Luiz in a real-world business.
 The business currently tracks deliveries by writing them manually on a whiteboard using a whiteboard marker. 
