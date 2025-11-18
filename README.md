@@ -1,9 +1,5 @@
 # StartSmartDeliveryManagementSystem
 
-## Note: 
-> Development on this project is temporarily postponed while I focus on a long-term university project that has begun in May, involving a Braille display with IoT integration.  
-> Work will resume after its completion.
-
 ## Description
 The goal of this project is to resolve an issue encountered by Tiago Luiz in a real-world business.
 The business currently tracks deliveries by writing them manually on a whiteboard using a whiteboard marker. 
@@ -41,7 +37,11 @@ TODO (When version 1 is released)
 TODO (When version 1 is released)
 
 ## Project Background
-StartSmartDeliever was originally conceived by Tiago Luiz and developed as a university project of the same name. This repository refines and expands the concept into one that can be applied in the real world. The original university project can be found [here](https://github.com/zannlin/StartSmartDelivery).
+StartSmartDeliever was originally conceived by Tiago Luiz and developed as a university project of the same name. This repository refines and expands the concept into one that can be applied in the real world. The original university project can be found [here](https://github.com/zannlin/StartSmartDelivery). 
+
+## Project Timeline
+Started project in September 2024. Development was temporarily paused while I worked on a long-term university project that began in May involving a Braille display with IoT integration seen [here](https://github.com/TryMyLogic/IoTBrailleDisplay). 
+Development has since resumed.
 
 ## Contributing
 * Tiago Luiz - https://www.linkedin.com/in/tiago-luiz-8192a8358/
