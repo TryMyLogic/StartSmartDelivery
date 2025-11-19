@@ -44,10 +44,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="C:\Users\fudge\source\repos\MajorNameless\StartSmartDelivery\.editorconfig" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="8.0.1" />
