@@ -8,18 +8,21 @@ namespace StartSmartDelivery.Core.DataLayer.Models
         public required int Id { get; set; }
 
         [Required]
+        [MaxLength(50)]
         public required string Make { get; set; }
 
         [Required]
+        [MaxLength(50)]
         public required string Model { get; set; }
 
         [Required]
         public required int Year { get; set; }
 
         [Required]
+        [MaxLength(10)]
         public required string NumberPlate { get; set; }
 
         [Required]
-        public required bool Availability { get; set; }
+        public required bool Availability { get; set; } = true;
     }
 }

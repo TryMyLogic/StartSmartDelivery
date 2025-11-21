@@ -28,11 +28,13 @@ namespace StartSmartDelivery.Core.DataLayer.Models
         public required int Id { get; set; }
 
         [Required]
+        [MaxLength(50)]
         public required string Username { get; set; }
 
         [Required]
+        [MaxLength(100)]
         public required string Password { get; set; }
 
-        public UserPermissions UserPermissions { get; set; } = 0;
+        public UserPermissions UserPermissions { get; set; } = UserPermissions.None;
     }
 }

@@ -1,5 +1,12 @@
 ﻿```mermaid
 erDiagram
+    User {
+        int Id PK
+        string Username
+        string Password
+        UserPermissions UserPermissions
+    }
+
     Driver {
         int Id PK
         string Name

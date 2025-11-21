@@ -10,12 +10,15 @@ namespace StartSmartDelivery.Core.DataLayer.Models
         public required int Id { get; set; }
 
         [Required]
+        [MaxLength(50)]
         public required string Name { get; set; }
 
         [Required]
+        [MaxLength(50)]
         public required string Surname { get; set; }
 
         [Required]
+        [MaxLength(10)]
         public required string EmployeeNo { get; set; }
 
         [Required]
