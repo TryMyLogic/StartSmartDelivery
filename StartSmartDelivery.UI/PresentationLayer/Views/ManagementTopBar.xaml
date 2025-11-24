@@ -1,0 +1,41 @@
+﻿<UserControl x:Class="StartSmartDelivery.UI.PresentationLayer.Views.ManagementTopBar"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:StartSmartDelivery.UI.PresentationLayer.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Row="0" Orientation="Horizontal"  Height="25" Background="LightGray" Margin="5">
+            <TextBlock Text="Actions:" Margin="10,0" VerticalAlignment="Center" FontWeight="Bold"/>
+            <Button BorderThickness="0" Background="Transparent" ToolTip="Refresh View" Margin="0,0,5,0">
+                <Image Source="/PresentationLayer/Images/RefreshIcon.png" Width="25" VerticalAlignment="Center"/>
+            </Button>
+            <Button BorderThickness="0" Background="Transparent" ToolTip="Reload Data from DB" Margin="0,0,5,0">
+                <Image Source="/PresentationLayer/Images/RefreshIcon.png" Width="25" VerticalAlignment="Center"/>
+            </Button>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Height="25" Margin="0,5">
+            <TextBlock VerticalAlignment="Center" FontWeight="Bold" Margin="0,0,5,0">Search</TextBlock>
+            <ComboBox Width="100" Margin="0,0,5,0"></ComboBox>
+            <TextBox Width="200" Margin="0,0,5,0" VerticalContentAlignment="Center"/>
+            <Button Margin="0,0,5,0" BorderThickness="0" Background="Transparent">
+                <Image Source="/PresentationLayer/Images/SearchIcon.png" Width="25" VerticalAlignment="Center"/>
+            </Button>
+            <Button BorderThickness="0" Background="Transparent">
+                <Image Source="/PresentationLayer/Images/CaseMatchIcon.png" Width="25" VerticalAlignment="Center"/>
+            </Button>
+        </StackPanel>
+    </Grid>
+</UserControl>

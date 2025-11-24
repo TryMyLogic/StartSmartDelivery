@@ -1,0 +1,55 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="PresentationLayer\Images\arrow-direction-pointer-left.png" />
+    <None Remove="PresentationLayer\Images\arrow-direction-pointer-right.png" />
+    <None Remove="PresentationLayer\Images\arrow-thin-left.png" />
+    <None Remove="PresentationLayer\Images\arrow-thin-right.png" />
+    <None Remove="PresentationLayer\Images\CaseMatchIcon.png" />
+    <None Remove="PresentationLayer\Images\DeleteIcon.png" />
+    <None Remove="PresentationLayer\Images\EditIcon.png" />
+    <None Remove="PresentationLayer\Images\GotoIcon.png" />
+    <None Remove="PresentationLayer\Images\RefreshIcon.png" />
+    <None Remove="PresentationLayer\Images\SearchIcon.png" />
+    <None Remove="PresentationLayer\Images\StartSmartLogo.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\StartSmartDelivery.Core\StartSmartDelivery.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="PresentationLayer\Images\arrow-direction-pointer-left.png" />
+    <Resource Include="PresentationLayer\Images\arrow-direction-pointer-right.png" />
+    <Resource Include="PresentationLayer\Images\arrow-thin-left.png" />
+    <Resource Include="PresentationLayer\Images\arrow-thin-right.png" />
+    <Resource Include="PresentationLayer\Images\CaseMatchIcon.png" />
+    <Resource Include="PresentationLayer\Images\DeleteIcon.png" />
+    <Resource Include="PresentationLayer\Images\EditIcon.png" />
+    <Resource Include="PresentationLayer\Images\GotoIcon.png" />
+    <Resource Include="PresentationLayer\Images\RefreshIcon.png" />
+    <Resource Include="PresentationLayer\Images\SearchIcon.png" />
+    <Resource Include="PresentationLayer\Images\StartSmartLogo.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="PresentationLayer\ViewModels\" />
+    <Folder Include="PresentationLayer\ViewResources\" />
+  </ItemGroup>
+
+</Project>
